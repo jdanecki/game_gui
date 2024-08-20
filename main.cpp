@@ -583,7 +583,7 @@ void player_interact(int key)
                     break;
                 if (plant_with_seed(el))
                     break;
-                if (((Element *)(el))->get_base()->id == ID_WATER)
+                if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
                 {
                     if (Plant ** pp = get_plant_at_ppos(&player))
                     {

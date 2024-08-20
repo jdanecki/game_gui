@@ -64,6 +64,33 @@ InventoryElement ** InvList::find_form(enum Form f, int *count)
 	}
 }
 
+InventoryElement ** InvList::find_id(enum Item_id id, int *count)
+{
+    ListElement * cur = head;
+    InventoryElement ** a = (InventoryElement**)calloc(nr_elements, sizeof(InventoryElement*));
+    int c = 0;
+
+    while(cur) 
+    {
+        if (cur->el->get_base()->id == id) {
+			a[c] = cur->el;
+			c++;
+		}
+        cur = cur->next;
+    }
+
+    if (!c) 
+    {
+            free(a);
+            return NULL;
+    }
+    else 
+    {
+            *count = c;
+            return a;
+    }
+}
+
 void InvList::show(bool details)
 {
     ListElement * cur = head;

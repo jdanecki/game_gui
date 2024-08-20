@@ -34,6 +34,7 @@ public:
     bool virtual find_check(ListElement *el, void * what) { return el == what; }
 //    bool virtual find_at_check(ListElement *el, void * pos) { return false; }
 	InventoryElement ** find_form(enum Form f, int *count);
+	InventoryElement ** find_id(enum Item_id id, int *count);
 	void show(bool details=true);
 	void add(InventoryElement *el);
 	void add(ListElement *el);

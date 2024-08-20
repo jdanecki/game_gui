@@ -110,6 +110,7 @@ class InventoryElement
         virtual const char * get_form_name() { return NULL; }
         virtual int get_id() {return -1; }
         virtual Edible * get_edible() { return NULL; }
+        virtual BaseElement * get_base() { return NULL; }
 #ifndef STUB_SDL     
         virtual SDL_Texture * get_texture() { return NULL;}
 #endif
@@ -161,7 +162,7 @@ class Element : public InventoryElement
         unsigned int width;
         unsigned int height;
         unsigned int volume; //lenght*width*height
-        BaseElement * get_base()
+        virtual BaseElement * get_base()
         {
             return base;
         }
