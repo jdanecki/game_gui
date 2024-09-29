@@ -19,11 +19,10 @@ extern int active_hotbar;
 Menu *menu_music;
 Menu *menu_main;
 Menu *menu_help;
-Menu *menu_help2;
-Menu *menu_help3;
 Menu *current_menu;
 Menu *menu_inventory_categories;
 Menu *menu_inventory;
+Menu *menu_inventory_categories2;
 Menu *menu_crafting;
 Menu *menu_dev;
 Menu *menu_build;
@@ -35,11 +34,12 @@ Menu::Menu(const char *n, int opt)
 {
     name = n;
     options=opt;
-	menu_pos=0;
+    menu_pos=0;
     added=0;
     entries=(const char**)calloc(opt, sizeof(char*));
     actions=(menu_actions*)calloc(opt, sizeof(enum menu_actions));
     values=(int*)calloc(opt, sizeof(int));
+    texture=(SDL_Texture**)(calloc(opt, sizeof(SDL_Texture *))); 
     el=(Element**)calloc(opt, sizeof(Element*));
     show_texture=false;
 }
@@ -57,12 +57,19 @@ void Menu::add(const char * e, enum menu_actions a, int val)
     add(e, a);
 }
 
+void Menu::add(const char * e, enum menu_actions a, SDL_Texture * _texture)
+{
+    int i=0;
+    texture[i] = _texture;
+    add(e, a);
+}
+
 void Menu::add(const char * e, enum menu_actions a, Element * p_el)
 {
     int i=a & ~ MENU_ITEM; 
     el[i] = p_el;
     add(e, a);
-    show_texture=true;
+    show_texture=false;
 }
 
 
@@ -106,8 +113,10 @@ void Menu::show()
 
     int modx = (game_size/2)-(0.4*game_size);
     int modx2 = (game_size/2)+(0.4*game_size);
-   
+
     SDL_Rect rect = {modx, mody, modx2-modx, mody2-mody};
+    if (!(options < 10))
+	rect = (SDL_Rect){modx, mody+(-menu_pos+options/2) * menu_opt_size, modx2-modx, menu_opt_size*options};
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 100);
     SDL_RenderFillRect(renderer, &rect);
     
@@ -116,17 +125,31 @@ void Menu::show()
     
 
     // THIS IS THE SELECT
-    /* SDL_Rect rect2 = {modx, mody3, modx2-modx, mody4-mody3}; */
-    /* SDL_SetRenderDrawColor(renderer, 200, 200, 200, 100); */
-    /* SDL_RenderFillRect(renderer, &rect2); */
-    draw_rectangle(modx, mody3, modx2-modx, mody4-mody3, SDL_Color{0,255,255,255}, SDL_Color{0,255,255,255}, SDL_Color{}, SDL_Color{});
-    draw_rectangle(modx, mody3, modx2-modx, mody4-mody3, SDL_Color{}, SDL_Color{}, SDL_Color{0,255,255,255}, SDL_Color{0,255,255,255});
-    
-    SDL_Rect rect3 = {modx, mody - menu_opt_size, modx2-modx, mody4-mody3};
-    SDL_SetRenderDrawColor(renderer, 150, 0, 150, 100);
-    SDL_RenderFillRect(renderer, &rect3);
-    write_text(modx, mody - menu_opt_size, name, Yellow, game_size/27, menu_opt_size);
-    
+    if (options < 10)
+    {
+	draw_rectangle(modx, mody3, modx2-modx, mody4-mody3, SDL_Color{0,255,255,255}, SDL_Color{0,255,255,255}, SDL_Color{}, SDL_Color{});
+	draw_rectangle(modx, mody3, modx2-modx, mody4-mody3, SDL_Color{}, SDL_Color{}, SDL_Color{0,255,255,255}, SDL_Color{0,255,255,255});
+    }
+    else
+    {
+	draw_rectangle(modx, game_size/2-menu_opt_size/2, modx2-modx, menu_opt_size, SDL_Color{0,255,255,255}, SDL_Color{0,255,255,255}, SDL_Color{}, SDL_Color{});
+	draw_rectangle(modx, game_size/2-menu_opt_size/2, modx2-modx, menu_opt_size, SDL_Color{}, SDL_Color{}, SDL_Color{0,255,255,255}, SDL_Color{0,255,255,255});
+    }
+
+    if (options < 10)
+    {
+	SDL_Rect rect3 = {modx, mody - menu_opt_size, modx2-modx, mody4-mody3};
+	SDL_SetRenderDrawColor(renderer, 150, 0, 150, 100);
+	SDL_RenderFillRect(renderer, &rect3);
+	write_text(modx, mody - menu_opt_size, name, Yellow, game_size/27, menu_opt_size);
+    }
+    else 
+    {
+	SDL_Rect rect3 = {modx, mody+(-menu_pos+options/2) * menu_opt_size - menu_opt_size, modx2-modx, menu_opt_size};
+	SDL_SetRenderDrawColor(renderer, 150, 0, 150, 100);
+	SDL_RenderFillRect(renderer, &rect3);
+	write_text(modx, mody+(-menu_pos+options/2) * menu_opt_size - menu_opt_size, name, Yellow, game_size/27, menu_opt_size);
+    }
     for (i=0; i < options; i++){
         if (show_texture) {
             SDL_Rect rect;
@@ -135,12 +158,18 @@ void Menu::show()
             rect.w = menu_opt_size;
             rect.h = menu_opt_size;
 
-            SDL_Texture *texture = el[i]->get_texture();
-            SDL_RenderCopy(renderer, texture, NULL, &rect);
-            write_text(rect.x+menu_opt_size, rect.y, entries[i], White, game_size/27, menu_opt_size);
+            SDL_Texture *_texture;
+	    if (show_texture)
+		SDL_Texture *_texture = el[i]->get_texture();
+	    SDL_RenderCopy(renderer, _texture, NULL, &rect);
         } 
         else 
-            write_text(modx, mody+i * menu_opt_size, entries[i], White, game_size/27, menu_opt_size);
+	{
+	    if (options < 10)
+		write_text(modx, mody+i * menu_opt_size, entries[i], White, game_size/27, menu_opt_size);
+	    else
+		write_text(modx, mody+(i-menu_pos+options/2) * menu_opt_size, entries[i], White, game_size/27, menu_opt_size);
+	}
     }
 }
 
@@ -156,7 +185,7 @@ void create_menus()
     menu_main->add("Cancel", MENU_CANCEL);
 
 
-    menu_help = new Menu("Help 1", 9);
+    menu_help = new Menu("Help 1", 21);
 	menu_help->add("; - show item info", MENU_CANCEL);
 	menu_help->add("f11 - resize", MENU_CANCEL);
 	menu_help->add("1-9,0 - hotbar", MENU_CANCEL);
@@ -164,30 +193,20 @@ void create_menus()
 	menu_help->add("` - previous item", MENU_CANCEL);
 	menu_help->add("tab - next item", MENU_CANCEL);
 	menu_help->add("minus - deselect hotbar", MENU_CANCEL);
-    menu_help->add("N E X T", MENU_HELP_2);
+	menu_help->add("esc - main menu", MENU_CANCEL);
+	menu_help->add("l - devmenu", MENU_CANCEL);
+	menu_help->add("c - crafting", MENU_CANCEL);
+	menu_help->add("i - inventory", MENU_CANCEL);
+	menu_help->add("v - clear statusline", MENU_CANCEL);
+	menu_help->add("g - terrain break", MENU_CANCEL);
+	menu_help->add("r - remove from hotbar", MENU_CANCEL);
+	menu_help->add("= - select hotbar", MENU_CANCEL);
+	menu_help->add("F5 - autoexplore", MENU_CANCEL);
+	menu_help->add("F4 - item info at player", MENU_CANCEL);
+	menu_help->add("e / enter - use", MENU_CANCEL);
+	menu_help->add("shift/control - sneak/run", MENU_CANCEL);
+	menu_help->add("wasd+arrows - move", MENU_CANCEL);
 	menu_help->add("Cancel", MENU_CANCEL);
-
-    menu_help2 = new Menu("Help 2", 9);
-    menu_help2->add("P R E V I O U S", MENU_HELP_1);
-	menu_help2->add("esc - main menu", MENU_CANCEL);
-	menu_help2->add("l - devmenu", MENU_CANCEL);
-	menu_help2->add("c - crafting", MENU_CANCEL);
-	menu_help2->add("i - inventory", MENU_CANCEL);
-	menu_help2->add("v - clear statusline", MENU_CANCEL);
-	menu_help2->add("g - terrain break", MENU_CANCEL);
-    menu_help2->add("N E X T", MENU_HELP_3);
-	menu_help2->add("Cancel", MENU_CANCEL);
-
-    menu_help3 = new Menu("Help 3", 9);
-    menu_help3->add("P R E V I O U S", MENU_HELP_2);
-	menu_help3->add("r - remove from hotbar", MENU_CANCEL);
-	menu_help3->add("= - select hotbar", MENU_CANCEL);
-	menu_help3->add("F5 - autoexplore", MENU_CANCEL);
-	menu_help3->add("F4 - item info at player", MENU_CANCEL);
-	menu_help3->add("e / enter - use", MENU_CANCEL);
-	menu_help3->add("shift/control - sneak/run", MENU_CANCEL);
-	menu_help3->add("wasd+arrows - move", MENU_CANCEL);
-    menu_help3->add("Cancel", MENU_CANCEL);
 
     menu_music = new Menu("Music 3", 3);
     menu_music->add("+5 Volume", MENU_LOUDER);
@@ -221,28 +240,44 @@ void create_menus()
     menu_dev->add("random edible", MENU_GET_RANDOM_EDIBLE);
     menu_dev->add("food/water +100", MENU_REGAIN);
 }
-                
-Menu * create_inv_menu(int v)
+Menu * create_inv_category_menu(enum Form f)
 {
-
-	printf("szukam %d\n", v);
-	int c=0;
-	InventoryElement ** i_el = player.inventory->find_form((Form) v, &c);
-	if (i_el) {
-		printf("found %d elements\n", c);
-
-		if (menu_inventory) delete menu_inventory;
-		menu_inventory = new Menu("Inventory", c);
-	    Element ** el=(Element**) i_el;
-		for (int i=0; i < c; i++)
-		{
-			printf("%s\n", el[i]->get_name());
-			menu_inventory->add(el[i]->get_name(), (menu_actions)(MENU_ITEM+i), el[i]);
-		}
-        free(el);
-		return menu_inventory;
+    extern SDL_Texture* items_textures[BASE_ELEMENTS];
+    int count=0;
+    for (int i = 0; i < BASE_ELEMENTS; i++)
+	if (base_elements[i]->form == f)
+	    count++;
+    if (menu_inventory_categories2) delete menu_inventory_categories2;
+    menu_inventory_categories2 = new Menu("Inventory", count);
+    for (int i = 0; i < BASE_ELEMENTS; i++)
+    {
+	if (base_elements[i]->form == f)
+	{
+	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, i);
 	}
-	return NULL;
+    }
+    return menu_inventory_categories2;
+}
+Menu * create_inv_menu(Item_id id)
+{
+    printf("szukam %d\n", id);
+    int c=0;
+    InventoryElement ** i_el = player.inventory->find_id(id, &c);
+    if (i_el) {
+	printf("found %d elements\n", c);
+
+	if (menu_inventory) delete menu_inventory;
+	menu_inventory = new Menu("Inventory", c);
+	Element ** el=(Element**) i_el;
+	for (int i=0; i < c; i++)
+	{
+		printf("%s\n", el[i]->get_name());
+		menu_inventory->add(el[i]->get_name(), (menu_actions)(MENU_ITEM+i), el[i]);
+	}
+	free(el);
+	return menu_inventory;
+    }
+    return NULL;
 }
 
 void Menu::go_down()
@@ -286,9 +321,9 @@ int menu_interact(int key)
 	}
         case SDLK_i:
 	{
-			    player.inventory->show();
+		player.inventory->show();
 		if (!current_menu) current_menu=menu_inventory_categories; 
-			    else if (current_menu == menu_inventory_categories) current_menu=NULL;
+		else if (current_menu == menu_inventory_categories) current_menu=NULL;
 		return 1;
 	}
 
@@ -363,6 +398,11 @@ int interact(enum menu_actions a)
     if (a & MENU_ITEM) return handle_item(a & ~MENU_ITEM);
     switch(a)
     {
+	case MENU_CATEGORIE:
+	{
+	    current_menu = create_inv_menu((Item_id)menu_inventory_categories2->values[menu_inventory_categories2->menu_pos]);
+	    return 0;
+	}
 	case MENU_BUILD_WALL:
 	{
 	    sprintf(status_line, "Starting building");
@@ -444,16 +484,6 @@ int interact(enum menu_actions a)
             player.hunger+=100;
             player.thirst+=100;
             return 0;
-        case MENU_HELP_3:
-            current_menu=menu_help3;
-            return 0;
-        case MENU_HELP_2:
-            current_menu=menu_help2;
-            return 0;
-        case MENU_HELP_1:
-            current_menu=menu_help;
-            return 0;
-
         case MENU_SAVE:
             save(1);
             break;
@@ -464,20 +494,19 @@ int interact(enum menu_actions a)
             SDL_Quit();
             Mix_Quit();
             exit(0);
-
         case MENU_LOAD:
             load(1);
             break;
 
-        case MENU_HELP: 
+        case MENU_HELP:
             current_menu=menu_help;
-            return 0;   
-        
+            return 0;
+
         case MENU_INV_SOLID: 
         case MENU_INV_LIGQUID: 
         case MENU_INV_GAS:
-             current_menu=create_inv_menu(menu_inventory_categories->get_val(a));
-          return 0;   
+	    current_menu = create_inv_category_menu((Form)menu_inventory_categories->get_val(a));
+	    return 0;
 
         case MENU_LOUDER:
             Mix_Volume(0, Mix_Volume(0, -1)+5);
@@ -489,7 +518,7 @@ int interact(enum menu_actions a)
             Mix_Volume(1, Mix_Volume(1, -1)-5);
             printf("%d\n%d\n", Mix_Volume(1, -1), Mix_Volume(0, -1));
             return 0;
-        
+
         case MENU_CRAFT_AXE_BLADE: 
         case MENU_CRAFT_AXE_HANDLE: 
         case MENU_CRAFT_AXE: 

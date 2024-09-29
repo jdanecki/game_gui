@@ -15,9 +15,6 @@ enum menu_actions
     MENU_LOUDER,
     MENU_QUIETER,
     MENU_MUSIC,
-    MENU_HELP_1,
-    MENU_HELP_2,
-    MENU_HELP_3,
     MENU_INV_SOLID,
     MENU_INV_LIGQUID,
     MENU_INV_GAS,
@@ -32,6 +29,7 @@ enum menu_actions
     MENU_GET_RANDOM_ELEMENT,
     MENU_GET_RANDOM_EDIBLE,
     MENU_BUILD_WALL,
+    MENU_CATEGORIE,
 //must be the last     
     MENU_ITEM=0x1000,
 };
@@ -44,19 +42,22 @@ public:
     int options;
     int menu_pos;
     int added;
+    SDL_Texture ** texture;
     const char ** entries;
     enum menu_actions * actions;
-	int *values;
+    int *values;
     Element ** el;
     bool show_texture;
-	Menu(const char *n, int opt);
-	void add(const char * e, enum menu_actions a);
-	void add(const char * e, enum menu_actions a, int val);
+    bool show_texture_literal;
+    Menu(const char *n, int opt);
+    void add(const char * e, enum menu_actions a);
+    void add(const char * e, enum menu_actions a, int val);
     void add(const char * e, enum menu_actions a, Element * p_el);
-	int get_val(int v);
-	void show();
-	void go_down();
-	void go_up();
+    void add(const char * e, enum menu_actions a, SDL_Texture * _texture);
+    int get_val(int v);
+    void show();
+    void go_down();
+    void go_up();
 };
 
 extern Menu *menu_main;

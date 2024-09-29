@@ -1,5 +1,7 @@
 build
 data
+PCUSTOM
+start.sh
 *.os
 .cache
 tags
