@@ -1,9 +1,1 @@
-build
-data
-PCUSTOM
-start.sh
-*.os
-.cache
 tags
-godot-cpp
-the_game

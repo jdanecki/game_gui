@@ -9,28 +9,19 @@ pkg_check_modules(SDL2_MIXER SDL2_mixer)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(pime 
+add_subdirectory(../core core)
+
+add_executable(pime_SDL
 	window.cpp music.cpp text.cpp  
 	texture.cpp main.cpp menu.cpp
-    world.cpp player.cpp 
-	notifier.cpp craft.cpp 
+)
 
-    alchemist/elements.cpp
-	alchemist/names.cpp
-	alchemist/el_list.cpp
-    alchemist/game_time.cpp
+# link_directories(${CMAKE_SOURCE_DIR}/core)
 
-    alchemist/axe_blade.cpp
-    alchemist/axe_handle.cpp
-    alchemist/axe.cpp
-
-    alchemist/knife_blade.cpp
-    alchemist/knife_handle.cpp
-    alchemist/knife.cpp
-	)
-
-target_link_libraries(pime
+target_link_libraries(pime_SDL
     SDL2 SDL2_image SDL2_ttf SDL2_mixer
     ${SDL_LDFLAGS} ${SDL2_MIXER_LDFLAGS}
     -lm 
+    pime
+    enet
 )

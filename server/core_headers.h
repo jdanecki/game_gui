@@ -1,0 +1,6 @@
+#include "../core/craft.h"
+#include "../core/engine_hooks.h"
+#include "../core/notifier.h"
+#include "../core/player.h"
+#include "../core/tiles.h"
+#include "../core/world.h"
