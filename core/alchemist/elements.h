@@ -1,13 +1,6 @@
 #ifndef __ELEMENTS__H
 #define __ELEMENTS__H
 
-#ifdef STUB_SDL
-typedef void * SDL_Texture;
-#else
-#include <SDL2/SDL.h>
-#endif
-
-
 #include <cstdio>
 #include <cstdlib>
 #include "names.h"
@@ -111,9 +104,6 @@ class InventoryElement
         virtual int get_id() {return -1; }
         virtual Edible * get_edible() { return NULL; }
         virtual BaseElement * get_base() { return NULL; }
-#ifndef STUB_SDL     
-        virtual SDL_Texture * get_texture() { return NULL;}
-#endif
         virtual bool craft() { 
             printf("missing craft function\n");
             return false; 
@@ -146,9 +136,6 @@ public:
         printf("Object type: %s", get_name());
         base->show();
     }
-#ifndef STUB_SDL     
-    SDL_Texture * get_texture();
-#endif
 };
 
 class Element : public InventoryElement
@@ -180,9 +167,6 @@ class Element : public InventoryElement
         }
         const char * get_form_name() { return Form_name[base->form]; }
         int get_id() {return base->id; }
-#ifndef STUB_SDL     
-        SDL_Texture * get_texture();
-#endif
 };
 
 enum Ingredient_id
@@ -225,9 +209,6 @@ class Ingredient : public InventoryElement
         Edible * get_edible() {return el->get_edible();}
         Ingredient(InventoryElement * from, Ingredient_id i, Form f);
         void show(bool details=true);
-#ifndef STUB_SDL     
-        SDL_Texture * get_texture();
-#endif        
 };
 
 class Product : public InventoryElement
@@ -255,9 +236,6 @@ class Product : public InventoryElement
         bool craft();
         virtual bool check_ing() { return false; }
         void show(bool details=true);
-#ifndef STUB_SDL     
-        SDL_Texture * get_texture();
-#endif
 };
 
 enum being_types
@@ -284,9 +262,6 @@ class Being : public InventoryElement
         unsigned int max_age;
         bool alive;
         enum being_types type;
-#ifndef STUB_SDL
-        SDL_Texture * get_texture();
-#endif
         virtual bool grow() {
             if (!alive) return false;
             age++;
@@ -320,10 +295,6 @@ enum animal_types
 class Animal : public Being
 {
     public:
-#ifndef STUB_SDL
-        SDL_Texture * get_texture();
-        bool going_right;
-#endif
         enum animal_types type;
         Animal()
         {
@@ -363,9 +334,6 @@ public:
     bool grown;
     int water;
     enum plant_types type;
-#ifndef STUB_SDL
-        SDL_Texture * get_texture();
-#endif
     Plant_phase phase;
     Plant();
     void show(bool details=true) {

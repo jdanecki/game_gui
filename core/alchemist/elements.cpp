@@ -1,10 +1,8 @@
-#include <SDL2/SDL_render.h>
 #include <cstdio>
 #include <cstdlib>
 
 #include "elements.h"
 #include "names.h"
-#include "../texture.h"
 #include "../tiles.h"
 
 BaseElement *base_elements[BASE_ELEMENTS];
@@ -164,51 +162,6 @@ void BaseElement::show(bool details)
     if (edible) edible->show();
 }
 
-SDL_Texture * Object::get_texture()
-{
-    if (type == OBJECT_wall)
-    {
-        switch (base->id)
-        {
-            case ID_STONE:
-                return object_textures[TEXTURE_stone_wall];
-                break;
-            case ID_LOG:
-                return object_textures[TEXTURE_log_wall];
-                break;
-            case ID_LOG1:
-                return object_textures[TEXTURE_log1_wall];
-                break;
-            case ID_LOG2:
-                return object_textures[TEXTURE_log2_wall];
-                break;
-        }
-    }
-    return NULL;
-}
-
-SDL_Texture * Being::get_texture()
-{
-    return being_textures[type];
-}
-
-SDL_Texture * Animal::get_texture()
-{
-    if (going_right)
-        return animalr_textures[type];
-    else
-        return animall_textures[type];
-    return animall_textures[type];
-}
-
-SDL_Texture * Plant::get_texture()
-{
-    if (grown)
-        return grown_plant_textures[type];
-    else
-        return plant_textures[type];
-}
-
 Element::Element(BaseElement *b)
 {
     c_id=Class_Element;
@@ -233,12 +186,6 @@ void Element::show(bool details)
     base->show(details);
 }
 
-#ifndef STUB_SDL
-SDL_Texture * Element::get_texture()
-{
-    return items_textures[base->id]; 
-}
-#endif
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
 {
     c_id=Class_Ingredient;
@@ -271,12 +218,6 @@ void Ingredient::show(bool details)
     el->show(details);
 }
         
-#ifndef STUB_SDL
-SDL_Texture *Ingredient::get_texture() 
-{ 
-    return ing_textures[id]; 
-}
-#endif
 void Product::init(Product_id i, int c, Form f)
 {
     name = Product_name[i];
@@ -331,12 +272,6 @@ void Product::show(bool details)
     }
 }
 
-#ifndef STUB_SDL     
-SDL_Texture *Product::get_texture() 
-{ 
-    return prod_textures[id]; 
-}
-#endif        
 Form Product::get_form()
 {
     int solid=0;
@@ -382,6 +317,7 @@ void show_base_elements(bool details)
 
 void Animal::move()
 {
+    // TODO: send info about movement for animations
     int _x, _y;
 
     get_posittion(&_x, &_y);
@@ -395,11 +331,11 @@ void Animal::move()
             _y++;
             break;
         case 2: // left
-            going_right=false;
+            //going_right=false;
             _x--;
             break;
         case 3: // right
-            going_right=true;
+            //going_right=true;
             _x++;
             break;
     }

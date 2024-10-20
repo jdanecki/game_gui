@@ -6,22 +6,22 @@
 //#include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "alchemist/elements.h"
 #include "text.h"
-#include "tiles.h"
 #include "window.h"
 #include <SDL2/SDL_keycode.h>
 //#include <SDL2/SDL2_framerate.h>
 #include "texture.h"
-#include "player.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include "menu.h"
-#include "world.h"
-#include "tiles.h"
 #include <termios.h>
-#include "alchemist/game_time.h"
+#include "../core/alchemist/game_time.h"
+#include "../core/world.h"
+#include "../core/alchemist/elements.h"
+#include "../core/tiles.h"
+#include "../core/player.h"
+#include "implementations/alchemistSDL.h"
 
 // Normal speed
 #define UPDATE_DELAY 1000
@@ -758,10 +758,11 @@ void draw()
             SDL_RenderCopy(renderer, texture, NULL, &img_rect);
         }
     }
+    // TODO render
     // render items
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
+    /*for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
     {
-        InventoryElement * o = world_table[player.map_y][player.map_x]->items[i];
+        InventoryElementSDL * o = world_table[player.map_y][player.map_x]->items[i];
         if (o) 
         {
             int x, y;
@@ -821,7 +822,7 @@ void draw()
             if (o->get_texture())
                 SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
         }
-    }
+    }*/
 
     // render player
     SDL_Rect img_rect = {player.x * tile_dungeon_size, player.y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
@@ -883,8 +884,9 @@ void draw()
 		if (player.hotbar[i])
         {
             InventoryElement * item = player.hotbar[i];
-			SDL_Texture *texture = item->get_texture();
-            SDL_RenderCopy(renderer, texture, NULL, &rect);
+            // TODO render
+			//SDL_Texture *texture = item->get_texture();
+            //SDL_RenderCopy(renderer, texture, NULL, &rect);
             if (i == active_hotbar) {
                 sprintf(text, "%s (%s)", item->get_form_name(), item->get_name() );
 	    	    write_text(tx + 3 , rect.y+50, text, Yellow, 10,20);
@@ -1020,9 +1022,11 @@ void intro()
      // tcsetattr(0, TCSANOW, &state); 
 }
 
-
-int main()
+int init_SDL()
 {
+	if (init_window()) return 1;
+    if (load_font()) return 1;
+
     struct stat statbuf;
     int ret = stat("textures", &statbuf);
     if (ret) {
@@ -1044,24 +1048,76 @@ int main()
 // #endif
     // }
 
-    srand (time(NULL));
-    intro();
-
-    callback_daily=daily_call;
-    init_elements();
-	game_time=new Game_time;
-    
-    
-	if (init_window()) return 1;
-    if (load_font()) return 1;
-
     load_textures();
-    generator();
     create_menus();
     map = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WORLD_SIZE, WORLD_SIZE);
 
-    load(1);
+    return 0;
+}
+
+int setup() 
+{
+    if (init_SDL() != 0) return 1;
+
+    //intro();
+
+    srand (time(NULL));
     
+    callback_daily=daily_call;
+    init_elements();
+	game_time=new Game_time;
+
+    return 0;
+}
+
+bool handle_SDL_events()
+{
+    int ww=0, wh=0;
+    SDL_Event event;
+    // keyboard handling for not move
+    while (SDL_PollEvent(&event))
+    {
+        if (event.type==SDL_QUIT) {SDL_Quit(); return true;};
+        if(event.type == SDL_KEYDOWN)
+        {
+            int key= event.key.keysym.sym;
+
+            player_interact(key);
+        }
+        if (event.type==SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED )
+        { 
+            //i3 window manager sends these events if window is not floated 
+            if (ww != event.window.data1 && wh != event.window.data2) {
+                printf("window event: resizing to %d, %d\n", event.window.data1, event.window.data2);
+                update_window_size();
+                ww=event.window.data1;
+                wh=event.window.data2;
+            }
+        }
+
+        if (event.type == SDL_MOUSEBUTTONDOWN)
+        {
+         /*   switch (event.button.button)
+            {
+                case 1: break;
+                case 2: break;
+                case 3: break;
+            }
+         */
+             printf("mouse %d,%d %d\n", event.button.x, event.button.y, event.button.button);
+        }
+        
+    }
+    return 0;
+}
+
+void do_auto_explore()
+{
+
+}
+
+void loop()
+{
     int dst_map_x=player.map_x;
     int dst_map_y=player.map_y;
     int last_frame_press=0;
@@ -1070,12 +1126,9 @@ int main()
     Uint64 last_update_time = 0;
    
     sprintf(status_line, "Welcome in game!");
-    status_code = 1;
     
-    int ww=0, wh=0;
     for (;;)
     {   
-        SDL_Event event;
         clear_window();
 
         if (player.hunger < 0) player.hunger = 0;
@@ -1088,41 +1141,8 @@ int main()
         }
         draw();
 
-        // keyboard handling for not move
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type==SDL_QUIT) {SDL_Quit(); return 0;};
-            if(event.type == SDL_KEYDOWN)
-            {
-                int key= event.key.keysym.sym;
-
-                player_interact(key);
-            }
-            if (event.type==SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED )
-            { 
-                //i3 window manager sends these events if window is not floated 
-                if (ww != event.window.data1 && wh != event.window.data2) {
-                    printf("window event: resizing to %d, %d\n", event.window.data1, event.window.data2);
-                    update_window_size();
-                    ww=event.window.data1;
-                    wh=event.window.data2;
-                }
-            }
-
-            if (event.type == SDL_MOUSEBUTTONDOWN)
-            {
-             /*   switch (event.button.button)
-                {
-                    case 1: break;
-                    case 2: break;
-                    case 3: break;
-                }
-             */
-                 printf("mouse %d,%d %d\n", event.button.x, event.button.y, event.button.button);
-            }
-            
-        }
-
+        if (handle_SDL_events())
+            return;
         // keyboard handling for move
 #ifndef OLDKB
         if (player.hunger > 0 || rand() % 3)
@@ -1163,4 +1183,12 @@ int main()
         SDL_RenderPresent(renderer);
         if (!auto_explore) SDL_Delay(20);   
     }
+
+}
+
+int main()
+{
+    if (setup()) return 1;
+    generator();
+    loop();
 }

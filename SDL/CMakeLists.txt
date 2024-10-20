@@ -14,6 +14,7 @@ add_subdirectory(../core core)
 add_executable(pime_SDL
 	window.cpp music.cpp text.cpp  
 	texture.cpp main.cpp menu.cpp
+    engine_hooks.cpp
 )
 
 # link_directories(${CMAKE_SOURCE_DIR}/core)

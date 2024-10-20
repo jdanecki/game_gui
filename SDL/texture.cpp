@@ -1,7 +1,7 @@
 #include "texture.h"
-#include "alchemist/elements.h"
-#include "tiles.h"
 #include "window.h"
+#include "../core/alchemist/elements.h"
+#include "../core/tiles.h"
 #include <SDL2/SDL_blendmode.h>
 
 struct textures Texture;

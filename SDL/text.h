@@ -1,7 +1,6 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include "player.h"
 #include <stdio.h>
 #include <SDL2/SDL_ttf.h>
 

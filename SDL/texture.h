@@ -1,14 +1,12 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "alchemist/elements.h"
 #include <stdlib.h>
 
-#ifndef STUB_SDL
 #include <SDL2/SDL_image.h>
-#endif
 
-#include "tiles.h"
+#include "../core/alchemist/elements.h"
+#include "../core/tiles.h"
 
 enum object_textures_enum 
 {

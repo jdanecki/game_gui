@@ -1,7 +1,7 @@
 #ifndef BEING_SDL_H
 #define BEING_SDL_H
 
-#include "../core/alchemist/elements.h"
+#include "../../core/alchemist/elements.h"
 
 class BeingSDL : public Being
 {

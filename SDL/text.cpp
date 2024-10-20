@@ -15,7 +15,7 @@ SDL_Color Cyan = {255, 0, 255};
 SDL_Color Yellow = {255, 255, 0};
 
 char status_line[256];
-int status_code;
+int status_code = 1;
 
 int load_font()
 {

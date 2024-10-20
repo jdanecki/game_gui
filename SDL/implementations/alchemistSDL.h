@@ -1,7 +1,7 @@
 #ifndef ALCHEMIST_SDL_H
 #define ALCHEMIST_SDL_H
 
-#include "../core/alchemist/elements.h"
+#include "../../core/alchemist/elements.h"
 
 class IngredientSDL : public Ingredient
 {

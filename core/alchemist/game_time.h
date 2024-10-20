@@ -25,5 +25,6 @@ class Game_time
 };
 
 extern Game_time *game_time;
-extern void (*callback_daily)();
+// TODO fix that
+//extern void (*callback_daily)();
 #endif

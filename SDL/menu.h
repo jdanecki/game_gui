@@ -2,6 +2,7 @@
 #define MENU_H
 
 #include "text.h"
+#include "../core/alchemist/elements.h"
 
 enum menu_actions
 {

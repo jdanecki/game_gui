@@ -1,13 +1,14 @@
 #include "menu.h"
 #include "text.h"
-#include "tiles.h"
+#include "../core/tiles.h"
 #include "window.h"
 #include "music.h"
-#include "alchemist/elements.h"
-#include "alchemist/axe.h"
-#include "alchemist/knife.h"
-#include "world.h"
-#include "craft.h"
+#include "../core/alchemist/elements.h"
+#include "../core/alchemist/axe.h"
+#include "../core/alchemist/knife.h"
+#include "../core/world.h"
+#include "../core/craft.h"
+#include "../core/player.h"
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -159,9 +160,8 @@ void Menu::show()
             rect.h = menu_opt_size;
 
             SDL_Texture *_texture;
-	    if (show_texture)
-		SDL_Texture *_texture = el[i]->get_texture();
-	    SDL_RenderCopy(renderer, _texture, NULL, &rect);
+            //SDL_Texture *_texture = el[i]->get_texture();
+            //SDL_RenderCopy(renderer, _texture, NULL, &rect);
         } 
         else 
 	{
@@ -375,13 +375,14 @@ int craft(menu_actions a)
     InventoryElement * el=NULL;
     sprintf(status_line, "Starting crafting");
     switch(a) { 
-        case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
+        // TODO fix that
+        /*case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
         case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
         case MENU_CRAFT_KNIFE: el = craft_knife(); break;
 
         case MENU_CRAFT_AXE_BLADE: el = craft_axe_blade(); break;
         case MENU_CRAFT_AXE_HANDLE: el = craft_axe_handle(); break;
-        case MENU_CRAFT_AXE: el = craft_axe(); break;
+        case MENU_CRAFT_AXE: el = craft_axe(); break;*/
 
     }
     if (el) {

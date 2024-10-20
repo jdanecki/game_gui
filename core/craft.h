@@ -3,12 +3,12 @@
 
 #include "alchemist/elements.h"
 
-InventoryElement * craft_axe_blade();
-InventoryElement * craft_axe_handle();
-InventoryElement * craft_axe();
+InventoryElement * craft_axe_blade(Player* player);
+InventoryElement * craft_axe_handle(Player* player);
+InventoryElement * craft_axe(Player* player);
 
-InventoryElement * craft_knife_blade();
-InventoryElement * craft_knife_handle();
-InventoryElement * craft_knife();
+InventoryElement * craft_knife_blade(Player* player);
+InventoryElement * craft_knife_handle(Player* player);
+InventoryElement * craft_knife(Player* player);
 #endif
 
