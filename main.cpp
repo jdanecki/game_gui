@@ -29,7 +29,6 @@
 // TURBO
 // #define UPDATE_DELAY 0
 
-/* #define OLDKB */
 
 SDL_Texture *map;
 int auto_explore;
@@ -369,101 +368,7 @@ void player_interact(int key)
             sprintf(status_line, "");
             status_code = 1;
             break;
-#ifdef OLDKB
-        case SDLK_s:
-            player.move(0, 1);
-            player.direction=direction::down;
-            break;
-        case SDLK_w:
-            player.move(0, -1);
-            player.direction=direction::up;
-            break;
-        case SDLK_a:
-            player.move(-1, 0);
-            player.direction=direction::left;
-            player.going_right=0;
-            break;
-        case SDLK_d:
-            player.move(1, 0);
-            player.direction=direction::right;
-            player.going_right=1;
-            break;
-
-#endif 
-        // case SDLK_g: // break same level
-        //     switch ((int)player.direction) 
-        //     {
-        //         case (int)direction::down:
-        //             if (player.y == CHUNK_SIZE-1)
-        //             {
-        //                 if (!load_chunk(player.map_x, player.map_y+1)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-        //                 world_table[player.map_y+1][player.map_x]->table[0][player.x].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y+1][player.x].tile=TILE_AIR;
-        //             }
-        //             break;
-        //         case (int)direction::up:
-        //             if (player.y == 0)
-        //             {
-        //                 if (!load_chunk(player.map_x, player.map_y-1)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-
-        //                 world_table[player.map_y-1][player.map_x]->table[CHUNK_SIZE-1][player.x].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y-1][player.x].tile=TILE_AIR;
-        //             }
-        //             break;
-
-        //         case (int)direction::right:
-        //             if (player.x == CHUNK_SIZE-1)
-        //             {
-        //                 if (!load_chunk(player.map_x+1, player.map_y)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-
-        //                 world_table[player.map_y][player.map_x+1]->table[player.y][0].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y][player.x+1].tile=TILE_AIR;
-        //             }
-        //             break;
-        //         case (int)direction::left:
-        //             if (player.x == 0)
-        //             {
-        //                 if (!load_chunk(player.map_x-1, player.map_y)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-
-        //                 world_table[player.map_y][player.map_x-1]->table[player.y][CHUNK_SIZE-1].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y][player.x-1].tile=TILE_AIR;
-        //             }
-        //             break;
-        //     break;
-        // }
-        case SDLK_r:
+        case SDLK_t:
             player.hotbar[active_hotbar]=NULL;
             break;
         case SDLK_SEMICOLON:
@@ -579,7 +484,7 @@ void player_interact(int key)
             InventoryElement * el = player.hotbar[active_hotbar];
             if (el)
             {
-                if (el->use(&player))
+                if (el->use(player.map_x, player.map_y, player.x, player.y))
                     break;
                 if (plant_with_seed(el))
                     break;
@@ -1124,7 +1029,6 @@ int main()
         }
 
         // keyboard handling for move
-#ifndef OLDKB
         if (player.hunger > 0 || rand() % 3)
         {
             const Uint8 *currentKeyState = SDL_GetKeyboardState(NULL);
@@ -1134,7 +1038,6 @@ int main()
                 last_time = tmp;
             }
         }
-#endif
         // printf("%d\n", last_frame_press);
 
 
