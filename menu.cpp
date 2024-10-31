@@ -57,9 +57,10 @@ void Menu::add(const char * e, enum menu_actions a, int val)
     add(e, a);
 }
 
-void Menu::add(const char * e, enum menu_actions a, SDL_Texture * _texture, int id)
+void Menu::add(const char * e, enum menu_actions a, SDL_Texture * _texture, int index, int item_id)
 {
-    texture[id] = _texture;
+    values[index] = item_id;
+    texture[index] = _texture;
     add(e, a);
 }
 
@@ -262,13 +263,13 @@ Menu * create_inv_category_menu(enum Form f)
     	    count++;
     if (menu_inventory_categories2) {delete menu_inventory_categories2->texture; delete menu_inventory_categories2;}
         menu_inventory_categories2 = new Menu("Inventory", count);
-    int id=0;
+    int menu_index=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
     {
       	if (base_elements[i]->form == f)
       	{
-      	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], id);
-      	    id++;
+      	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], menu_index, i);
+      	    menu_index++;
       	}
     }
     return menu_inventory_categories2;
@@ -415,7 +416,7 @@ int interact(enum menu_actions a)
     {
 	case MENU_CATEGORIE:
 	{
-	    current_menu = create_inv_menu((Item_id)menu_inventory_categories2->values[menu_inventory_categories2->menu_pos]);
+	    current_menu = create_inv_menu((Item_id)(menu_inventory_categories2->values[menu_inventory_categories2->menu_pos]));
 	    return 0;
 	}
 	case MENU_BUILD_WALL:
