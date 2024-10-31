@@ -1,4 +1,5 @@
 #include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_timer.h>
 #include <cstdlib>
@@ -91,9 +92,9 @@ void put_element()
     }
 }
 
-void use_tile()
+void use_tile(int map_x, int map_y, int x, int y)
 {
-    InventoryElement ** item_pointer = get_item_at_ppos(&player);
+    InventoryElement ** item_pointer = get_item_at(map_x, map_y, x, y);
     if (item_pointer)
     {
         InventoryElement * item = *item_pointer;
@@ -113,12 +114,12 @@ void use_tile()
 
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
     {
-        Plant * p = world_table[player.map_y][player.map_x]->plants[i];
+        Plant * p = world_table[map_y][map_x]->plants[i];
         if (p)
         {
-            int x,y;
-            p->get_posittion(&x, &y);
-            if ((player.x == x && player.y == y) && ((p->type == PLANTID_watermelon) || (p->type == PLANTID_pumpkin)) && (p->grown))
+            int px,py;
+            p->get_posittion(&px, &py);
+            if ((px == x && py == y) && ((p->type == PLANTID_watermelon) || (p->type == PLANTID_pumpkin)) && (p->grown))
             {
                 Element * el;
                 Element * el2;
@@ -134,38 +135,38 @@ void use_tile()
                 }
 
                 el->set_posittion(x, y);
-                set_item_at_ppos(el, &player);
+                set_item_at(el, map_x, map_y, x, y);
                 el2->set_posittion(x, y);
-                set_item_at_ppos(el2, &player);
+                set_item_at(el2, map_x, map_y, x, y);
 
-                free(world_table[player.map_y][player.map_x]->plants[i]);
-                world_table[player.map_y][player.map_x]->plants[i] = NULL;
+                free(world_table[map_y][map_x]->plants[i]);
+                world_table[map_y][map_x]->plants[i] = NULL;
             }
         }
     }
 }
 
-bool plant_with_seed(InventoryElement * el)
+bool plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
 {
-    if (get_tile_at_ppos(&player) == TILE_GRASS || get_tile_at_ppos(&player) == TILE_DIRT)
+    if (get_tile_at(map_x, map_y, x, y) == TILE_GRASS || get_tile_at(map_x, map_y, x, y) == TILE_DIRT)
         {
         if (el->get_id() == ID_ACORN2)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_tree2;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -187,19 +188,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_tree1;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -221,19 +222,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_tree;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -255,19 +256,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_pumpkin;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -289,19 +290,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_watermelon;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -323,19 +324,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_strawberry;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -486,7 +487,7 @@ void player_interact(int key)
             {
                 if (el->use(player.map_x, player.map_y, player.x, player.y))
                     break;
-                if (plant_with_seed(el))
+                if (plant_with_seed(el, player.map_x, player.map_y, player.x, player.y))
                     break;
                 if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
                 {
@@ -503,7 +504,7 @@ void player_interact(int key)
                     }
                 }
             }
-            use_tile();
+            use_tile(player.map_x, player.map_y, player.x, player.y);
             break;
     }
 }
@@ -1016,14 +1017,54 @@ int main()
 
             if (event.type == SDL_MOUSEBUTTONDOWN)
             {
-             /*   switch (event.button.button)
+                InventoryElement * el = player.hotbar[active_hotbar];
+                int x = 0;
+                int y = 0;
+
+                SDL_GetMouseState(&x, &y);
+
+                int game_size;
+                int tile_dungeon_size;
+                int width = window_width - PANEL_WINDOW;
+
+                if (width < window_height)
                 {
-                    case 1: break;
-                    case 2: break;
-                    case 3: break;
+                    game_size = width;
+                    tile_dungeon_size = width/(CHUNK_SIZE);
+                } 
+                else
+                {
+                    game_size = window_height;
+                    tile_dungeon_size = window_height/(CHUNK_SIZE);
                 }
-             */
-                 printf("mouse %d,%d %d\n", event.button.x, event.button.y, event.button.button);
+
+                int tile_x = x/tile_dungeon_size;
+                int tile_y = y/tile_dungeon_size;
+
+                if (tile_x < CHUNK_SIZE && tile_y < CHUNK_SIZE)
+                {
+                    if (el)
+                    {
+                        if (el->use(player.map_x, player.map_y, tile_x, tile_y)) break;
+                        if (plant_with_seed(el, player.map_x, player.map_y, tile_x, tile_y)) break;
+                        if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
+                        {
+                            if (Plant ** pp = get_plant_at(player.map_x, player.map_y, tile_x, tile_y))
+                            {
+                                if (Plant * p = *pp)
+                                {
+                                    p->water += 100;
+                                    player.inventory->remove(el);
+                                    player.hotbar[active_hotbar]=NULL;
+                                    free(el);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    use_tile(player.map_x, player.map_y, tile_x, tile_y);
+                }
+                printf("mouse %d,%d %d %d,%d\n", event.button.x, event.button.y, event.button.button, tile_x, tile_y);
             }
             
         }
