@@ -39,7 +39,7 @@ Menu::Menu(const char *n, int opt)
     entries=(const char**)calloc(opt, sizeof(char*));
     actions=(menu_actions*)calloc(opt, sizeof(enum menu_actions));
     values=(int*)calloc(opt, sizeof(int));
-    texture=(SDL_Texture**)(calloc(opt, sizeof(SDL_Texture *))); 
+    texture=(SDL_Texture**)calloc(opt, sizeof(SDL_Texture *)); 
     el=(Element**)calloc(opt, sizeof(Element*));
     show_texture=false;
 }
@@ -258,16 +258,16 @@ Menu * create_inv_category_menu(enum Form f)
     extern SDL_Texture* items_textures[BASE_ELEMENTS];
     int count=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
-  	if (base_elements[i]->form == f)
-  	    count++;
-    if (menu_inventory_categories2) delete menu_inventory_categories2;
+    	if (base_elements[i]->form == f)
+    	    count++;
+    if (menu_inventory_categories2) {delete menu_inventory_categories2->texture; delete menu_inventory_categories2;}
         menu_inventory_categories2 = new Menu("Inventory", count);
     int id=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
     {
       	if (base_elements[i]->form == f)
       	{
-      	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], i);
+      	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], id);
       	    id++;
       	}
     }
