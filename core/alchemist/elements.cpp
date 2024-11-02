@@ -166,22 +166,30 @@ void BaseElement::show(bool details)
 unsigned int InventoryElement::get_packet_size()
 {
     //if (get_base())
-        return sizeof(int) * 4 + sizeof(Class_id);
+        return sizeof(size_t) + sizeof(int) * 4 + sizeof(Class_id);
     //return sizeof(int)*4;
 }
 
 unsigned char* InventoryElement::to_bytes()
 {
     unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
-    memcpy(&bytes[0], &c_id, sizeof(Class_id));
-    memcpy(&bytes[sizeof(Class_id)], &x, sizeof(x));
-    memcpy(&bytes[sizeof(Class_id) + sizeof(x)], &y, sizeof(y));
-    memcpy(&bytes[sizeof(Class_id) + sizeof(x) + sizeof(y)], &z, sizeof(z));
+    int offset = 0;
+    memcpy(&bytes[offset], &uid, sizeof(uid));
+    offset += sizeof(uid);
+    memcpy(&bytes[offset], &c_id, sizeof(Class_id));
+    offset += sizeof(Class_id);
+    memcpy(&bytes[offset], &x, sizeof(x));
+    offset += sizeof(x);
+    memcpy(&bytes[offset], &y, sizeof(y));
+    offset += sizeof(y);
+    memcpy(&bytes[offset], &z, sizeof(z));
+    offset += sizeof(z);
 
-    printf("class %d - %d %d %d %d - %d %d", c_id, bytes[0], bytes[1], bytes[2], bytes[3], x, y);
+    printf("class %d - uid: %ld - %d %d", c_id, uid, x, y);
     if (get_base())
     {
-        memcpy(&bytes[sizeof(Class_id) + sizeof(x) + sizeof(y) + sizeof(z)], &get_base()->id, sizeof(int));
+        memcpy(&bytes[offset], &get_base()->id, sizeof(int));
+        offset += sizeof(int);
         printf(", id %d", get_base()->id);
     }
     printf("\n");

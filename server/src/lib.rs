@@ -96,10 +96,16 @@ fn add_player(mut peer: Peer<usize>, players: &mut Vec<core::Player>) {
 
     unsafe {
         let p = core::Player::new();
+
+        let el = &mut core::Element::new(core::base_elements[0]) as *mut core::Element;
+        let el = el as *mut core::InventoryElement;
+        println!("item {} {}", (*el).c_id, (*el).uid);
+        (*p.inventory).add(el);
         players.push(p);
     }
     println!("{:?} , players {:?}", peer, players);
-    update_chunk_for_player(peer, (128, 128));
+    update_chunk_for_player(&mut peer, (128, 128));
+    update_player_inventory(&mut peer, players);
 }
 
 
@@ -118,13 +124,42 @@ fn update_players(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
     }
 }
 
-fn update_chunk_for_player(mut peer: Peer<usize>, coords: (u8, u8)) {
-    unsafe {
-        let mut data = vec![ 0 as u8 ; 3 + (core::CHUNK_SIZE * core::CHUNK_SIZE) as usize * size_of::<core::game_tiles>()];
-        data[0] = core::PacketType_PACKET_CHUNK_UPDATE as u8;
-        data[1] = coords.0;
-        data[2] = coords.1;
+#[allow(non_snake_case)]
+fn InvList_to_bytes(data: &mut Vec<u8>, list: &mut core::InvList) {
+    unsafe{
+        let object_num = list.size();
+        data.extend_from_slice(&object_num.to_le_bytes());
+        let mut cur = list.head;
+        while cur != std::ptr::null_mut() {
+            let el = (*cur).el as *mut ::core::ffi::c_void;
+            let obj_ptr = core::InventoryElement_to_bytes(el);
+            let o = std::slice::from_raw_parts_mut(obj_ptr, core::InventoryElement_get_packet_size(el) as usize);
+            data.extend_from_slice(o);
+            cur = (*cur).next;
+            core::free(obj_ptr as *mut ::core::ffi::c_void);
+        }
+    }
+}
 
+fn update_player_inventory(peer: &mut Peer<usize>, players: &mut Vec<core::Player>) {
+    let id = *peer.data().unwrap();
+
+    let mut data = vec![core::PacketType_PACKET_SEND_INVENTORY as u8];
+    unsafe{
+        let inv = &mut *players[id].inventory;
+        InvList_to_bytes(&mut data, inv);
+    }
+
+    let _ = peer.send_packet(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
+}
+
+fn update_chunk_for_player(peer: &mut Peer<usize>, coords: (u8, u8)) {
+    let mut data = vec![ 0 as u8 ; 3 + (core::CHUNK_SIZE * core::CHUNK_SIZE) as usize * size_of::<core::game_tiles>()];
+    data[0] = core::PacketType_PACKET_CHUNK_UPDATE as u8;
+    data[1] = coords.0;
+    data[2] = coords.1;
+
+    unsafe {
         let mut chunk = *core::world_table[coords.1 as usize][coords.0 as usize];
         let tile = core::tile{tile: 1};
         chunk.table[5][5] = tile;
@@ -135,20 +170,10 @@ fn update_chunk_for_player(mut peer: Peer<usize>, coords: (u8, u8)) {
         let dest = std::slice::from_raw_parts_mut(dest, 1024);
         dest.clone_from_slice(table);
 
-        let object_num = chunk.objects.size();
-        data.extend_from_slice(&object_num.to_le_bytes());
-        let mut cur = chunk.objects.head;
-        while cur != std::ptr::null_mut() {
-            let el = (*cur).el as *mut ::core::ffi::c_void;
-            let o = core::InventoryElement_to_bytes(el);
-            let o = std::slice::from_raw_parts_mut(o, core::InventoryElement_get_packet_size(el) as usize);
-            data.extend_from_slice(o);
-            cur = (*cur).next;
-        }
-
-
-        let _ = peer.send_packet(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
+        InvList_to_bytes(&mut data, &mut chunk.objects);
     }
+        
+        let _ = peer.send_packet(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
 }
 
 fn handle_packet(player: &mut core::Player, packet: &Packet) {

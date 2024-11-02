@@ -92,10 +92,11 @@ class InventoryElement
 {
 	int x, y, z;
     public:
+        size_t uid;
         Class_id c_id;
         Form req_form;
         bool known;
-        InventoryElement() { req_form = Form_none; known = true; }
+        InventoryElement() { req_form = Form_none; known = true; uid = (size_t)this;}
         virtual bool use(Player * player) { return false; }
         virtual void show(bool details=true) { }
         virtual bool tick() { return false;}
@@ -111,6 +112,7 @@ class InventoryElement
         }
         void set_posittion(int _x, int _y) { x=_x; y=_y; }
         void get_posittion(int *_x, int *_y) { *_x=x; *_y=y; }
+        size_t get_uid() {return uid;}
         virtual unsigned int get_packet_size();
         virtual unsigned char* to_bytes();
 };
@@ -141,7 +143,11 @@ public:
     }
 };
 
+#ifdef FUNNY_STUFF_FOR_SDL
 class Element : virtual public InventoryElement
+#else
+class Element : public InventoryElement
+#endif
 {
     BaseElement * base;
     public:
@@ -193,7 +199,11 @@ extern const char * Product_name[];
 extern const char * items_name[];
 extern const char * food_name[];
 
+#ifdef FUNNY_STUFF_FOR_SDL
 class Ingredient : virtual public InventoryElement
+#else
+class Ingredient : public InventoryElement
+#endif
 {
     const char * name;
     public:
@@ -214,7 +224,11 @@ class Ingredient : virtual public InventoryElement
         void show(bool details=true);
 };
 
+#ifdef FUNNY_STUFF_FOR_SDL
 class Product : virtual public InventoryElement
+#else
+class Product : public InventoryElement
+#endif
 {
     const char * name;
     void init(Product_id i, int c, Form f);
@@ -257,7 +271,11 @@ enum plant_types
 
 #define PLANTS 6
 
+#ifdef FUNNY_STUFF_FOR_SDL
 class Being : virtual public InventoryElement
+#else
+class Being : public InventoryElement
+#endif
 {
     public:
         const char * name;

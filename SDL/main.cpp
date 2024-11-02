@@ -969,8 +969,8 @@ void draw()
    
     sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed"); 
     write_text(5, window_height - 32, text, White, 15, 30);
-
-    if (current_menu) current_menu->show();*/
+*/
+    if (current_menu) current_menu->show();
 }
 
 void intro()

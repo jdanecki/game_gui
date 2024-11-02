@@ -2813,6 +2813,7 @@ pub const Class_id_Class_Element: Class_id = 1;
 pub const Class_id_Class_Ingredient: Class_id = 2;
 pub const Class_id_Class_Product: Class_id = 3;
 pub const Class_id_Class_Plant: Class_id = 4;
+pub const Class_id_Class_Animal: Class_id = 5;
 pub type Class_id = ::std::os::raw::c_uint;
 pub const Item_id_ID_STONE: Item_id = 0;
 pub const Item_id_ID_LOG: Item_id = 1;
@@ -2885,23 +2886,26 @@ pub struct InventoryElement {
     pub x: ::std::os::raw::c_int,
     pub y: ::std::os::raw::c_int,
     pub z: ::std::os::raw::c_int,
+    pub uid: usize,
     pub c_id: Class_id,
     pub req_form: Form,
     pub known: bool,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of InventoryElement"][::std::mem::size_of::<InventoryElement>() - 32usize];
+    ["Size of InventoryElement"][::std::mem::size_of::<InventoryElement>() - 48usize];
     ["Alignment of InventoryElement"][::std::mem::align_of::<InventoryElement>() - 8usize];
     ["Offset of field: InventoryElement::x"][::std::mem::offset_of!(InventoryElement, x) - 8usize];
     ["Offset of field: InventoryElement::y"][::std::mem::offset_of!(InventoryElement, y) - 12usize];
     ["Offset of field: InventoryElement::z"][::std::mem::offset_of!(InventoryElement, z) - 16usize];
+    ["Offset of field: InventoryElement::uid"]
+        [::std::mem::offset_of!(InventoryElement, uid) - 24usize];
     ["Offset of field: InventoryElement::c_id"]
-        [::std::mem::offset_of!(InventoryElement, c_id) - 20usize];
+        [::std::mem::offset_of!(InventoryElement, c_id) - 32usize];
     ["Offset of field: InventoryElement::req_form"]
-        [::std::mem::offset_of!(InventoryElement, req_form) - 24usize];
+        [::std::mem::offset_of!(InventoryElement, req_form) - 36usize];
     ["Offset of field: InventoryElement::known"]
-        [::std::mem::offset_of!(InventoryElement, known) - 28usize];
+        [::std::mem::offset_of!(InventoryElement, known) - 40usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN16InventoryElement15get_packet_sizeEv"]
@@ -2930,11 +2934,11 @@ pub struct Object {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Object"][::std::mem::size_of::<Object>() - 56usize];
+    ["Size of Object"][::std::mem::size_of::<Object>() - 72usize];
     ["Alignment of Object"][::std::mem::align_of::<Object>() - 8usize];
-    ["Offset of field: Object::base"][::std::mem::offset_of!(Object, base) - 32usize];
-    ["Offset of field: Object::type_"][::std::mem::offset_of!(Object, type_) - 40usize];
-    ["Offset of field: Object::information"][::std::mem::offset_of!(Object, information) - 48usize];
+    ["Offset of field: Object::base"][::std::mem::offset_of!(Object, base) - 48usize];
+    ["Offset of field: Object::type_"][::std::mem::offset_of!(Object, type_) - 56usize];
+    ["Offset of field: Object::information"][::std::mem::offset_of!(Object, information) - 64usize];
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2951,16 +2955,16 @@ pub struct Element {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Element"][::std::mem::size_of::<Element>() - 72usize];
+    ["Size of Element"][::std::mem::size_of::<Element>() - 88usize];
     ["Alignment of Element"][::std::mem::align_of::<Element>() - 8usize];
-    ["Offset of field: Element::base"][::std::mem::offset_of!(Element, base) - 32usize];
-    ["Offset of field: Element::sharpness"][::std::mem::offset_of!(Element, sharpness) - 40usize];
-    ["Offset of field: Element::smoothness"][::std::mem::offset_of!(Element, smoothness) - 44usize];
-    ["Offset of field: Element::mass"][::std::mem::offset_of!(Element, mass) - 48usize];
-    ["Offset of field: Element::length"][::std::mem::offset_of!(Element, length) - 52usize];
-    ["Offset of field: Element::width"][::std::mem::offset_of!(Element, width) - 56usize];
-    ["Offset of field: Element::height"][::std::mem::offset_of!(Element, height) - 60usize];
-    ["Offset of field: Element::volume"][::std::mem::offset_of!(Element, volume) - 64usize];
+    ["Offset of field: Element::base"][::std::mem::offset_of!(Element, base) - 48usize];
+    ["Offset of field: Element::sharpness"][::std::mem::offset_of!(Element, sharpness) - 56usize];
+    ["Offset of field: Element::smoothness"][::std::mem::offset_of!(Element, smoothness) - 60usize];
+    ["Offset of field: Element::mass"][::std::mem::offset_of!(Element, mass) - 64usize];
+    ["Offset of field: Element::length"][::std::mem::offset_of!(Element, length) - 68usize];
+    ["Offset of field: Element::width"][::std::mem::offset_of!(Element, width) - 72usize];
+    ["Offset of field: Element::height"][::std::mem::offset_of!(Element, height) - 76usize];
+    ["Offset of field: Element::volume"][::std::mem::offset_of!(Element, volume) - 80usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN7ElementC1EP11BaseElement"]
@@ -3011,15 +3015,15 @@ pub struct Ingredient {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Ingredient"][::std::mem::size_of::<Ingredient>() - 64usize];
+    ["Size of Ingredient"][::std::mem::size_of::<Ingredient>() - 80usize];
     ["Alignment of Ingredient"][::std::mem::align_of::<Ingredient>() - 8usize];
-    ["Offset of field: Ingredient::name"][::std::mem::offset_of!(Ingredient, name) - 32usize];
-    ["Offset of field: Ingredient::quality"][::std::mem::offset_of!(Ingredient, quality) - 40usize];
+    ["Offset of field: Ingredient::name"][::std::mem::offset_of!(Ingredient, name) - 48usize];
+    ["Offset of field: Ingredient::quality"][::std::mem::offset_of!(Ingredient, quality) - 56usize];
     ["Offset of field: Ingredient::resilience"]
-        [::std::mem::offset_of!(Ingredient, resilience) - 44usize];
-    ["Offset of field: Ingredient::usage"][::std::mem::offset_of!(Ingredient, usage) - 48usize];
-    ["Offset of field: Ingredient::id"][::std::mem::offset_of!(Ingredient, id) - 52usize];
-    ["Offset of field: Ingredient::el"][::std::mem::offset_of!(Ingredient, el) - 56usize];
+        [::std::mem::offset_of!(Ingredient, resilience) - 60usize];
+    ["Offset of field: Ingredient::usage"][::std::mem::offset_of!(Ingredient, usage) - 64usize];
+    ["Offset of field: Ingredient::id"][::std::mem::offset_of!(Ingredient, id) - 68usize];
+    ["Offset of field: Ingredient::el"][::std::mem::offset_of!(Ingredient, el) - 72usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN10IngredientC1EP16InventoryElement13Ingredient_id4Form"]
@@ -3060,15 +3064,15 @@ pub struct Product {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Product"][::std::mem::size_of::<Product>() - 72usize];
+    ["Size of Product"][::std::mem::size_of::<Product>() - 88usize];
     ["Alignment of Product"][::std::mem::align_of::<Product>() - 8usize];
-    ["Offset of field: Product::name"][::std::mem::offset_of!(Product, name) - 32usize];
-    ["Offset of field: Product::quality"][::std::mem::offset_of!(Product, quality) - 40usize];
-    ["Offset of field: Product::resilience"][::std::mem::offset_of!(Product, resilience) - 44usize];
-    ["Offset of field: Product::usage"][::std::mem::offset_of!(Product, usage) - 48usize];
-    ["Offset of field: Product::id"][::std::mem::offset_of!(Product, id) - 52usize];
-    ["Offset of field: Product::ing_count"][::std::mem::offset_of!(Product, ing_count) - 56usize];
-    ["Offset of field: Product::ings"][::std::mem::offset_of!(Product, ings) - 64usize];
+    ["Offset of field: Product::name"][::std::mem::offset_of!(Product, name) - 48usize];
+    ["Offset of field: Product::quality"][::std::mem::offset_of!(Product, quality) - 56usize];
+    ["Offset of field: Product::resilience"][::std::mem::offset_of!(Product, resilience) - 60usize];
+    ["Offset of field: Product::usage"][::std::mem::offset_of!(Product, usage) - 64usize];
+    ["Offset of field: Product::id"][::std::mem::offset_of!(Product, id) - 68usize];
+    ["Offset of field: Product::ing_count"][::std::mem::offset_of!(Product, ing_count) - 72usize];
+    ["Offset of field: Product::ings"][::std::mem::offset_of!(Product, ings) - 80usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN7ProductC1EP16InventoryElementS1_10Product_id4Form"]
@@ -3152,13 +3156,13 @@ pub struct Being {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Being"][::std::mem::size_of::<Being>() - 56usize];
+    ["Size of Being"][::std::mem::size_of::<Being>() - 72usize];
     ["Alignment of Being"][::std::mem::align_of::<Being>() - 8usize];
-    ["Offset of field: Being::name"][::std::mem::offset_of!(Being, name) - 32usize];
-    ["Offset of field: Being::age"][::std::mem::offset_of!(Being, age) - 40usize];
-    ["Offset of field: Being::max_age"][::std::mem::offset_of!(Being, max_age) - 44usize];
-    ["Offset of field: Being::alive"][::std::mem::offset_of!(Being, alive) - 48usize];
-    ["Offset of field: Being::type_"][::std::mem::offset_of!(Being, type_) - 52usize];
+    ["Offset of field: Being::name"][::std::mem::offset_of!(Being, name) - 48usize];
+    ["Offset of field: Being::age"][::std::mem::offset_of!(Being, age) - 56usize];
+    ["Offset of field: Being::max_age"][::std::mem::offset_of!(Being, max_age) - 60usize];
+    ["Offset of field: Being::alive"][::std::mem::offset_of!(Being, alive) - 64usize];
+    ["Offset of field: Being::type_"][::std::mem::offset_of!(Being, type_) - 68usize];
 };
 pub const animal_types_ANIMALID_pig: animal_types = 0;
 pub type animal_types = ::std::os::raw::c_uint;
@@ -3170,18 +3174,28 @@ pub struct Animal {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Animal"][::std::mem::size_of::<Animal>() - 64usize];
+    ["Size of Animal"][::std::mem::size_of::<Animal>() - 80usize];
     ["Alignment of Animal"][::std::mem::align_of::<Animal>() - 8usize];
-    ["Offset of field: Animal::type_"][::std::mem::offset_of!(Animal, type_) - 56usize];
+    ["Offset of field: Animal::type_"][::std::mem::offset_of!(Animal, type_) - 72usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN6Animal4moveEv"]
     pub fn Animal_move(this: *mut Animal);
 }
+extern "C" {
+    #[link_name = "\u{1}_ZN6AnimalC1Ev"]
+    pub fn Animal_Animal(this: *mut Animal);
+}
 impl Animal {
     #[inline]
     pub unsafe fn move_(&mut self) {
         Animal_move(self)
+    }
+    #[inline]
+    pub unsafe fn new() -> Self {
+        let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+        Animal_Animal(__bindgen_tmp.as_mut_ptr());
+        __bindgen_tmp.assume_init()
     }
 }
 pub const Plant_phase_Plant_seed: Plant_phase = 0;
@@ -3208,17 +3222,17 @@ pub struct Plant {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of Plant"][::std::mem::size_of::<Plant>() - 88usize];
+    ["Size of Plant"][::std::mem::size_of::<Plant>() - 104usize];
     ["Alignment of Plant"][::std::mem::align_of::<Plant>() - 8usize];
     ["Offset of field: Plant::seedling_time"]
-        [::std::mem::offset_of!(Plant, seedling_time) - 56usize];
-    ["Offset of field: Plant::growing_time"][::std::mem::offset_of!(Plant, growing_time) - 60usize];
-    ["Offset of field: Plant::flowers_time"][::std::mem::offset_of!(Plant, flowers_time) - 64usize];
-    ["Offset of field: Plant::planted"][::std::mem::offset_of!(Plant, planted) - 68usize];
-    ["Offset of field: Plant::grown"][::std::mem::offset_of!(Plant, grown) - 69usize];
-    ["Offset of field: Plant::water"][::std::mem::offset_of!(Plant, water) - 72usize];
-    ["Offset of field: Plant::type_"][::std::mem::offset_of!(Plant, type_) - 76usize];
-    ["Offset of field: Plant::phase"][::std::mem::offset_of!(Plant, phase) - 80usize];
+        [::std::mem::offset_of!(Plant, seedling_time) - 72usize];
+    ["Offset of field: Plant::growing_time"][::std::mem::offset_of!(Plant, growing_time) - 76usize];
+    ["Offset of field: Plant::flowers_time"][::std::mem::offset_of!(Plant, flowers_time) - 80usize];
+    ["Offset of field: Plant::planted"][::std::mem::offset_of!(Plant, planted) - 84usize];
+    ["Offset of field: Plant::grown"][::std::mem::offset_of!(Plant, grown) - 85usize];
+    ["Offset of field: Plant::water"][::std::mem::offset_of!(Plant, water) - 88usize];
+    ["Offset of field: Plant::type_"][::std::mem::offset_of!(Plant, type_) - 92usize];
+    ["Offset of field: Plant::phase"][::std::mem::offset_of!(Plant, phase) - 96usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN5PlantC1Ev"]
@@ -3402,6 +3416,10 @@ extern "C" {
     #[link_name = "\u{1}_ZN7InvListC1EPKc"]
     pub fn InvList_InvList(this: *mut InvList, n: *const ::std::os::raw::c_char);
 }
+extern "C" {
+    #[link_name = "\u{1}_ZN7InvListC1Ev"]
+    pub fn InvList_InvList1(this: *mut InvList);
+}
 impl InvList {
     #[inline]
     pub unsafe fn find(&mut self, what: *mut ::std::os::raw::c_void) -> *mut ListElement {
@@ -3459,6 +3477,12 @@ impl InvList {
     pub unsafe fn new(n: *const ::std::os::raw::c_char) -> Self {
         let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
         InvList_InvList(__bindgen_tmp.as_mut_ptr(), n);
+        __bindgen_tmp.assume_init()
+    }
+    #[inline]
+    pub unsafe fn new1() -> Self {
+        let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+        InvList_InvList1(__bindgen_tmp.as_mut_ptr());
         __bindgen_tmp.assume_init()
     }
 }
@@ -4132,7 +4156,7 @@ pub const PacketType_PACKET_PLAYER_UPDATE: PacketType = 0;
 pub const PacketType_PACKET_PLAYER_ID: PacketType = 1;
 pub const PacketType_PACKET_MOVE: PacketType = 2;
 pub const PacketType_PACKET_CHUNK_UPDATE: PacketType = 3;
-pub const PacketType_PACKET_INIT_INVENTORY_ELEMENT: PacketType = 4;
+pub const PacketType_PACKET_SEND_INVENTORY: PacketType = 4;
 pub type PacketType = ::std::os::raw::c_uint;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]

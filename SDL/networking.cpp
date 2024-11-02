@@ -14,6 +14,7 @@ unsigned int my_id;
 
 #define PLAYER_NUM 16
 extern Player* players[PLAYER_NUM];
+extern Player* player;
 
 int init_enet()
 {
@@ -73,6 +74,8 @@ int init_enet()
             if (event.packet->data[0] == PACKET_PLAYER_ID)
             {
                 my_id = (unsigned int)event.packet->data[1];
+                players[my_id] = new Player;
+                player = players[my_id];
                 int seed = *((int*)&event.packet->data[9]);
                 printf("seed: %d\n", seed);
                 srand(seed);
@@ -94,18 +97,74 @@ void update_player(unsigned char* data)
         {
             players[id] = new Player();
         }
-        for (int i = 0; i < 25; i++)
+        /*for (int i = 0; i < 25; i++)
         {
             printf("%d, ", data[i]);
-        }
+        }*/
         Player* player = players[id];
         player->map_x = (int)data[9];
         player->map_y = (int)data[13];
         player->x = (int)data[17];
         player->y = (int)data[21];
 
-        printf("updated player %d: %d %d %d %d\n", id, player->map_x, player->map_y, player->x, player->y);
+        //printf("updated player %d: %d %d %d %d\n", id, player->map_x, player->map_y, player->x, player->y);
     }
+}
+
+InventoryElementSDL* el_from_data(unsigned char* data)
+{
+    int offset = 0;
+
+    size_t uid = *(size_t*)&data[offset];
+    offset += sizeof(size_t);
+    
+    Class_id c_id = (Class_id)data[offset];
+    offset += sizeof(Class_id);
+    
+    int ox = *((int*)&data[offset]);
+    offset += sizeof(int);
+    
+    int oy = data[offset];
+    offset += sizeof(int);
+    
+    int oz = data[offset];
+    offset += sizeof(int);
+    
+    int id = data[offset];
+    offset += sizeof(int);
+
+    InventoryElementSDL* el = NULL;
+    switch (c_id)
+    {
+        case Class_Element:
+            el = new ElementSDL(id);
+            printf("element %d - %d,%d\n", id, ox, oy);
+            break;
+        case Class_Ingredient:
+            el = new IngredientSDL(id);
+            printf("ingredient %d - %d,%d\n", id, ox, oy);
+            break;
+        case Class_Product:
+            el = new ProductSDL(id);
+            printf("product %d - %d,%d\n", id, ox, oy);
+            break;
+        case Class_Plant:
+            el = new PlantSDL();
+            printf("plant %d - %d,%d\n", id, ox, oy);
+            break;
+        case Class_Animal:
+            el = new AnimalSDL();
+            printf("animal %d - %d,%d\n", id, ox, oy);
+            break;
+        default:
+            printf("something %d - %d,%d\n", c_id, ox, oy);
+    }
+    if (el)
+    {
+        el->uid = uid;
+        el->set_posittion(ox, oy);
+    }
+    return el;
 }
 
 void update_chunk(unsigned char* data)
@@ -127,46 +186,32 @@ void update_chunk(unsigned char* data)
         printf("\n");*/
         for (int i = 0; i < item_num; i++)
         {
-            Class_id c_id = (Class_id)data[1031+i*20];
-            int ox = *((int*)&data[1031+i*20 + 4]);
-            int oy = data[1031+i*20 + 8];
-            int oz = data[1031+i*20 + 12];
-            int id = data[1031+i*20 + 16];
+            InventoryElementSDL* el = el_from_data(&data[1031 + i*28]);
 
-//            printf("\n%d %d\n", data[1027], data[1028]);
-
-            InventoryElementSDL* el = NULL;
-            switch (c_id)
-            {
-                case Class_Element:
-                    el = new ElementSDL(id);
-                    printf("element %d - %d,%d\n", id, ox, oy);
-                    break;
-                case Class_Ingredient:
-                    el = new IngredientSDL(id);
-                    printf("ingredient %d - %d,%d\n", id, ox, oy);
-                    break;
-                case Class_Product:
-                    el = new ProductSDL(id);
-                    printf("product %d - %d,%d\n", id, ox, oy);
-                    break;
-                case Class_Plant:
-                    el = new PlantSDL();
-                    printf("plant %d - %d,%d\n", id, ox, oy);
-                    break;
-                case Class_Animal:
-                    el = new AnimalSDL();
-                    printf("animal %d - %d,%d\n", id, ox, oy);
-                    break;
-                default:
-                    printf("something %d - %d,%d\n", c_id, ox, oy);
-            }
             if (el)
             {
-                el->set_posittion(ox, oy);
-
                 world_table[y][x]->add_object(el);
             }
+        }
+    }
+}
+
+void update_inventory(unsigned char* data)
+{
+    int offset = 1;
+    int item_num = *(int*)&data[offset];
+    for (int i = 0; i < item_num; i++)
+    {
+        InventoryElement* el = el_from_data(&data[5 + i*28]);
+        
+        if (el)
+        {
+            players[my_id]->inventory->add(el);
+            printf("invent %d %d", el->c_id, el->uid);
+        }
+        else
+        {
+            printf("invalid item\n");
         }
     }
 }
@@ -194,6 +239,9 @@ int network_tick()
                             update_chunk(data);
                         //else
                           //  printf("bad c update");
+                        break;
+                    case PACKET_SEND_INVENTORY:
+                        update_inventory(data);
                         break;
 
                 }

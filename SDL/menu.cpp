@@ -14,7 +14,7 @@
 #include <cstdlib>
 
 
-//extern class Player player;
+extern class Player* player;
 extern int active_hotbar;
 
 Menu *menu_music;
@@ -260,9 +260,9 @@ Menu * create_inv_category_menu(enum Form f)
 }
 Menu * create_inv_menu(Item_id id)
 {
-    /*printf("szukam %d\n", id);
+    printf("szukam %d\n", id);
     int c=0;
-    InventoryElement ** i_el = player.inventory->find_id(id, &c);
+    InventoryElement ** i_el = player->inventory->find_id(id, &c);
     if (i_el) {
 	printf("found %d elements\n", c);
 
@@ -276,7 +276,7 @@ Menu * create_inv_menu(Item_id id)
 	}
 	free(el);
 	return menu_inventory;
-    }*/
+    }
     return NULL;
 }
 
@@ -321,9 +321,9 @@ int menu_interact(int key)
 	}
         case SDLK_i:
 	{
-		/*player.inventory->show();
+		player->inventory->show();
 		if (!current_menu) current_menu=menu_inventory_categories; 
-		else if (current_menu == menu_inventory_categories) current_menu=NULL;*/
+		else if (current_menu == menu_inventory_categories) current_menu=NULL;
 		return 1;
 	}
 
