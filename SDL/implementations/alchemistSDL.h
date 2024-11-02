@@ -2,6 +2,7 @@
 #define ALCHEMIST_SDL_H
 
 #include "../../core/alchemist/elements.h"
+#include "../texture.h"
 
 class IngredientSDL : public Ingredient
 {
@@ -33,6 +34,7 @@ class ElementSDL : public Element
 {
     public:
         SDL_Texture * get_texture();
+        ElementSDL(int id);
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define TILES_H
 
 #include "alchemist/elements.h"
+#include "alchemist/el_list.h"
 
 
 enum  game_tiles
@@ -40,15 +41,19 @@ struct tile {
     
 typedef struct tile chunk_table[CHUNK_SIZE][CHUNK_SIZE];
 
-typedef struct {
+class chunk {
+    public:
     enum biomes biome;
     chunk_table table;
-    InventoryElement * items[CHUNK_SIZE*CHUNK_SIZE];
+    InvList objects;
+    void add_object(InventoryElement* object);
+    chunk();
+    /*InventoryElement * items[CHUNK_SIZE*CHUNK_SIZE];
     Being * beings[CHUNK_SIZE*CHUNK_SIZE];
     Plant * plants[CHUNK_SIZE*CHUNK_SIZE];
     Animal * animals[CHUNK_SIZE*CHUNK_SIZE];
-    Object * objects[CHUNK_SIZE*CHUNK_SIZE];
-} chunk;
+    Object * objects[CHUNK_SIZE*CHUNK_SIZE];*/
+};
 
 
 

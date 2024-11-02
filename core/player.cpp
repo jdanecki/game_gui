@@ -49,6 +49,7 @@ Player::Player()
     map_y = WORLD_CENTER;
     inventory = new InvList("inventory");
 
+    x = 0;
 	y = 0;
 
 	for (int i=0; i < 10; i++)

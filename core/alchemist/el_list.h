@@ -30,6 +30,7 @@ public:
     ListElement * tail;
 
 	InvList(const char *n);
+    InvList();
     ListElement * find(void * what);
     bool virtual find_check(ListElement *el, void * what) { return el == what; }
 //    bool virtual find_at_check(ListElement *el, void * pos) { return false; }
@@ -42,6 +43,7 @@ public:
 	int get_count(InventoryElement *el);
     void tick();
     void enable_all();
+    int size();
 };
 
 class Show_el : public ListElement

@@ -22,6 +22,7 @@
 #include "../core/tiles.h"
 #include "../core/player.h"
 #include "implementations/alchemistSDL.h"
+#include "networking.h"
 
 // Normal speed
 #define UPDATE_DELAY 1000
@@ -35,7 +36,10 @@ SDL_Texture *map;
 int auto_explore;
 int active_hotbar=0;
 
-Player player;
+#define PLAYER_NUM 16
+Player* players[PLAYER_NUM];
+Player * player;
+bool finish;
 
 void (*callback_daily)();
 
@@ -82,19 +86,19 @@ void update_window_size()
 
 void put_element()
 {
-    InventoryElement * el = player.hotbar[active_hotbar];
+    /*InventoryElement * el = player.hotbar[active_hotbar];
     if (el) {
         el->set_posittion(player.x, player.y);
         set_item_at_ppos(el, &player);
         player.inventory->remove(el);
         player.hotbar[active_hotbar]=NULL;
         printf("item %s placed\n", el->get_name());
-    }
+    }*/
 }
 
 void use_tile()
 {
-    InventoryElement ** item_pointer = get_item_at_ppos(&player);
+    /*InventoryElement ** item_pointer = get_item_at_ppos(&player);
     if (item_pointer)
     {
         InventoryElement * item = *item_pointer;
@@ -143,12 +147,12 @@ void use_tile()
                 world_table[player.map_y][player.map_x]->plants[i] = NULL;
             }
         }
-    }
+    }*/
 }
 
 bool plant_with_seed(InventoryElement * el)
 {
-    if (get_tile_at_ppos(&player) == TILE_GRASS || get_tile_at_ppos(&player) == TILE_DIRT)
+    /*if (get_tile_at_ppos(&player) == TILE_GRASS || get_tile_at_ppos(&player) == TILE_DIRT)
         {
         if (el->get_id() == ID_ACORN2)
         {
@@ -356,8 +360,9 @@ bool plant_with_seed(InventoryElement * el)
         }
     }
     return false;
-
+    */
 }
+
 
 void player_interact(int key)
 {
@@ -369,6 +374,18 @@ void player_interact(int key)
             sprintf(status_line, "");
             status_code = 1;
             break;
+        case SDLK_w:
+              send_packet_move(0, -1);
+              break;
+        case SDLK_a:
+              send_packet_move(-1, 0);
+              break;
+        case SDLK_s:
+              send_packet_move(0, 1);
+              break;
+        case SDLK_d:
+              send_packet_move(1, 0);
+              break;
 #ifdef OLDKB
         case SDLK_s:
             player.move(0, 1);
@@ -463,7 +480,7 @@ void player_interact(int key)
         //             break;
         //     break;
         // }
-        case SDLK_r:
+        /*case SDLK_r:
             player.hotbar[active_hotbar]=NULL;
             break;
         case SDLK_SEMICOLON:
@@ -539,7 +556,7 @@ void player_interact(int key)
             }
             
             break;
-        }
+        }*/
         case SDLK_F11:
             update_window_size();
             break;
@@ -559,24 +576,24 @@ void player_interact(int key)
 		case SDLK_BACKQUOTE: active_hotbar--; if (active_hotbar==-1) active_hotbar=9; break;
         case SDLK_TAB: active_hotbar++; if (active_hotbar==10) active_hotbar=0; break;
 		
-        case SDLK_MINUS: player.craftbar[active_hotbar]=0;  break;
-        case SDLK_EQUALS: player.craftbar[active_hotbar]=1;  break;
+        //case SDLK_MINUS: player.craftbar[active_hotbar]=0;  break;
+        //case SDLK_EQUALS: player.craftbar[active_hotbar]=1;  break;
 
         case SDLK_F5:
             auto_explore^=1;
         break;
 		case SDLK_F4:
 		{
-           	InventoryElement ** item_pointer = get_item_at_ppos(&player);
+           /*	InventoryElement ** item_pointer = get_item_at_ppos(&player);
             if (item_pointer)
-                (*item_pointer)->show();
+                (*item_pointer)->show();*/
 		}
 		break;
                     
 
         case SDLK_RETURN:
         case SDLK_e:
-            InventoryElement * el = player.hotbar[active_hotbar];
+/*            InventoryElement * el = player.hotbar[active_hotbar];
             if (el)
             {
                 if (el->use(&player))
@@ -598,7 +615,7 @@ void player_interact(int key)
                     }
                 }
             }
-            use_tile();
+            use_tile();*/
             break;
     }
 }
@@ -607,7 +624,7 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
 {
     Uint64 current_time = SDL_GetTicks64();
     int time_period = 0;
-    if (keys[SDL_SCANCODE_LSHIFT])
+    /*if (keys[SDL_SCANCODE_LSHIFT])
     {
         player.sneaking = 1;
         time_period = 200;
@@ -659,7 +676,7 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
         {
             return SDL_GetTicks64();
         }
-    }
+    }*/
     if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
     {
         *last_frame_press=1;
@@ -683,7 +700,7 @@ int next_to(int x1, int y1, int x2, int y2)
 }
 void update()
 {
-    for (int i = 0; i<CHUNK_SIZE*CHUNK_SIZE; i++) {
+    /*for (int i = 0; i<CHUNK_SIZE*CHUNK_SIZE; i++) {
         Being * b = world_table[player.map_y][player.map_x]->beings[i];
 
         if (b)
@@ -726,7 +743,7 @@ void update()
                 world_table[player.map_y][player.map_x]->animals[i]=NULL;
             }
         }
-    }
+    }*/
 }
 
 void draw()
@@ -753,10 +770,33 @@ void draw()
         for (int x=0; x < CHUNK_SIZE; x++)
         {
             SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
+            if (world_table[128][128])
+            {
+            //enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
+            enum game_tiles tile = get_tile_at(128, 128, x, y);
             SDL_Texture *texture = tiles_textures[tile];
             SDL_RenderCopy(renderer, texture, NULL, &img_rect);
+            }
+            else
+            {
+                printf("chunk not loaded\n");
+            }
         }
+    }
+
+    chunk* c = world_table[128][128];
+    ListElement* el = c->objects.head;
+    while (el)
+    {
+        ElementSDL * o = (ElementSDL*)el->el;
+        if (o) 
+        {
+            int x, y;
+            o->get_posittion(&x, &y);
+            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+            SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
+        }
+        el = el->next;
     }
     // TODO render
     // render items
@@ -824,13 +864,19 @@ void draw()
         }
     }*/
 
-    // render player
-    SDL_Rect img_rect = {player.x * tile_dungeon_size, player.y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-    if (player.going_right) SDL_RenderCopy(renderer, Texture.playerr, NULL, &img_rect);
-    else SDL_RenderCopy(renderer, Texture.playerl, NULL, &img_rect);
+    // render players
 
+    for (int i = 0; i < PLAYER_NUM; i++) 
+    {
+        if (players[i])
+        {
+            SDL_Rect img_rect = {players[i]->x * tile_dungeon_size, players[i]->y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+            if (players[i]->going_right) SDL_RenderCopy(renderer, Texture.playerr, NULL, &img_rect);
+            else SDL_RenderCopy(renderer, Texture.playerl, NULL, &img_rect);
+        }
+    }
     // render GUI
-    int icon_size = game_size/10;
+    /*int icon_size = game_size/10;
     if (player.running)
     {
         SDL_Rect running_icon_rect = {(int)(game_size-(icon_size*1.1)), 0, icon_size, icon_size};
@@ -990,7 +1036,7 @@ void draw()
     sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed"); 
     write_text(5, window_height - 32, text, White, 15, 30);
 
-    if (current_menu) current_menu->show();
+    if (current_menu) current_menu->show();*/
 }
 
 void intro()
@@ -1055,17 +1101,22 @@ int init_SDL()
     return 0;
 }
 
+
+
 int setup() 
 {
     if (init_SDL() != 0) return 1;
 
-    //intro();
+    if (init_enet()) return 1;
+    player = players[my_id];
 
-    srand (time(NULL));
-    
-    callback_daily=daily_call;
-    init_elements();
-	game_time=new Game_time;
+
+    // TODO is this necessary?
+    //intro();
+    //srand (time(NULL));
+    //init_elements();
+    //callback_daily=daily_call;
+	//game_time=new Game_time;
 
     return 0;
 }
@@ -1113,13 +1164,29 @@ bool handle_SDL_events()
 
 void do_auto_explore()
 {
+    /*if ((dst_map_x == player.map_x) && (dst_map_y == player.map_y)) { 
+        int dx = 5 - (rand() % 11);
+        int dy = 5 - (rand() % 11);
+
+       if (player.map_y+dy >= 0 && player.map_y+dy < WORLD_SIZE && player.map_x +dx >= 0 && player.map_x+dx < WORLD_SIZE)
+       {
+            if (!world_table[player.map_y+dy][player.map_x+dx]) {                
+                dst_map_x=player.map_x + dx;
+                dst_map_y=player.map_y + dy;
+            }
+       }
+    }
+    if (dst_map_x > player.map_x) player.move(1, 0);
+    if (dst_map_x < player.map_x) player.move(-1, 0);
+    if (dst_map_y > player.map_y) player.move(0, 1);
+    if (dst_map_y < player.map_y) player.move(0, -1);*/
 
 }
 
 void loop()
 {
-    int dst_map_x=player.map_x;
-    int dst_map_y=player.map_y;
+    //int dst_map_x=player.map_x;
+    //int dst_map_y=player.map_y;
     int last_frame_press=0;
 
     Uint64 last_time = 0;
@@ -1131,21 +1198,22 @@ void loop()
     {   
         clear_window();
 
-        if (player.hunger < 0) player.hunger = 0;
-        if (player.thirst < 0) player.thirst = 0;
         
         if (SDL_GetTicks() - last_update_time > UPDATE_DELAY)
         {
             last_update_time = SDL_GetTicks();
             update();
         }
-        draw();
+
 
         if (handle_SDL_events())
             return;
+
+        if (network_tick())
+            return;
         // keyboard handling for move
 #ifndef OLDKB
-        if (player.hunger > 0 || rand() % 3)
+        //if (player.hunger > 0 || rand() % 3)
         {
             const Uint8 *currentKeyState = SDL_GetKeyboardState(NULL);
             Uint64 tmp = move_interact(currentKeyState, last_time, &last_frame_press);
@@ -1158,37 +1226,21 @@ void loop()
         // printf("%d\n", last_frame_press);
 
 
-        if (auto_explore) {
-           if ((dst_map_x == player.map_x) && (dst_map_y == player.map_y)) { 
-                int dx = 5 - (rand() % 11);
-                int dy = 5 - (rand() % 11);
-
-               if (player.map_y+dy >= 0 && player.map_y+dy < WORLD_SIZE && player.map_x +dx >= 0 && player.map_x+dx < WORLD_SIZE)
-               {
-                    if (!world_table[player.map_y+dy][player.map_x+dx]) {                
-                        dst_map_x=player.map_x + dx;
-                        dst_map_y=player.map_y + dy;
-                    }
-               }
-           }
-           if (dst_map_x > player.map_x) player.move(1, 0);
-           if (dst_map_x < player.map_x) player.move(-1, 0);
-           if (dst_map_y > player.map_y) player.move(0, 1);
-           if (dst_map_y < player.map_y) player.move(0, -1);
+        /*if (auto_explore) {
+            do_auto_explore();
          } else {
-                dst_map_x=player.map_x;
-                dst_map_y=player.map_y;
-         }
+                //dst_map_x=player.map_x;
+                //dst_map_y=player.map_y;
+         }*/
+        draw();
 
         SDL_RenderPresent(renderer);
         if (!auto_explore) SDL_Delay(20);   
     }
-
 }
 
 int main()
 {
     if (setup()) return 1;
-    generator();
     loop();
 }

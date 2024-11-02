@@ -32,6 +32,14 @@ InvList::InvList(const char * n)
     head = NULL;
 }
 
+InvList::InvList()
+{
+    name = "foo";
+    nr_elements=0;
+    tail = NULL;
+    head = NULL;
+}
+
 ListElement * InvList::find(void  * what)
 {
     ListElement * cur = head;
@@ -109,6 +117,17 @@ void InvList::enable_all()
         cur->enable();
         cur = cur->next;
     }
+}
+
+int InvList::size()
+{
+    int size = 0;
+    ListElement* cur = head;
+    while (cur) {
+        size++;
+        cur = cur->next;
+    }
+    return size;
 }
 
 void InvList::tick()

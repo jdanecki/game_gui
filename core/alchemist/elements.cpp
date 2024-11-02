@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include "elements.h"
 #include "names.h"
@@ -160,6 +161,27 @@ void BaseElement::show(bool details)
         default: break;
     }
     if (edible) edible->show();
+}
+
+unsigned int InventoryElement::get_packet_size()
+{
+    if (get_base())
+        return sizeof(int) * 4;
+    return sizeof(int)*4;
+}
+
+unsigned char* InventoryElement::to_bytes()
+{
+    unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
+    memcpy(&bytes[0], &x, sizeof(x));
+    memcpy(&bytes[sizeof(x)], &y, sizeof(y));
+    memcpy(&bytes[sizeof(x) + sizeof(y)], &z, sizeof(z));
+
+    if (get_base())
+    {
+        memcpy(&bytes[12], &get_base()->id, sizeof(int));
+    }
+    return bytes;
 }
 
 Element::Element(BaseElement *b)

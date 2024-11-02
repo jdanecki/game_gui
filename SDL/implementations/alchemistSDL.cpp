@@ -23,9 +23,14 @@ SDL_Texture * ObjectSDL::get_texture()
     return NULL;
 }
 
+ElementSDL::ElementSDL(int id) : Element(base_elements[id])
+{
+
+}
+
 SDL_Texture * ElementSDL::get_texture()
 {
-    return items_textures[base->id]; 
+    return items_textures[get_base()->id]; 
 }
 
 SDL_Texture *IngredientSDL::get_texture() 

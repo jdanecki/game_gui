@@ -41,7 +41,7 @@ void create_biome_plains(chunk * chunk)
 
             o->set_posittion(x, y);
 
-            chunk->items[i] = o;
+            chunk->add_object(o);
         }
     }
     if (rand() % 2)
@@ -56,7 +56,7 @@ void create_biome_plains(chunk * chunk)
 
             p->set_posittion(x, y);
 
-            chunk->plants[i] = p;
+            chunk->add_object(p);
         }
     }
     if (rand() % 2)
@@ -71,7 +71,7 @@ void create_biome_plains(chunk * chunk)
 
             p->set_posittion(x, y);
 
-            chunk->plants[i] = p;
+            chunk->add_object(p);
         }
     }
     if (rand() % 2)
@@ -86,7 +86,7 @@ void create_biome_plains(chunk * chunk)
 
             p->set_posittion(x, y);
 
-            chunk->plants[i] = p;
+            chunk->add_object(p);
         }
     }
     if (rand() % 2)
@@ -101,7 +101,7 @@ void create_biome_plains(chunk * chunk)
 
             a->set_posittion(x, y);
 
-            chunk->animals[i]=a;
+            chunk->add_object(a);
         }
     }
 }
@@ -125,7 +125,7 @@ void create_biome_forest(chunk * chunk)
 
         o->set_posittion(x, y);
 
-        chunk->items[i] = o;
+        chunk->add_object(o);
     }
 
 
@@ -136,7 +136,7 @@ void create_biome_forest(chunk * chunk)
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
-        for (int i = 0; i < 256; i++) {
+        /*for (int i = 0; i < 256; i++) {
             if (chunk->plants[i])
             {
                 int ox=0;
@@ -151,7 +151,7 @@ void create_biome_forest(chunk * chunk)
                 }
             }
         
-        }
+        }*/
 
         tree->set_posittion(x, y);
         switch (rand() % 3) {
@@ -167,7 +167,7 @@ void create_biome_forest(chunk * chunk)
         
         }
 
-        chunk->plants[i]=tree;
+        chunk->add_object(tree);
     }
 }
 
@@ -191,7 +191,7 @@ void create_biome_desert(chunk * chunk)
 
         o->set_posittion(x, y);
 
-        chunk->items[i] = o;
+        chunk->add_object(o);
     }
 
 
@@ -243,7 +243,8 @@ char traversable_tiles[TILE_MAX_NUM] =
 
 Being **get_being_at(int chunk_x, int chunk_y, int x, int y)
 {
-    for (int i = 0; i < 128; i++)
+    //TODO
+    /*for (int i = 0; i < 128; i++)
     {
         Being *b = world_table[chunk_y][chunk_x]->beings[i];
         if (b)
@@ -256,7 +257,7 @@ Being **get_being_at(int chunk_x, int chunk_y, int x, int y)
                 return &world_table[chunk_y][chunk_x]->beings[i];
             }
         }
-    }
+    }*/
     return NULL;
 }
 
@@ -267,7 +268,8 @@ Being **get_being_at_ppos(Player * player)
 
 Animal **get_animal_at(int chunk_x, int chunk_y, int x, int y)
 {
-    for (int i = 0; i < 128; i++)
+    // TODO
+    /*for (int i = 0; i < 128; i++)
     {
         Animal *a = world_table[chunk_y][chunk_x]->animals[i];
         if (a)
@@ -280,7 +282,7 @@ Animal **get_animal_at(int chunk_x, int chunk_y, int x, int y)
                 return &world_table[chunk_y][chunk_x]->animals[i];
             }
         }
-    }
+    }*/
     return NULL;
 }
 Animal **get_animal_at_ppos(Player * player)
@@ -290,7 +292,8 @@ Animal **get_animal_at_ppos(Player * player)
 
 Object **get_object_at(int chunk_x, int chunk_y, int x, int y)
 {
-    for (int i = 0; i < 128; i++)
+    // TODO
+    /*for (int i = 0; i < 128; i++)
     {
         Object * o = world_table[chunk_y][chunk_x]->objects[i];
         if (o)
@@ -303,7 +306,7 @@ Object **get_object_at(int chunk_x, int chunk_y, int x, int y)
                 return &world_table[chunk_y][chunk_x]->objects[i];
             }
         }
-    }
+    }*/
     return NULL;
 }
 
@@ -315,7 +318,8 @@ Object **get_object_at_ppos(Player * player)
 
 Plant **get_plant_at(int chunk_x, int chunk_y, int x, int y)
 {
-    for (int i = 0; i < 128; i++)
+    // TODO
+    /*for (int i = 0; i < 128; i++)
     {
         Plant *p = world_table[chunk_y][chunk_x]->plants[i];
         if (p)
@@ -328,7 +332,7 @@ Plant **get_plant_at(int chunk_x, int chunk_y, int x, int y)
                 return &world_table[chunk_y][chunk_x]->plants[i];
             }
         }
-    }
+    }*/
     return NULL;
 }
 
@@ -340,7 +344,8 @@ Plant **get_plant_at_ppos(Player * player)
 
 InventoryElement **get_item_at(int chunk_x, int chunk_y, int x, int y)
 {
-    for (int i = 0; i < 128; i++)
+    // TODO
+    /*for (int i = 0; i < 128; i++)
     {
         InventoryElement *el = world_table[chunk_y][chunk_x]->items[i];
         if (el)
@@ -353,7 +358,7 @@ InventoryElement **get_item_at(int chunk_x, int chunk_y, int x, int y)
                 return &world_table[chunk_y][chunk_x]->items[i];
             }
         }
-    }
+    }*/
     return NULL;
 }
 
@@ -364,14 +369,15 @@ InventoryElement **get_item_at_ppos(Player * player)
 
 void set_item_at(InventoryElement *item, int chunk_x, int chunk_y, int x, int y) 
 {
-    for (int i = 0; i < 128; i++)
+    // TODO
+    /*for (int i = 0; i < 128; i++)
     {
         if (!world_table[chunk_y][chunk_x]->items[i])
         {
             world_table[chunk_y][chunk_x]->items[i] = item;
             break;
         }
-    }
+    }*/
 }
 
 void set_item_at_ppos(InventoryElement *item, Player *player) 

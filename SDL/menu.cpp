@@ -14,7 +14,7 @@
 #include <cstdlib>
 
 
-extern class Player player;
+//extern class Player player;
 extern int active_hotbar;
 
 Menu *menu_music;
@@ -260,7 +260,7 @@ Menu * create_inv_category_menu(enum Form f)
 }
 Menu * create_inv_menu(Item_id id)
 {
-    printf("szukam %d\n", id);
+    /*printf("szukam %d\n", id);
     int c=0;
     InventoryElement ** i_el = player.inventory->find_id(id, &c);
     if (i_el) {
@@ -276,7 +276,7 @@ Menu * create_inv_menu(Item_id id)
 	}
 	free(el);
 	return menu_inventory;
-    }
+    }*/
     return NULL;
 }
 
@@ -321,9 +321,9 @@ int menu_interact(int key)
 	}
         case SDLK_i:
 	{
-		player.inventory->show();
+		/*player.inventory->show();
 		if (!current_menu) current_menu=menu_inventory_categories; 
-		else if (current_menu == menu_inventory_categories) current_menu=NULL;
+		else if (current_menu == menu_inventory_categories) current_menu=NULL;*/
 		return 1;
 	}
 
@@ -361,11 +361,11 @@ int handle_item(int i)
 {
 	if (active_hotbar >=0) {
         Element *el=menu_inventory->el[i];
-		for (int h=0; h< 10; h++)
+		/*for (int h=0; h< 10; h++)
         {
             if (player.hotbar[h] == el) return 0;
         };
-        player.hotbar[active_hotbar]=menu_inventory->el[i];
+        player.hotbar[active_hotbar]=menu_inventory->el[i];*/
 	}
 	return 1;
 }	
@@ -386,7 +386,7 @@ int craft(menu_actions a)
 
     }
     if (el) {
-        set_item_at_ppos(el, &player);
+        //set_item_at_ppos(el, &player);
         status_code = 1;
     } else status_code = 0;
     current_menu=NULL;
@@ -407,7 +407,7 @@ int interact(enum menu_actions a)
 	case MENU_BUILD_WALL:
 	{
 	    sprintf(status_line, "Starting building");
-	    if (player.hotbar[active_hotbar] && player.hotbar[active_hotbar]->get_form() == Form_solid)
+	    /*if (player.hotbar[active_hotbar] && player.hotbar[active_hotbar]->get_form() == Form_solid)
 	    {
 		Object * ob = new Object();
 		ob->base = ((Element *)(player.hotbar[active_hotbar]))->get_base();
@@ -438,11 +438,11 @@ int interact(enum menu_actions a)
 	    }
 	    else {
 		status_code = 0;
-	    }
+	    }*/
 	    break;
 	}
 
-        case MENU_GET_AXE:
+        /*case MENU_GET_AXE:
         {
             Element * el1=new Element(base_elements[0]);
             Element * el2=new Element(base_elements[1]);
@@ -484,7 +484,7 @@ int interact(enum menu_actions a)
         case MENU_REGAIN:
             player.hunger+=100;
             player.thirst+=100;
-            return 0;
+            return 0;*/
         case MENU_SAVE:
             save(1);
             break;

@@ -13,7 +13,9 @@ Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_A
 bool Axe::use(Player * player)
 {
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Plant * p = world_table[player->map_y][player->map_x]->plants[i];
+        // TODO
+        Plant * p = NULL;
+//        Plant * p = world_table[player->map_y][player->map_x]->plants[i];
         if (p)
         {
             int x,y;
@@ -57,14 +59,15 @@ bool Axe::use(Player * player)
                     }
                     free(p);
                     p=NULL;
-                    world_table[player->map_y][player->map_x]->plants[i]=NULL;
+                    //                    TODO
+//                    world_table[player->map_y][player->map_x]->plants[i]=NULL;
                     return true;
                 }
                 // TODO    break when used too much
             }
         }
 
-        Object * o = world_table[player->map_y][player->map_x]->objects[i];
+        Object * o = NULL; //TODO world_table[player->map_y][player->map_x]->objects[i];
         if (o && o->type == OBJECT_wall)
         {
             int x,y;
@@ -77,7 +80,7 @@ bool Axe::use(Player * player)
 
                 free(o);
                 o=NULL;
-                world_table[player->map_y][player->map_x]->objects[i]=NULL;
+                // TODOworld_table[player->map_y][player->map_x]->objects[i]=NULL;
                 return true;
             }
         }

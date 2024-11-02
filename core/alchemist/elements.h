@@ -110,6 +110,8 @@ class InventoryElement
         }
         void set_posittion(int _x, int _y) { x=_x; y=_y; }
         void get_posittion(int *_x, int *_y) { *_x=x; *_y=y; }
+        virtual unsigned int get_packet_size();
+        virtual unsigned char* to_bytes();
 };
 
 enum object_types

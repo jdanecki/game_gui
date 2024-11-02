@@ -13,7 +13,7 @@ Knife::Knife(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PR
 bool Knife::use(Player * player)
 {
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Plant * p = world_table[player->map_y][player->map_x]->plants[i];
+        Plant * p = NULL; //TODOworld_table[player->map_y][player->map_x]->plants[i];
         if (p)
         {
             int x,y;
@@ -35,14 +35,14 @@ bool Knife::use(Player * player)
 
                             free(p);
                             p=NULL;
-                            world_table[player->map_y][player->map_x]->plants[i]=NULL;
+                            //world_table[player->map_y][player->map_x]->plants[i]=NULL;
                             return true;
                         }
                     }
                 }
             }
         }
-        Animal * a = world_table[player->map_y][player->map_x]->animals[i];
+        Animal * a = NULL;// TODOworld_table[player->map_y][player->map_x]->animals[i];
         if (a)
         {
             int x,y;
