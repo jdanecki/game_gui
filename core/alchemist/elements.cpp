@@ -165,22 +165,26 @@ void BaseElement::show(bool details)
 
 unsigned int InventoryElement::get_packet_size()
 {
-    if (get_base())
-        return sizeof(int) * 4;
-    return sizeof(int)*4;
+    //if (get_base())
+        return sizeof(int) * 4 + sizeof(Class_id);
+    //return sizeof(int)*4;
 }
 
 unsigned char* InventoryElement::to_bytes()
 {
     unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
-    memcpy(&bytes[0], &x, sizeof(x));
-    memcpy(&bytes[sizeof(x)], &y, sizeof(y));
-    memcpy(&bytes[sizeof(x) + sizeof(y)], &z, sizeof(z));
+    memcpy(&bytes[0], &c_id, sizeof(Class_id));
+    memcpy(&bytes[sizeof(Class_id)], &x, sizeof(x));
+    memcpy(&bytes[sizeof(Class_id) + sizeof(x)], &y, sizeof(y));
+    memcpy(&bytes[sizeof(Class_id) + sizeof(x) + sizeof(y)], &z, sizeof(z));
 
+    printf("class %d - %d %d %d %d - %d %d", c_id, bytes[0], bytes[1], bytes[2], bytes[3], x, y);
     if (get_base())
     {
-        memcpy(&bytes[12], &get_base()->id, sizeof(int));
+        memcpy(&bytes[sizeof(Class_id) + sizeof(x) + sizeof(y) + sizeof(z)], &get_base()->id, sizeof(int));
+        printf(", id %d", get_base()->id);
     }
+    printf("\n");
     return bytes;
 }
 
@@ -335,6 +339,15 @@ void show_base_elements(bool details)
         base_elements[i]->show(details);
     }
 
+}
+
+Animal::Animal()
+{
+    c_id = Class_Animal;
+    alive = true;
+    max_age = 1 + rand() % 36000; // 100 years
+    age = rand() % max_age;
+    name = create_name(rand() % 2 + 2);
 }
 
 void Animal::move()

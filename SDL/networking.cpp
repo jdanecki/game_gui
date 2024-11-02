@@ -6,6 +6,7 @@
 #include "../core/world.h"
 #include "../core/alchemist/elements.h"
 #include "implementations/alchemistSDL.h"
+#include "implementations/BeingSDL.h"
 
 ENetHost* host;
 ENetPeer* server;
@@ -93,6 +94,10 @@ void update_player(unsigned char* data)
         {
             players[id] = new Player();
         }
+        for (int i = 0; i < 25; i++)
+        {
+            printf("%d, ", data[i]);
+        }
         Player* player = players[id];
         player->map_x = (int)data[9];
         player->map_y = (int)data[13];
@@ -114,18 +119,54 @@ void update_chunk(unsigned char* data)
         world_table[y][x] = new chunk;
         memcpy(world_table[y][x]->table, &data[3], CHUNK_SIZE * CHUNK_SIZE * sizeof(game_tiles));
         unsigned int item_num = data[1027];
-        printf("got %d items\n", item_num);
+        /*printf("got %d items\n[", item_num);
+        for (int i = 0; i < 1027 + item_num*20; i++)
+        {
+            printf("%d, ", data[i]);
+        }
+        printf("\n");*/
         for (int i = 0; i < item_num; i++)
         {
-            int ox = data[1027+i*16];
-            int oy = data[1027+i*16 + 4];
-            int oz = data[1027+i*16 + 8];
-            int id = data[1027+i*16 + 12];
+            Class_id c_id = (Class_id)data[1031+i*20];
+            int ox = *((int*)&data[1031+i*20 + 4]);
+            int oy = data[1031+i*20 + 8];
+            int oz = data[1031+i*20 + 12];
+            int id = data[1031+i*20 + 16];
 
-            ElementSDL* el = new ElementSDL(id);
-            el->set_posittion(ox, oy);
+//            printf("\n%d %d\n", data[1027], data[1028]);
 
-            world_table[y][x]->add_object(el);
+            InventoryElementSDL* el = NULL;
+            switch (c_id)
+            {
+                case Class_Element:
+                    el = new ElementSDL(id);
+                    printf("element %d - %d,%d\n", id, ox, oy);
+                    break;
+                case Class_Ingredient:
+                    el = new IngredientSDL(id);
+                    printf("ingredient %d - %d,%d\n", id, ox, oy);
+                    break;
+                case Class_Product:
+                    el = new ProductSDL(id);
+                    printf("product %d - %d,%d\n", id, ox, oy);
+                    break;
+                case Class_Plant:
+                    el = new PlantSDL();
+                    printf("plant %d - %d,%d\n", id, ox, oy);
+                    break;
+                case Class_Animal:
+                    el = new AnimalSDL();
+                    printf("animal %d - %d,%d\n", id, ox, oy);
+                    break;
+                default:
+                    printf("something %d - %d,%d\n", c_id, ox, oy);
+            }
+            if (el)
+            {
+                el->set_posittion(ox, oy);
+
+                world_table[y][x]->add_object(el);
+            }
         }
     }
 }

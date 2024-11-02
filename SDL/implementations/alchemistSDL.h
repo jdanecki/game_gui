@@ -4,33 +4,37 @@
 #include "../../core/alchemist/elements.h"
 #include "../texture.h"
 
-class IngredientSDL : public Ingredient
-{
-    public:
-        SDL_Texture * get_texture();
-};
-
-class ProductSDL : public Product
-{
-    public:
-        SDL_Texture * get_texture();
-
-};
-
-class InventoryElementSDL : public InventoryElement
+class InventoryElementSDL : virtual public InventoryElement
 {
     public:
         virtual SDL_Texture * get_texture() {return NULL; }
 };
 
-class ObjectSDL : public Object
+
+class IngredientSDL : public Ingredient, public InventoryElementSDL
 {
     public:
         SDL_Texture * get_texture();
+        IngredientSDL(int id);
+};
+
+class ProductSDL : public Product, public InventoryElementSDL
+{
+    public:
+        SDL_Texture * get_texture();
+        ProductSDL(int id);
 
 };
 
-class ElementSDL : public Element
+class ObjectSDL : public Object, public InventoryElementSDL
+{
+    public:
+        SDL_Texture * get_texture();
+        ObjectSDL(int id);
+
+};
+
+class ElementSDL : public Element, public InventoryElementSDL
 {
     public:
         SDL_Texture * get_texture();

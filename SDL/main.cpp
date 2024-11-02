@@ -788,7 +788,7 @@ void draw()
     ListElement* el = c->objects.head;
     while (el)
     {
-        ElementSDL * o = (ElementSDL*)el->el;
+        InventoryElementSDL * o = dynamic_cast<InventoryElementSDL*>(el->el);
         if (o) 
         {
             int x, y;
@@ -798,74 +798,8 @@ void draw()
         }
         el = el->next;
     }
-    // TODO render
-    // render items
-    /*for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
-    {
-        InventoryElementSDL * o = world_table[player.map_y][player.map_x]->items[i];
-        if (o) 
-        {
-            int x, y;
-            o->get_posittion(&x, &y);
-            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
-        }
-    }
-    // render beings
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
-    {
-        Being * b = world_table[player.map_y][player.map_x]->beings[i];
-        if (b)
-        {
-            int x,y;
-            b->get_posittion(&x, &y);
-            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            SDL_RenderCopy(renderer, b->get_texture(), NULL, &img_rect);
-        }
-    }
-    // render plants
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
-    {
-        Plant * p = world_table[player.map_y][player.map_x]->plants[i];
-        if (p)
-        {
-            int x,y;
-            p->get_posittion(&x, &y);
-
-            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            SDL_RenderCopy(renderer, p->get_texture(), NULL, &img_rect);
-        }
-    }
-
-    // render animals
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
-    {
-        Animal * a = world_table[player.map_y][player.map_x]->animals[i];
-        if (a)
-        {
-            int x,y;
-            a->get_posittion(&x, &y);
-
-            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            SDL_RenderCopy(renderer, a->get_texture(), NULL, &img_rect);
-        }
-    }
-    // render objects
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Object * o = world_table[player.map_y][player.map_x]->objects[i];
-        if (o)
-        {
-            int x,y;
-            o->get_posittion(&x, &y);
-            
-            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            if (o->get_texture())
-                SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
-        }
-    }*/
 
     // render players
-
     for (int i = 0; i < PLAYER_NUM; i++) 
     {
         if (players[i])

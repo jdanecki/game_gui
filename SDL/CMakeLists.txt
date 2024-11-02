@@ -17,6 +17,7 @@ add_executable(pime_SDL
     engine_hooks.cpp networking.cpp
     
     implementations/alchemistSDL.cpp
+    implementations/BeingSDL.cpp
 )
 
 # link_directories(${CMAKE_SOURCE_DIR}/core)

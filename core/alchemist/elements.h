@@ -44,6 +44,7 @@ enum Class_id
     Class_Ingredient,
     Class_Product,
     Class_Plant,
+    Class_Animal,
 };
 
 enum Item_id
@@ -140,7 +141,7 @@ public:
     }
 };
 
-class Element : public InventoryElement
+class Element : virtual public InventoryElement
 {
     BaseElement * base;
     public:
@@ -192,7 +193,7 @@ extern const char * Product_name[];
 extern const char * items_name[];
 extern const char * food_name[];
 
-class Ingredient : public InventoryElement
+class Ingredient : virtual public InventoryElement
 {
     const char * name;
     public:
@@ -213,7 +214,7 @@ class Ingredient : public InventoryElement
         void show(bool details=true);
 };
 
-class Product : public InventoryElement
+class Product : virtual public InventoryElement
 {
     const char * name;
     void init(Product_id i, int c, Form f);
@@ -256,7 +257,7 @@ enum plant_types
 
 #define PLANTS 6
 
-class Being : public InventoryElement
+class Being : virtual public InventoryElement
 {
     public:
         const char * name;
@@ -298,13 +299,7 @@ class Animal : public Being
 {
     public:
         enum animal_types type;
-        Animal()
-        {
-            alive = true;
-            max_age = 1 + rand() % 36000; // 100 years
-            age = rand() % max_age;
-            name = create_name(rand() % 2 + 2);
-        }
+        Animal();
         void move();
         void show(bool details=true) {
                printf("Animal %s age=%d/%d alive=%d\n", name, age, max_age, alive);

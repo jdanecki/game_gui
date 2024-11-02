@@ -136,7 +136,6 @@ fn update_chunk_for_player(mut peer: Peer<usize>, coords: (u8, u8)) {
         dest.clone_from_slice(table);
 
         let object_num = chunk.objects.size();
-        println!("{object_num}");
         data.extend_from_slice(&object_num.to_le_bytes());
         let mut cur = chunk.objects.head;
         while cur != std::ptr::null_mut() {
