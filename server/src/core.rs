@@ -3716,14 +3716,16 @@ pub struct chunk {
     pub biome: biomes,
     pub table: chunk_table,
     pub objects: InvList,
+    pub beings: InvList,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of chunk"][::std::mem::size_of::<chunk>() - 1072usize];
+    ["Size of chunk"][::std::mem::size_of::<chunk>() - 1112usize];
     ["Alignment of chunk"][::std::mem::align_of::<chunk>() - 8usize];
     ["Offset of field: chunk::biome"][::std::mem::offset_of!(chunk, biome) - 0usize];
     ["Offset of field: chunk::table"][::std::mem::offset_of!(chunk, table) - 4usize];
     ["Offset of field: chunk::objects"][::std::mem::offset_of!(chunk, objects) - 1032usize];
+    ["Offset of field: chunk::beings"][::std::mem::offset_of!(chunk, beings) - 1072usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN5chunk10add_objectEP16InventoryElement"]
@@ -4152,11 +4154,22 @@ extern "C" {
         y: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
+extern "C" {
+    #[link_name = "\u{1}_Z6updatev"]
+    pub fn update();
+}
+extern "C" {
+    pub static mut objects_to_update: InvList;
+}
+extern "C" {
+    pub static mut objects_to_update_reliable: InvList;
+}
 pub const PacketType_PACKET_PLAYER_UPDATE: PacketType = 0;
 pub const PacketType_PACKET_PLAYER_ID: PacketType = 1;
 pub const PacketType_PACKET_MOVE: PacketType = 2;
 pub const PacketType_PACKET_CHUNK_UPDATE: PacketType = 3;
 pub const PacketType_PACKET_SEND_INVENTORY: PacketType = 4;
+pub const PacketType_PACKET_OBJECTS_UPDATE: PacketType = 5;
 pub type PacketType = ::std::os::raw::c_uint;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]

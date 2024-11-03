@@ -46,6 +46,7 @@ class chunk {
     enum biomes biome;
     chunk_table table;
     InvList objects;
+    InvList beings;
     void add_object(InventoryElement* object);
     chunk();
     /*InventoryElement * items[CHUNK_SIZE*CHUNK_SIZE];

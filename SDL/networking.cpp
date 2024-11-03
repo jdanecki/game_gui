@@ -104,7 +104,11 @@ void update_player(unsigned char* data)
         Player* player = players[id];
         player->map_x = (int)data[9];
         player->map_y = (int)data[13];
-        player->x = (int)data[17];
+
+        int nx = (int)data[17];
+        if (nx != player->x) 
+            player->going_right = player->x > nx ? 0 : 1;
+        player->x = nx;
         player->y = (int)data[21];
 
         //printf("updated player %d: %d %d %d %d\n", id, player->map_x, player->map_y, player->x, player->y);
@@ -216,6 +220,60 @@ void update_inventory(unsigned char* data)
     }
 }
 
+InventoryElement* find_by_uid(size_t uid)
+{
+    ListElement* el = world_table[128][128]->objects.head;
+    while (el)
+    {
+        if (el->el->uid == uid)
+            return el->el;
+        el = el->next;
+    }
+    return nullptr;
+}
+
+void update_objects(unsigned char * data)
+{
+    int offset = 1;
+    int obj_num = *(int*)&data[offset];
+    offset += sizeof(int);
+    for (int i = 0; i < obj_num; i++)
+    {
+        size_t uid = *(size_t*)&data[offset];
+        offset += sizeof(size_t);
+        
+        Class_id c_id = (Class_id)data[offset];
+        offset += sizeof(Class_id);
+        
+        int ox = *((int*)&data[offset]);
+        offset += sizeof(int);
+        
+        int oy = data[offset];
+        offset += sizeof(int);
+        
+        int oz = data[offset];
+        offset += sizeof(int);
+        
+        int id = data[offset];
+        offset += sizeof(int);
+
+        InventoryElement * el = find_by_uid(uid);
+        if (el && el->c_id == c_id)
+        {
+            el->set_posittion(ox, oy);
+            printf("%ld moved to %d %d\n", uid, ox, oy);
+        }
+        else
+        {
+            if (el)
+                printf("bad data for update object %ld %d real %d\n", uid, c_id, el->c_id);
+            else
+                printf("non existing object for update object %ld %d\n", uid, c_id);
+        }
+
+    }
+}
+
 int network_tick()
 {
     ENetEvent event;
@@ -242,6 +300,9 @@ int network_tick()
                         break;
                     case PACKET_SEND_INVENTORY:
                         update_inventory(data);
+                        break;
+                    case PACKET_OBJECTS_UPDATE:
+                        update_objects(data);
                         break;
 
                 }

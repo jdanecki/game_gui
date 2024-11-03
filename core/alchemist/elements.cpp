@@ -5,6 +5,7 @@
 #include "elements.h"
 #include "names.h"
 #include "../tiles.h"
+#include "../networking.h"
 
 BaseElement *base_elements[BASE_ELEMENTS];
 
@@ -390,6 +391,8 @@ void Animal::move()
     if (_x < 0) _x=0;
 
     set_posittion(_x, _y);
+
+    objects_to_update.add(this);
 }
 
 Plant::Plant()

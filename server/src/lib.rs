@@ -34,51 +34,13 @@ pub fn init_enet() -> Host<usize> {
 
 pub fn main_loop(mut host: Host<usize>) {
     let mut players: Vec<core::Player> = vec![];
-    let mut i = 0;
     loop {
-        match host.service(1000).expect("foo") {
-            /*Some(e) => {
-                match e {
-                    Event::Connect(ref p) => {
-                        println!("{:?}", p);
-                    }
-                    Event::Disconnect(_, _) => {},
-                    Event::Receive { .. } => {},
-                }
-            }*/
-            Some(Event::Connect(ref p)) => {
-                println!("connected");
-                add_player(p.clone(), &mut players);
-            }
-            Some(Event::Disconnect(..)) => println!("disconnected"),
-            Some(Event::Receive { ref mut sender, channel_id: _, ref packet }) => {
-                match sender.data() {
-                    Some(id) =>  {
-                        if *id < players.len() {
-                            handle_packet(&mut players[*id], packet);
-                        } else {
-                            println!("invalid player idx {}", *id);
-                        }
-                    }
-                    None => println!("player without idx"),
-                }
-                /*println!(
-                    "geto packet from {:?} on channel {}, content {}",
-                    sender.data(), channel_id, std::str::from_utf8(packet.data()).unwrap()
-                );*/
-                //let _ = sender.send_packet(Packet::new(b"from server", PacketMode::ReliableSequenced).unwrap(), 1);
-            }
-            _ => (),
+        handle_network(&mut host, &mut players);
+        unsafe {
+            core::update();
         }
-//  let _ = sender.send_packet(Packet::new(b"from server", PacketMode::ReliableSequenced).unwrap(), 1);
-        
-        update_players(&mut host, &mut players);
-        let s = format!("packet nr {}", i);
-        host.broadcast(Packet::new(s.as_bytes(), PacketMode::ReliableSequenced).unwrap(), 1);
-        i += 1;
-
-        let a = ClientEvent::Whatever;
-        let a = vec!(1, 2, 3);
+        send_game_updates(&mut host, &mut players);
+        std::thread::sleep(std::time::Duration::from_millis(50));
     }
 }
 
@@ -125,8 +87,9 @@ fn update_players(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
 }
 
 #[allow(non_snake_case)]
-fn InvList_to_bytes(data: &mut Vec<u8>, list: &mut core::InvList) {
+fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
     unsafe{
+        let mut list = *list;
         let object_num = list.size();
         data.extend_from_slice(&object_num.to_le_bytes());
         let mut cur = list.head;
@@ -176,6 +139,51 @@ fn update_chunk_for_player(peer: &mut Peer<usize>, coords: (u8, u8)) {
         let _ = peer.send_packet(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
 }
 
+fn handle_network(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
+    let mut finish = false;
+    while !finish{
+        match host.service(0).expect("foo") {
+            /*Some(e) => {
+                match e {
+                    Event::Connect(ref p) => {
+                        println!("{:?}", p);
+                    }
+                    Event::Disconnect(_, _) => {},
+                    Event::Receive { .. } => {},
+                }
+            }*/
+            Some(Event::Connect(ref p)) => {
+                println!("connected");
+                add_player(p.clone(), players);
+            }
+            Some(Event::Disconnect(..)) => println!("disconnected"),
+            Some(Event::Receive { ref mut sender, channel_id: _, ref packet }) => {
+                match sender.data() {
+                    Some(id) =>  {
+                        if *id < players.len() {
+                            handle_packet(&mut players[*id], packet);
+                        } else {
+                            println!("invalid player idx {}", *id);
+                        }
+                    }
+                    None => println!("player without idx"),
+                }
+                /*println!(
+                    "geto packet from {:?} on channel {}, content {}",
+                    sender.data(), channel_id, std::str::from_utf8(packet.data()).unwrap()
+                );*/
+                //let _ = sender.send_packet(Packet::new(b"from server", PacketMode::ReliableSequenced).unwrap(), 1);
+            }
+            _ => {finish = true;}
+        }
+    }
+//  let _ = sender.send_packet(Packet::new(b"from server", PacketMode::ReliableSequenced).unwrap(), 1);
+    
+    /*let s = format!("packet nr {}", i);
+    host.broadcast(Packet::new(s.as_bytes(), PacketMode::ReliableSequenced).unwrap(), 1);
+    i += 1;*/
+}
+
 fn handle_packet(player: &mut core::Player, packet: &Packet) {
     let tag = ClientEvent::from(packet.data());
     match tag {
@@ -184,5 +192,29 @@ fn handle_packet(player: &mut core::Player, packet: &Packet) {
             unsafe {player.move_(x, y)}
         },
         ClientEvent::Whatever => println!("whatever"),
+    }
+}
+
+fn send_game_updates(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
+
+    update_players(host, players);
+    unsafe {
+        let el = std::ptr::addr_of_mut!(core::objects_to_update);
+        let mut data = vec![core::PacketType_PACKET_OBJECTS_UPDATE as u8];
+        InvList_to_bytes(&mut data, el);
+        host.broadcast(Packet::new(&data, PacketMode::UnreliableUnsequenced).unwrap(), 1);
+
+        while (*el).head != std::ptr::null_mut() {
+            (*el).remove((*(*el).head).el);
+        }
+
+        let el = std::ptr::addr_of_mut!(core::objects_to_update_reliable);
+        let mut data = vec![core::PacketType_PACKET_OBJECTS_UPDATE as u8];
+        InvList_to_bytes(&mut data, el);
+        host.broadcast(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
+
+        while (*el).head != std::ptr::null_mut() {
+            (*el).remove((*(*el).head).el);
+        }
     }
 }

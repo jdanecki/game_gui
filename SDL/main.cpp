@@ -374,18 +374,6 @@ void player_interact(int key)
             sprintf(status_line, "");
             status_code = 1;
             break;
-        case SDLK_w:
-              send_packet_move(0, -1);
-              break;
-        case SDLK_a:
-              send_packet_move(-1, 0);
-              break;
-        case SDLK_s:
-              send_packet_move(0, 1);
-              break;
-        case SDLK_d:
-              send_packet_move(1, 0);
-              break;
 #ifdef OLDKB
         case SDLK_s:
             player.move(0, 1);
@@ -624,22 +612,22 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
 {
     Uint64 current_time = SDL_GetTicks64();
     int time_period = 0;
-    /*if (keys[SDL_SCANCODE_LSHIFT])
+    if (keys[SDL_SCANCODE_LSHIFT])
     {
-        player.sneaking = 1;
+        player->sneaking = 1;
         time_period = 200;
     }
     else
     {
-        player.sneaking = 0;
-        if (keys[SDL_SCANCODE_LCTRL] && player.hunger && player.thirst)
+        player->sneaking = 0;
+        if (keys[SDL_SCANCODE_LCTRL] && player->hunger && player->thirst)
         {
-            player.running = 1;
+            player->running = 1;
             time_period = 50;
         }
         else
         {
-            player.running = 0;
+            player->running = 0;
             time_period = 100;
         }
     }
@@ -648,35 +636,52 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
     {
         if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S])
         {
-            player.move(0, 1);
-            player.direction=direction::down;
+            // TODO clientside movement prediction
+#ifdef LOCAL_ONLY
+            player->move(0, 1);
+            player->direction=direction::down;
+#else
+            send_packet_move(0, 1);
+#endif
             *last_frame_press=1;
         }
         else if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
         {
-            player.direction=direction::up;
-            player.move(0, -1);
+#ifdef LOCAL_ONLY
+            player->direction=direction::up;
+            player->move(0, -1);
+#else
+            send_packet_move(0, -1);
+#endif
             *last_frame_press=1;
         }
         if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT])
         {
-            player.going_right=1;
-            player.direction=direction::right;
-            player.move(1, 0);
+            player->going_right=1;
+#ifdef LOCAL_ONLY
+            player->direction=direction::right;
+            player->move(1, 0);
+#else
+            send_packet_move(1, 0);
+#endif
             *last_frame_press=1;
         }
         else if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
         {
-            player.going_right=0;
-            player.direction=direction::left;
-            player.move(-1, 0);
+            player->going_right=0;
+#ifdef LOCAL_ONLY
+            player->direction=direction::left;
+            player->move(-1, 0);
+#else
+            send_packet_move(-1, 0);
+#endif
             *last_frame_press=1;
         }
         if (last_frame_press)
         {
             return SDL_GetTicks64();
         }
-    }*/
+    }
     if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
     {
         *last_frame_press=1;
@@ -697,53 +702,6 @@ int next_to(int x1, int y1, int x2, int y2)
     if ((y1==y2+1 || y1==y2-1) && x1==x2)
         return 1;
     return 0;
-}
-void update()
-{
-    /*for (int i = 0; i<CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Being * b = world_table[player.map_y][player.map_x]->beings[i];
-
-        if (b)
-        {
-            b->tick();
-        }
-    }
-
-    for (int i = 0; i<CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Plant * p = world_table[player.map_y][player.map_x]->plants[i];
-
-        if (p)
-        {
-            p->tick();
-        }
-    }
-
-    for (int i = 0; i<CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Animal * a = world_table[player.map_y][player.map_x]->animals[i];
-
-        if (a)
-        {
-            a->tick();
-            if (!a->alive)
-            {
-                int x,y;
-                a->get_posittion(&x, &y);
-
-                Element * el;
-                switch (a->type)
-                {
-                    case ANIMALID_pig:
-                        el = new Element(base_elements[ID_RAW_HAM]);
-                }
-                el->set_posittion(x, y);
-                set_item_at(el, player.map_x, player.map_y, x, y);
-
-                free(a);
-                a=NULL;
-                world_table[player.map_y][player.map_x]->animals[i]=NULL;
-            }
-        }
-    }*/
 }
 
 void draw()
@@ -788,6 +746,7 @@ void draw()
     ListElement* el = c->objects.head;
     while (el)
     {
+#ifndef LOCAL_ONLY
         InventoryElementSDL * o = dynamic_cast<InventoryElementSDL*>(el->el);
         if (o) 
         {
@@ -796,6 +755,14 @@ void draw()
             SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
         }
+#else
+        InventoryElement* o = el->el;
+        int x, y;
+        o->get_posittion(&x, &y);
+        SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+        // TODO use proper texture not 0
+        SDL_RenderCopy(renderer, all_textures[o->c_id][0], NULL, &img_rect);
+#endif
         el = el->next;
     }
 
@@ -1035,22 +1002,42 @@ int init_SDL()
     return 0;
 }
 
-
+/*#ifdef LOCAL_ONLY
+void convert_elements_to_SDL(chunk* c)
+{
+    ListElement* le = c->objects.head;
+    while (le)
+    {
+        InventoryElement* el = le->el;
+        c->objects.remove(
+    }
+}
+#endif*/
 
 int setup() 
 {
     if (init_SDL() != 0) return 1;
 
+#ifndef LOCAL_ONLY
     if (init_enet()) return 1;
     player = players[my_id];
+#endif
 
-
+#ifdef LOCAL_ONLY
     // TODO is this necessary?
     //intro();
-    //srand (time(NULL));
-    //init_elements();
+    srand (time(NULL));
+    init_elements();
+    generator();
+
+    players[0] = new Player;
+    player = players[0];
+    my_id = 0;
+    printf("objects %d", world_table[player->map_y][player->map_x]->objects.size());
+//    printf("player %d %d", player->map_x, player->map_y);
     //callback_daily=daily_call;
 	//game_time=new Game_time;
+#endif
 
     return 0;
 }
@@ -1136,15 +1123,19 @@ void loop()
         if (SDL_GetTicks() - last_update_time > UPDATE_DELAY)
         {
             last_update_time = SDL_GetTicks();
-            update();
+            //update();
         }
 
 
         if (handle_SDL_events())
             return;
 
+#ifndef LOCAL_ONLY
         if (network_tick())
             return;
+#else
+        update();
+#endif
         // keyboard handling for move
 #ifndef OLDKB
         //if (player.hunger > 0 || rand() % 3)

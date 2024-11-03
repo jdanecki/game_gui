@@ -89,7 +89,7 @@ void create_biome_plains(chunk * chunk)
             chunk->add_object(p);
         }
     }
-    if (rand() % 2)
+    if (/*rand() % 2*/1)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -396,4 +396,35 @@ enum game_tiles get_tile_at_ppos(Player *player)
     return get_tile_at(player->map_x, player->map_y, player->x, player->y);
 }
 
+void update()
+{
+    // TODO update more chunks
+    ListElement* el = world_table[128][128]->beings.head;
+    while (el)
+    {
+        el->el->tick();
+        el = el->next;
+    printf("updaet\n");
+    }
+        // TODO kill animals
+        /*            if (!a->alive)
+            {
+                int x,y;
+                a->get_posittion(&x, &y);
+
+                Element * el;
+                switch (a->type)
+                {
+                    case ANIMALID_pig:
+                        el = new Element(base_elements[ID_RAW_HAM]);
+                }
+                el->set_posittion(x, y);
+                set_item_at(el, player.map_x, player.map_y, x, y);
+
+                free(a);
+                a=NULL;
+                world_table[player.map_y][player.map_x]->animals[i]=NULL;
+            }*/
+
+}
 

@@ -38,5 +38,7 @@ void generate_chunk(chunk* chunk, int chunk_x, int chunk_y);
 char load_chunk(int x, int y);
 int height_at(int chunk_x, int chunk_y, int x, int y);
 
+void update();
+
 
 #endif

@@ -12,7 +12,7 @@ set(CMAKE_BUILD_TYPE Debug)
 add_library(pime SHARED
     world.cpp player.cpp 
 	notifier.cpp craft.cpp 
-    tiles.cpp
+    tiles.cpp networking.cpp
 
     alchemist/elements.cpp
 	alchemist/names.cpp
