@@ -10,15 +10,15 @@ Knife::Knife(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PR
 
 }
 
-bool Knife::use(Player * player)
+bool Knife::use(int map_x, int map_y, int x, int y)
 {
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-        Plant * p = NULL; //TODOworld_table[player->map_y][player->map_x]->plants[i];
+        Plant * p = NULL; //world_table[map_y][map_x]->plants[i];
         if (p)
         {
-            int x,y;
-            p->get_posittion(&x, &y);
-            if (player->x == x && player->y == y)
+            int px,py;
+            p->get_posittion(&px, &py);
+            if (x == px && y == py)
             {
                 switch (p->type) {
                     case PLANTID_strawberry:
@@ -27,27 +27,27 @@ bool Knife::use(Player * player)
                         {
                             Element * el = new Element(base_elements[ID_STRAWBERRY]);
                             el->set_posittion(x, y);
-                            set_item_at_ppos(el, player);
+                            set_item_at(el, map_x, map_y, x, y);
 
                             Element * seed_el = new Element(base_elements[ID_STRAWBERRY_SEEDS]);
                             seed_el->set_posittion(x, y);
-                            set_item_at_ppos(seed_el, player);
+                            set_item_at(seed_el, map_x, map_y, x, y);
 
                             free(p);
                             p=NULL;
-                            //world_table[player->map_y][player->map_x]->plants[i]=NULL;
+                            // TODOworld_table[map_y][map_x]->plants[i]=NULL;
                             return true;
                         }
                     }
                 }
             }
         }
-        Animal * a = NULL;// TODOworld_table[player->map_y][player->map_x]->animals[i];
+        Animal * a = NULL; //TODOworld_table[map_y][map_x]->animals[i];
         if (a)
         {
-            int x,y;
-            a->get_posittion(&x, &y);
-            if (player->x == x && player->y == y)
+            int ax,ay;
+            a->get_posittion(&ax, &ay);
+            if (x == ax && y == ay)
                 a->alive=false;
         }
     }

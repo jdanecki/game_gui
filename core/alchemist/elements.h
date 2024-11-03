@@ -97,7 +97,7 @@ class InventoryElement
         Form req_form;
         bool known;
         InventoryElement() { req_form = Form_none; known = true; uid = (size_t)this;}
-        virtual bool use(Player * player) { return false; }
+        virtual bool use(int map_x, int map_y, int x, int y) { return false; }
         virtual void show(bool details=true) { }
         virtual bool tick() { return false;}
         virtual Form get_form() {return Form_none; }

@@ -54,7 +54,7 @@ public:
     void add(const char * e, enum menu_actions a);
     void add(const char * e, enum menu_actions a, int val);
     void add(const char * e, enum menu_actions a, Element * p_el);
-    void add(const char * e, enum menu_actions a, SDL_Texture * _texture);
+    void add(const char * e, enum menu_actions a, SDL_Texture * _texture, int index, int item_id);
     int get_val(int v);
     void show();
     void go_down();

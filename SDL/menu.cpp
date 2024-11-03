@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include "texture.h"
 
 
 extern class Player* player;
@@ -40,7 +41,7 @@ Menu::Menu(const char *n, int opt)
     entries=(const char**)calloc(opt, sizeof(char*));
     actions=(menu_actions*)calloc(opt, sizeof(enum menu_actions));
     values=(int*)calloc(opt, sizeof(int));
-    texture=(SDL_Texture**)(calloc(opt, sizeof(SDL_Texture *))); 
+    texture=(SDL_Texture**)calloc(opt, sizeof(SDL_Texture *)); 
     el=(Element**)calloc(opt, sizeof(Element*));
     show_texture=false;
 }
@@ -58,10 +59,10 @@ void Menu::add(const char * e, enum menu_actions a, int val)
     add(e, a);
 }
 
-void Menu::add(const char * e, enum menu_actions a, SDL_Texture * _texture)
+void Menu::add(const char * e, enum menu_actions a, SDL_Texture * _texture, int index, int item_id)
 {
-    int i=0;
-    texture[i] = _texture;
+    values[index] = item_id;
+    texture[index] = _texture;
     add(e, a);
 }
 
@@ -146,30 +147,48 @@ void Menu::show()
     }
     else 
     {
-	SDL_Rect rect3 = {modx, mody+(-menu_pos+options/2) * menu_opt_size - menu_opt_size, modx2-modx, menu_opt_size};
-	SDL_SetRenderDrawColor(renderer, 150, 0, 150, 100);
-	SDL_RenderFillRect(renderer, &rect3);
-	write_text(modx, mody+(-menu_pos+options/2) * menu_opt_size - menu_opt_size, name, Yellow, game_size/27, menu_opt_size);
+    	SDL_Rect rect3 = {modx, mody+(-menu_pos+options/2) * menu_opt_size - menu_opt_size, modx2-modx, menu_opt_size};
+    	SDL_SetRenderDrawColor(renderer, 150, 0, 150, 100);
+    	SDL_RenderFillRect(renderer, &rect3);
+    	write_text(modx, mody+(-menu_pos+options/2) * menu_opt_size - menu_opt_size, name, Yellow, game_size/27, menu_opt_size);
     }
-    for (i=0; i < options; i++){
-        if (show_texture) {
-            SDL_Rect rect;
-            rect.x = modx;
-            rect.y = mody + i * menu_opt_size;
-            rect.w = menu_opt_size;
-            rect.h = menu_opt_size;
+    for (i=0; i < options; i++)
+    {
+      SDL_Rect rect;
+      int text_y=mody+i*menu_opt_size;
+      int text_x=modx;
+      if (options < 10)
+      {
+        rect.x = modx;
+        rect.y = mody + i * menu_opt_size;
+        rect.w = menu_opt_size;
+        rect.h = menu_opt_size;
+      }
+      else
+      {
+        rect.x = modx;
+        rect.y = mody+(i-menu_pos+options/2) * menu_opt_size;
+        rect.w = menu_opt_size;
+        rect.h = menu_opt_size;
+      }
+      if (texture[i])
+      {
+  	    SDL_RenderCopy(renderer, texture[i], NULL, &rect);
+  	    text_x+=menu_opt_size;
+      }
+      if (show_texture) 
+      {
+          // TODO fix that
+        //SDL_Texture *_texture = el[i]->get_texture();
+  	    //SDL_RenderCopy(renderer, _texture, NULL, &rect);
+  	    //text_x+=menu_opt_size;
+      } 
+      if (options >= 10)
+      {
+        text_y = mody+(i-menu_pos+options/2) * menu_opt_size;
 
-            SDL_Texture *_texture;
-            //SDL_Texture *_texture = el[i]->get_texture();
-            //SDL_RenderCopy(renderer, _texture, NULL, &rect);
-        } 
-        else 
-	{
-	    if (options < 10)
-		write_text(modx, mody+i * menu_opt_size, entries[i], White, game_size/27, menu_opt_size);
-	    else
-		write_text(modx, mody+(i-menu_pos+options/2) * menu_opt_size, entries[i], White, game_size/27, menu_opt_size);
-	}
+  		write_text(text_x, text_y, entries[i], White, game_size/27, menu_opt_size);
+      }
     }
 }
 
@@ -245,16 +264,18 @@ Menu * create_inv_category_menu(enum Form f)
     extern SDL_Texture* items_textures[BASE_ELEMENTS];
     int count=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
-	if (base_elements[i]->form == f)
-	    count++;
-    if (menu_inventory_categories2) delete menu_inventory_categories2;
-    menu_inventory_categories2 = new Menu("Inventory", count);
+    	if (base_elements[i]->form == f)
+    	    count++;
+    if (menu_inventory_categories2) {delete menu_inventory_categories2->texture; delete menu_inventory_categories2;}
+        menu_inventory_categories2 = new Menu("Inventory", count);
+    int menu_index=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
     {
-	if (base_elements[i]->form == f)
-	{
-	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, i);
-	}
+      	if (base_elements[i]->form == f)
+      	{
+      	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], menu_index, i);
+      	    menu_index++;
+      	}
     }
     return menu_inventory_categories2;
 }
@@ -401,7 +422,7 @@ int interact(enum menu_actions a)
     {
 	case MENU_CATEGORIE:
 	{
-	    current_menu = create_inv_menu((Item_id)menu_inventory_categories2->values[menu_inventory_categories2->menu_pos]);
+	    current_menu = create_inv_menu((Item_id)(menu_inventory_categories2->values[menu_inventory_categories2->menu_pos]));
 	    return 0;
 	}
 	case MENU_BUILD_WALL:

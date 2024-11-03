@@ -1,4 +1,5 @@
 #include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_timer.h>
 #include <cstdlib>
@@ -30,7 +31,6 @@
 // TURBO
 // #define UPDATE_DELAY 0
 
-/* #define OLDKB */
 
 SDL_Texture *map;
 int auto_explore;
@@ -96,7 +96,7 @@ void put_element()
     }*/
 }
 
-void use_tile()
+void use_tile(int map_x, int map_y, int x, int y)
 {
     /*InventoryElement ** item_pointer = get_item_at_ppos(&player);
     if (item_pointer)
@@ -118,12 +118,12 @@ void use_tile()
 
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
     {
-        Plant * p = world_table[player.map_y][player.map_x]->plants[i];
+        Plant * p = world_table[map_y][map_x]->plants[i];
         if (p)
         {
-            int x,y;
-            p->get_posittion(&x, &y);
-            if ((player.x == x && player.y == y) && ((p->type == PLANTID_watermelon) || (p->type == PLANTID_pumpkin)) && (p->grown))
+            int px,py;
+            p->get_posittion(&px, &py);
+            if ((px == x && py == y) && ((p->type == PLANTID_watermelon) || (p->type == PLANTID_pumpkin)) && (p->grown))
             {
                 Element * el;
                 Element * el2;
@@ -139,18 +139,18 @@ void use_tile()
                 }
 
                 el->set_posittion(x, y);
-                set_item_at_ppos(el, &player);
+                set_item_at(el, map_x, map_y, x, y);
                 el2->set_posittion(x, y);
-                set_item_at_ppos(el2, &player);
+                set_item_at(el2, map_x, map_y, x, y);
 
-                free(world_table[player.map_y][player.map_x]->plants[i]);
-                world_table[player.map_y][player.map_x]->plants[i] = NULL;
+                free(world_table[map_y][map_x]->plants[i]);
+                world_table[map_y][map_x]->plants[i] = NULL;
             }
         }
     }*/
 }
 
-bool plant_with_seed(InventoryElement * el)
+bool plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
 {
     /*if (get_tile_at_ppos(&player) == TILE_GRASS || get_tile_at_ppos(&player) == TILE_DIRT)
         {
@@ -158,19 +158,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_tree2;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -192,19 +192,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_tree1;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -226,19 +226,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_tree;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -260,19 +260,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_pumpkin;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -294,19 +294,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_watermelon;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -328,19 +328,19 @@ bool plant_with_seed(InventoryElement * el)
         {
             bool able=false;
             for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
-                if (!world_table[player.map_y][player.map_x]->plants[i])
+                if (!world_table[map_y][map_x]->plants[i])
                 {
                     Plant *p = new Plant();
 
                     p->type = PLANTID_strawberry;
 
-                    p->set_posittion(player.x, player.y);
+                    p->set_posittion(x, y);
                     
                     p->phase=Plant_seed;
                     p->grown=false;
                     p->age=1;
 
-                    world_table[player.map_y][player.map_x]->plants[i]=p;
+                    world_table[map_y][map_x]->plants[i]=p;
 
                     sprintf(status_line, "Placing %s", p->name);
                     status_code=1;
@@ -374,104 +374,10 @@ void player_interact(int key)
             sprintf(status_line, "");
             status_code = 1;
             break;
-#ifdef OLDKB
-        case SDLK_s:
-            player.move(0, 1);
-            player.direction=direction::down;
+        case SDLK_t:
+            player->hotbar[active_hotbar]=NULL;
             break;
-        case SDLK_w:
-            player.move(0, -1);
-            player.direction=direction::up;
-            break;
-        case SDLK_a:
-            player.move(-1, 0);
-            player.direction=direction::left;
-            player.going_right=0;
-            break;
-        case SDLK_d:
-            player.move(1, 0);
-            player.direction=direction::right;
-            player.going_right=1;
-            break;
-
-#endif 
-        // case SDLK_g: // break same level
-        //     switch ((int)player.direction) 
-        //     {
-        //         case (int)direction::down:
-        //             if (player.y == CHUNK_SIZE-1)
-        //             {
-        //                 if (!load_chunk(player.map_x, player.map_y+1)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-        //                 world_table[player.map_y+1][player.map_x]->table[0][player.x].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y+1][player.x].tile=TILE_AIR;
-        //             }
-        //             break;
-        //         case (int)direction::up:
-        //             if (player.y == 0)
-        //             {
-        //                 if (!load_chunk(player.map_x, player.map_y-1)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-
-        //                 world_table[player.map_y-1][player.map_x]->table[CHUNK_SIZE-1][player.x].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y-1][player.x].tile=TILE_AIR;
-        //             }
-        //             break;
-
-        //         case (int)direction::right:
-        //             if (player.x == CHUNK_SIZE-1)
-        //             {
-        //                 if (!load_chunk(player.map_x+1, player.map_y)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-
-        //                 world_table[player.map_y][player.map_x+1]->table[player.y][0].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y][player.x+1].tile=TILE_AIR;
-        //             }
-        //             break;
-        //         case (int)direction::left:
-        //             if (player.x == 0)
-        //             {
-        //                 if (!load_chunk(player.map_x-1, player.map_y)) 
-        //                 {
-        //                     sprintf(status_line, "ON EDGE OF WORLD!");
-        //                     status_code=0;
-        //                     return;
-        //                 };
-
-        //                 world_table[player.map_y][player.map_x-1]->table[player.y][CHUNK_SIZE-1].tile=TILE_AIR;
-        //             }
-        //             else
-        //             {
-        //                 world_table[player.map_y][player.map_x]->table[player.y][player.x-1].tile=TILE_AIR;
-        //             }
-        //             break;
-        //     break;
-        // }
-        /*case SDLK_r:
-            player.hotbar[active_hotbar]=NULL;
-            break;
-        case SDLK_SEMICOLON:
+        /*case SDLK_SEMICOLON:
         {
             InventoryElement * el = player.hotbar[active_hotbar];
             if (el)
@@ -584,9 +490,9 @@ void player_interact(int key)
 /*            InventoryElement * el = player.hotbar[active_hotbar];
             if (el)
             {
-                if (el->use(&player))
+                if (el->use(player.map_x, player.map_y, player.x, player.y))
                     break;
-                if (plant_with_seed(el))
+                if (plant_with_seed(el, player.map_x, player.map_y, player.x, player.y))
                     break;
                 if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
                 {
@@ -603,7 +509,7 @@ void player_interact(int key)
                     }
                 }
             }
-            use_tile();*/
+            use_tile(player.map_x, player.map_y, player.x, player.y)*/;
             break;
     }
 }
@@ -1076,7 +982,55 @@ bool handle_SDL_events()
                 case 3: break;
             }
          */
-             printf("mouse %d,%d %d\n", event.button.x, event.button.y, event.button.button);
+            InventoryElement * el = player->hotbar[active_hotbar];
+            int x = 0;
+            int y = 0;
+
+            SDL_GetMouseState(&x, &y);
+
+            int game_size;
+            int tile_dungeon_size;
+            int width = window_width - PANEL_WINDOW;
+
+            if (width < window_height)
+            {
+                game_size = width;
+                tile_dungeon_size = width/(CHUNK_SIZE);
+            } 
+            else
+            {
+                game_size = window_height;
+                tile_dungeon_size = window_height/(CHUNK_SIZE);
+            }
+
+            int tile_x = x/tile_dungeon_size;
+            int tile_y = y/tile_dungeon_size;
+
+            if (tile_x < CHUNK_SIZE && tile_y < CHUNK_SIZE)
+            {
+                if (el)
+                {
+                    if (el->use(player->map_x, player->map_y, tile_x, tile_y)) break;
+                    if (plant_with_seed(el, player->map_x, player->map_y, tile_x, tile_y)) break;
+                    // TODO
+                    /*if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
+                    {
+                        if (Plant ** pp = get_plant_at(player->map_x, player->map_y, tile_x, tile_y))
+                        {
+                            if (Plant * p = *pp)
+                            {
+                                p->water += 100;
+                                player->inventory->remove(el);
+                                player->hotbar[active_hotbar]=NULL;
+                                free(el);
+                                break;
+                            }
+                        }
+                    }*/
+                }
+                use_tile(player->map_x, player->map_y, tile_x, tile_y);
+            }
+            printf("mouse %d,%d %d %d,%d\n", event.button.x, event.button.y, event.button.button, tile_x, tile_y);
         }
         
     }
@@ -1123,9 +1077,10 @@ void loop()
         if (SDL_GetTicks() - last_update_time > UPDATE_DELAY)
         {
             last_update_time = SDL_GetTicks();
-            //update();
+#ifdef LOCAL_ONLY
+            update();
+#endif
         }
-
 
         if (handle_SDL_events())
             return;
@@ -1133,11 +1088,8 @@ void loop()
 #ifndef LOCAL_ONLY
         if (network_tick())
             return;
-#else
-        update();
 #endif
         // keyboard handling for move
-#ifndef OLDKB
         //if (player.hunger > 0 || rand() % 3)
         {
             const Uint8 *currentKeyState = SDL_GetKeyboardState(NULL);
@@ -1147,7 +1099,6 @@ void loop()
                 last_time = tmp;
             }
         }
-#endif
         // printf("%d\n", last_frame_press);
 
 

@@ -404,7 +404,6 @@ void update()
     {
         el->el->tick();
         el = el->next;
-    printf("updaet\n");
     }
         // TODO kill animals
         /*            if (!a->alive)

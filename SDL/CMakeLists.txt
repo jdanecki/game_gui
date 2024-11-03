@@ -10,6 +10,8 @@ pkg_check_modules(SDL2_MIXER SDL2_mixer)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_definitions(-DFUNNY_STUFF_FOR_SDL)
+# uncomment this for single player game
+#add_definitions(-DLOCAL_ONLY)
 
 add_subdirectory(../core core)
 
