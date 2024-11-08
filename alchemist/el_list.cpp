@@ -72,7 +72,7 @@ InventoryElement ** InvList::find_id(enum Item_id id, int *count)
 
     while(cur) 
     {
-        if (cur->el->get_base()->id == id) {
+        if (cur && cur->el && cur->el->get_base() && cur->el->get_base()->id == id) {
 			a[c] = cur->el;
 			c++;
 		}
