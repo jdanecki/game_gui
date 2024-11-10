@@ -80,14 +80,14 @@ void update_window_size()
     SDL_GetWindowSize(main_window, &window_width, &window_height); 
 }
 
-void put_element()
+void put_element(int map_x, int map_y, int x, int y, Player * p)
 {
-    InventoryElement * el = player.hotbar[active_hotbar];
+    InventoryElement * el = p->hotbar[active_hotbar];
     if (el) {
-        el->set_posittion(player.x, player.y);
-        set_item_at_ppos(el, &player);
-        player.inventory->remove(el);
-        player.hotbar[active_hotbar]=NULL;
+        el->set_posittion(x, y);
+        set_item_at(el, map_x, map_y, map_x, map_y);
+        p->inventory->remove(el);
+        p->hotbar[active_hotbar]=NULL;
         printf("item %s placed\n", el->get_name());
     }
 }
@@ -460,7 +460,7 @@ void player_interact(int key)
         case SDLK_9: active_hotbar=8; break;
         case SDLK_0: active_hotbar=9; break;
     
-		case SDLK_q: put_element(); break;
+		case SDLK_q: put_element(player.map_x, player.map_y, player.x, player.y, &player); break;
 
 		case SDLK_BACKQUOTE: active_hotbar--; if (active_hotbar==-1) active_hotbar=9; break;
         case SDLK_TAB: active_hotbar++; if (active_hotbar==10) active_hotbar=0; break;
@@ -1043,30 +1043,36 @@ int main()
 
                 if (tile_x < CHUNK_SIZE && tile_y < CHUNK_SIZE)
                 {
-                    if (el)
+                    if (event.button.button == 1)
                     {
-                        if (el->use(player.map_x, player.map_y, tile_x, tile_y)) break;
-                        if (plant_with_seed(el, player.map_x, player.map_y, tile_x, tile_y)) break;
-                        if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
+                        if (el)
                         {
-                            if (Plant ** pp = get_plant_at(player.map_x, player.map_y, tile_x, tile_y))
+                            if (el->use(player.map_x, player.map_y, tile_x, tile_y)) break;
+                            if (plant_with_seed(el, player.map_x, player.map_y, tile_x, tile_y)) break;
+                            if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
                             {
-                                if (Plant * p = *pp)
+                                if (Plant ** pp = get_plant_at(player.map_x, player.map_y, tile_x, tile_y))
                                 {
-                                    p->water += 100;
-                                    player.inventory->remove(el);
-                                    player.hotbar[active_hotbar]=NULL;
-                                    free(el);
-                                    break;
+                                    if (Plant * p = *pp)
+                                    {
+                                        p->water += 100;
+                                        player.inventory->remove(el);
+                                        player.hotbar[active_hotbar]=NULL;
+                                        free(el);
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        use_tile(player.map_x, player.map_y, tile_x, tile_y);
                     }
-                    use_tile(player.map_x, player.map_y, tile_x, tile_y);
-                }
+                    if (event.button.button == 3)
+                    {
+                		    put_element(player.map_x, player.map_y, tile_x, tile_y, &player); 
+            		    }
+        		    }
                 printf("mouse %d,%d %d %d,%d\n", event.button.x, event.button.y, event.button.button, tile_x, tile_y);
             }
-            
         }
 
         // keyboard handling for move
