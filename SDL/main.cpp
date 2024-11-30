@@ -23,6 +23,7 @@
 #include "../core/tiles.h"
 #include "../core/player.h"
 #include "implementations/alchemistSDL.h"
+#include "networking_old.h"
 #include "networking.h"
 
 // Normal speed
@@ -1117,6 +1118,9 @@ void loop()
 
 int main()
 {
+    const NetClient* client = init();
+    foo(client);
+
     if (setup()) return 1;
     loop();
 }

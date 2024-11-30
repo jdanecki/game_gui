@@ -1,31 +1,19 @@
-#ifndef NETWORKING_H
-#define NETWORKING_H
+#include <cstdarg>
+#include <cstdint>
+#include <cstdlib>
+#include <ostream>
+#include <new>
 
-#include <enet/enet.h>
-#include "../core/networking.h"
+class UdpSocket{};
 
-extern ENetHost* host;
-extern ENetPeer* server;
-extern unsigned int my_id;
-
-enum ClientEvent
-{
-    MOVE,
-    WHATEVER,
+struct NetClient {
+  UdpSocket socket;
 };
 
-enum ServerEvent
-{
-    UPDATE_PLAYER,
-    COS
-};
+extern "C" {
 
-int init_enet();
-int network_tick();
-void send_packet_move(int x, int y);
+const NetClient *init();
 
-void send_packet(char* format, ...);
-// this function will be called by other functions
+void foo(const NetClient *a);
 
-
-#endif
+}  // extern "C"

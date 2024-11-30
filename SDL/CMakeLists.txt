@@ -18,7 +18,7 @@ add_subdirectory(../core core)
 add_executable(pime_SDL
 	window.cpp music.cpp text.cpp  
 	texture.cpp main.cpp menu.cpp
-    engine_hooks.cpp networking.cpp
+    engine_hooks.cpp networking_old.cpp
     
     implementations/alchemistSDL.cpp
     implementations/BeingSDL.cpp
@@ -32,4 +32,5 @@ target_link_libraries(pime_SDL
     -lm 
     pime
     enet
+    /home/kamil/data/projects/the_game/the_game_net/target/debug/libthe_game_net.so
 )
