@@ -24,12 +24,12 @@ add_executable(pime_SDL
     implementations/BeingSDL.cpp
 )
 
-# link_directories(${CMAKE_SOURCE_DIR}/core)
+target_link_directories(pime_SDL PRIVATE ${CMAKE_SOURCE_DIR}/../the_game_net/target/debug/)
 
 target_link_libraries(pime_SDL
     SDL2 SDL2_image SDL2_ttf SDL2_mixer
     ${SDL_LDFLAGS} ${SDL2_MIXER_LDFLAGS}
     -lm 
     pime
-    /home/kamil/data/projects/the_game/the_game_net/target/debug/libthe_game_net.so
+    the_game_net
 )
