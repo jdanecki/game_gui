@@ -18,7 +18,7 @@ add_subdirectory(../core core)
 add_executable(pime_SDL
 	window.cpp music.cpp text.cpp  
 	texture.cpp main.cpp menu.cpp
-    engine_hooks.cpp networking_old.cpp
+    engine_hooks.cpp networking.cpp
     
     implementations/alchemistSDL.cpp
     implementations/BeingSDL.cpp

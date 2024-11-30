@@ -2,6 +2,7 @@ use std::error::Error;
 use std::net::UdpSocket;
 
 mod events;
+mod common;
 
 #[repr(C)]
 pub struct NetClient {
@@ -16,24 +17,25 @@ pub extern "C" fn init() -> *const NetClient {
 fn init_internal() -> Result<NetClient, Box<dyn Error>> {
     let socket = UdpSocket::bind("127.0.0.1:0")?;
     socket.connect("127.0.0.1:1234")?;
+    let mut buf = [0];
+    buf[0] = common::PACKET_JOIN_REQUEST;
+    socket.send(&buf)?;
+    let mut buf = [0; 17];
+    socket.recv(&mut buf)?;
+    if buf[0] == common::PACKET_PLAYER_ID {
+        unsafe {
+            events::got_id(usize::from_le_bytes(buf[1..9].try_into().unwrap()), i64::from_le_bytes(buf[9..17].try_into().unwrap()));
+        };
+    } else {
+        println!("did not get id");
+        panic!();
+    }
+
     socket.set_nonblocking(true)?;
     
     Ok(NetClient {
         socket,
     })
-}
-
-enum ServerEvent {
-    UpdatePlayer{id: usize, map_x: i32, map_y: i32, x: i32, y: i32},
-    ChunkUpdate{x: i32, y: i32, data: [u8; 16*16*4]},
-}
-
-impl TryFrom<&[u8]> for ServerEvent {
-    type Error = ();
-
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-
-    }
 }
 
 #[no_mangle]
@@ -46,34 +48,65 @@ pub extern "C" fn foo(a: &NetClient) {
 pub extern "C" fn network_tick(client: &NetClient) {
     let socket = &client.socket;
     
-    let mut buf = [0;50];
-    if let Ok((amt, src)) = socket.recv_from(&mut buf) {
-        let value = &buf;
+    let mut buf = [0;2048];
+    loop {
+    if let Ok((amt, _src)) = socket.recv_from(&mut buf) {
+        //println!("{:?}", &buf);
+        let value = &mut buf;
+        //println!("{:?}", &value);
         match value[0] {
-            0 => {
-                unsafe{
-                    events::update_player(
-                        usize::from_le_bytes(value[1..9].try_into().unwrap()), 
-                        i32::from_le_bytes(value[9..13].try_into().unwrap()),
-                        i32::from_le_bytes(value[13..17].try_into().unwrap()),
-                        i32::from_le_bytes(value[17..21].try_into().unwrap()),
-                        i32::from_le_bytes(value[21..25].try_into().unwrap()),
-                    );
+            common::PACKET_PLAYER_UPDATE => {
+                println!("player update {}", amt);
+                if amt == 25 {
+                    unsafe{
+                        events::update_player(
+                            usize::from_le_bytes(value[1..9].try_into().unwrap()), 
+                            i32::from_le_bytes(value[9..13].try_into().unwrap()),
+                            i32::from_le_bytes(value[13..17].try_into().unwrap()),
+                            i32::from_le_bytes(value[17..21].try_into().unwrap()),
+                            i32::from_le_bytes(value[21..25].try_into().unwrap()),
+                        );
+                    }
+                } else {
+                    println!("invalid player update");
                 }
             },
-            1 => {
+            common::PACKET_CHUNK_UPDATE => {
+                println!("chunk update {}", amt);
                 unsafe {
-                    events::chunk_update(
-                        i32::from_le_bytes(value[1..5].try_into().unwrap()),
-                        i32::from_le_bytes(value[5..9].try_into().unwrap()),
-                        &value[9..]
+                    events::update_chunk(
+                        //i32::from_le_bytes(value[1..5].try_into().unwrap()),
+                        //i32::from_le_bytes(value[5..9].try_into().unwrap()),
+                        i32::from(value[1]),
+                        i32::from(value[2]),
+                        &mut value[3] as *mut u8
                     )
                 }
+            },
+            common::PACKET_INVENTORY_UPDATE => {
+                unsafe {
+                    events::update_inventory(value as *mut u8);
+                }
+            },
+            common::PACKET_OBJECTS_UPDATE => {
+                unsafe {
+                    events::update_objects(value as *mut u8);
+                }
             }
-            _ => ()
+            _ => {
+                println!("invalid packet type {:?}", value);
+            }
         }
+    } else {
+        break;
     }
-    
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn send_packet_move(client: &NetClient, x: i32, y: i32) {
+    let buf = [common::PACKET_PLAYER_MOVE, x as u8, y as u8];
+    client.socket.send(&buf).unwrap();
 }
 
 pub fn add(left: u64, right: u64) -> u64 {

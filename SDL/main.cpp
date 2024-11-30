@@ -23,7 +23,6 @@
 #include "../core/tiles.h"
 #include "../core/player.h"
 #include "implementations/alchemistSDL.h"
-#include "networking_old.h"
 #include "networking.h"
 
 // Normal speed
@@ -41,6 +40,8 @@ int active_hotbar=0;
 Player* players[PLAYER_NUM];
 Player * player;
 bool finish;
+
+const NetClient* client;
 
 void (*callback_daily)();
 
@@ -548,7 +549,7 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
             player->move(0, 1);
             player->direction=direction::down;
 #else
-            send_packet_move(0, 1);
+            send_packet_move(client, 0, 1);
 #endif
             *last_frame_press=1;
         }
@@ -556,9 +557,9 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
         {
 #ifdef LOCAL_ONLY
             player->direction=direction::up;
-            player->move(0, -1);
+            player->move(client, 0, -1);
 #else
-            send_packet_move(0, -1);
+            send_packet_move(client, 0, -1);
 #endif
             *last_frame_press=1;
         }
@@ -569,7 +570,7 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
             player->direction=direction::right;
             player->move(1, 0);
 #else
-            send_packet_move(1, 0);
+            send_packet_move(client, 1, 0);
 #endif
             *last_frame_press=1;
         }
@@ -580,7 +581,7 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
             player->direction=direction::left;
             player->move(-1, 0);
 #else
-            send_packet_move(-1, 0);
+            send_packet_move(client, -1, 0);
 #endif
             *last_frame_press=1;
         }
@@ -630,26 +631,28 @@ void draw()
     }
 
     // render terrain
-    for (int y=0; y < CHUNK_SIZE; y++)
+    if (world_table[128][128])
     {
-        for (int x=0; x < CHUNK_SIZE; x++)
+        for (int y=0; y < CHUNK_SIZE; y++)
         {
-            SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            if (world_table[128][128])
+            for (int x=0; x < CHUNK_SIZE; x++)
             {
-            //enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
-            enum game_tiles tile = get_tile_at(128, 128, x, y);
-            SDL_Texture *texture = tiles_textures[tile];
-            SDL_RenderCopy(renderer, texture, NULL, &img_rect);
-            }
-            else
-            {
-                printf("chunk not loaded\n");
+                SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+                //enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
+                enum game_tiles tile = get_tile_at(128, 128, x, y);
+                SDL_Texture *texture = tiles_textures[tile];
+                SDL_RenderCopy(renderer, texture, NULL, &img_rect);
+                
             }
         }
     }
-
+    else
+    {
+        printf("chunk not loaded\n");
+    }
     chunk* c = world_table[128][128];
+    if (c)
+    {
     ListElement* el = c->objects.head;
     while (el)
     {
@@ -671,6 +674,7 @@ void draw()
         SDL_RenderCopy(renderer, all_textures[o->c_id][0], NULL, &img_rect);
 #endif
         el = el->next;
+    }
     }
 
     // render players
@@ -925,26 +929,7 @@ int setup()
 {
     if (init_SDL() != 0) return 1;
 
-#ifndef LOCAL_ONLY
-    if (init_enet()) return 1;
-    player = players[my_id];
-#endif
-
-#ifdef LOCAL_ONLY
-    // TODO is this necessary?
-    //intro();
-    srand (time(NULL));
-    init_elements();
-    generator();
-
-    players[0] = new Player;
-    player = players[0];
-    my_id = 0;
-    printf("objects %d", world_table[player->map_y][player->map_x]->objects.size());
-//    printf("player %d %d", player->map_x, player->map_y);
-    //callback_daily=daily_call;
-	//game_time=new Game_time;
-#endif
+    client = init();
 
     return 0;
 }
@@ -1087,8 +1072,8 @@ void loop()
             return;
 
 #ifndef LOCAL_ONLY
-        if (network_tick())
-            return;
+        // TODO disconnect
+        network_tick(client);
 #endif
         // keyboard handling for move
         //if (player.hunger > 0 || rand() % 3)
@@ -1118,9 +1103,6 @@ void loop()
 
 int main()
 {
-    const NetClient* client = init();
-    foo(client);
-
     if (setup()) return 1;
     loop();
 }

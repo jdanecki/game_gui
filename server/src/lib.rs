@@ -1,6 +1,10 @@
+use std::error::Error;
+use std::net::UdpSocket;
+use std::net::SocketAddr;
+use std::collections::HashMap;
+
 mod core;
-use enet::*;
-use std::net::Ipv4Addr;
+mod common;
 
 pub static mut SEED: i64 = 0;
 
@@ -9,52 +13,63 @@ pub enum ClientEvent {
     Whatever,
 }
 
-impl From<&[u8]> for ClientEvent {
-    fn from(value: &[u8]) -> Self {
-        match value[0] as u32{
-            core::PacketType_PACKET_MOVE => ClientEvent::Move{x: (value[1] as i8).into(), y: (value[2] as i8).into()},
-            1 => ClientEvent::Whatever,
-            _ => panic!("invalid event")
+pub struct Server {
+    socket: UdpSocket,
+    clients: HashMap<SocketAddr, usize>,
+}
+
+impl Server {
+    fn broadcast(&self, data: &[u8]) {
+        for client in self.clients.keys() {
+            self.socket.send_to(data, client).unwrap();
         }
     }
 }
 
-pub fn init_enet() -> Host<usize> {
-    let enet = Enet::new().expect("failed to init enet");
-    let address = Address::new(Ipv4Addr::LOCALHOST, 1234);
-
-    enet.create_host::<usize>(
-        Some(&address),
-        10,
-        ChannelLimit::Maximum,
-        BandwidthLimit::Unlimited,
-        BandwidthLimit::Unlimited,
-    ).expect("failed to create host")
+impl From<&[u8]> for ClientEvent {
+    fn from(value: &[u8]) -> Self {
+        match value[0] {
+            common::PACKET_PLAYER_MOVE => ClientEvent::Move{x: (value[1] as i8).into(), y: (value[2] as i8).into()},
+            1 => ClientEvent::Whatever,
+            _ => panic!("invalid event {:?}", value)
+        }
+    }
 }
 
-pub fn main_loop(mut host: Host<usize>) {
+pub fn init_server() -> Result<Server, Box<dyn Error>>{
+    let socket = UdpSocket::bind("127.0.0.1:1234")?;
+    socket.set_nonblocking(true).unwrap();
+
+    Ok(Server {
+        socket,
+        clients: HashMap::new(),
+    })
+}
+
+pub fn main_loop(server: &mut Server) {
     let mut players: Vec<core::Player> = vec![];
     loop {
-        handle_network(&mut host, &mut players);
+        handle_network(server, &mut players);
         unsafe {
             core::update();
         }
-        send_game_updates(&mut host, &mut players);
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        send_game_updates(server, &mut players);
+        std::thread::sleep(std::time::Duration::from_millis(100));
     }
 }
 
-fn add_player(mut peer: Peer<usize>, players: &mut Vec<core::Player>) {
-    peer.set_data(Some(players.len()));
+fn add_player(server: &mut Server, mut peer: std::net::SocketAddr, players: &mut Vec<core::Player>) {
+    // TODO
+    //peer.set_data(Some(players.len()));
+    server.clients.insert(peer, players.len());
 
     let mut response = [0 as u8; 17];
-    response[0] = core::PacketType_PACKET_PLAYER_ID as u8;
+    response[0] = common::PACKET_PLAYER_ID as u8;
     response[1..9].copy_from_slice(&players.len().to_le_bytes());
     unsafe {
         response[9..17].copy_from_slice(&SEED.to_le_bytes());
     }
-    let response = Packet::new(&response, PacketMode::ReliableSequenced).unwrap();
-    let _ = peer.send_packet(response, 1);
+    server.socket.send_to(&response, peer).unwrap();
 
     unsafe {
         let p = core::Player::new();
@@ -66,23 +81,23 @@ fn add_player(mut peer: Peer<usize>, players: &mut Vec<core::Player>) {
         players.push(p);
     }
     println!("{:?} , players {:?}", peer, players);
-    update_chunk_for_player(&mut peer, (128, 128));
-    update_player_inventory(&mut peer, players);
+    update_chunk_for_player(server, &mut peer, (128, 128));
+    update_player_inventory(server, &mut peer, players);
 }
 
 
-fn update_players(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
+fn update_players(server: &Server, players: &mut Vec<core::Player>) {
     for (i, p) in players.iter().enumerate() {
         let mut data = [0 as u8; 25];
-        data[0] = core::PacketType_PACKET_PLAYER_UPDATE as u8;
+        data[0] = common::PACKET_PLAYER_UPDATE;
         data[1..9].clone_from_slice(&i.to_le_bytes());
         data[9..13].clone_from_slice(&p.map_x.to_le_bytes());
         data[13..17].clone_from_slice(&p.map_y.to_le_bytes());
         data[17..21].clone_from_slice(&p.x.to_le_bytes());
         data[21..25].clone_from_slice(&p.y.to_le_bytes());
 
-        //println!("{:?}", data);
-        host.broadcast(Packet::new(&data, PacketMode::UnreliableUnsequenced).unwrap(), 1);
+        println!("updating players{:?}", data);
+        server.broadcast(&data);
     }
 }
 
@@ -104,21 +119,21 @@ fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
     }
 }
 
-fn update_player_inventory(peer: &mut Peer<usize>, players: &mut Vec<core::Player>) {
-    let id = *peer.data().unwrap();
+fn update_player_inventory(server: &Server, peer: &SocketAddr, players: &mut Vec<core::Player>) {
+    let id = server.clients.get(peer).unwrap();
 
-    let mut data = vec![core::PacketType_PACKET_SEND_INVENTORY as u8];
+    let mut data = vec![common::PACKET_INVENTORY_UPDATE as u8];
     unsafe{
-        let inv = &mut *players[id].inventory;
+        let inv = &mut *players[*id].inventory;
         InvList_to_bytes(&mut data, inv);
     }
 
-    let _ = peer.send_packet(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
+    server.socket.send_to(&data, peer).unwrap();
 }
 
-fn update_chunk_for_player(peer: &mut Peer<usize>, coords: (u8, u8)) {
+fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
     let mut data = vec![ 0 as u8 ; 3 + (core::CHUNK_SIZE * core::CHUNK_SIZE) as usize * size_of::<core::game_tiles>()];
-    data[0] = core::PacketType_PACKET_CHUNK_UPDATE as u8;
+    data[0] = common::PACKET_CHUNK_UPDATE;
     data[1] = coords.0;
     data[2] = coords.1;
 
@@ -136,56 +151,42 @@ fn update_chunk_for_player(peer: &mut Peer<usize>, coords: (u8, u8)) {
         InvList_to_bytes(&mut data, &mut chunk.objects);
     }
         
-        let _ = peer.send_packet(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
+    server.socket.send_to(&data, peer).unwrap();
 }
 
-fn handle_network(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
-    let mut finish = false;
-    while !finish{
-        match host.service(0).expect("foo") {
-            /*Some(e) => {
-                match e {
-                    Event::Connect(ref p) => {
-                        println!("{:?}", p);
-                    }
-                    Event::Disconnect(_, _) => {},
-                    Event::Receive { .. } => {},
-                }
-            }*/
-            Some(Event::Connect(ref p)) => {
-                println!("connected");
-                add_player(p.clone(), players);
+fn handle_network(server: &mut Server, players: &mut Vec<core::Player>) {
+    let mut buf = [0; 100];
+    loop {
+        if let Ok((amt, src)) = server.socket.recv_from(&mut buf) {
+            if amt == 0 {
+                break;
             }
-            Some(Event::Disconnect(..)) => println!("disconnected"),
-            Some(Event::Receive { ref mut sender, channel_id: _, ref packet }) => {
-                match sender.data() {
-                    Some(id) =>  {
-                        if *id < players.len() {
-                            handle_packet(&mut players[*id], packet);
-                        } else {
-                            println!("invalid player idx {}", *id);
+            match buf[0] {
+                common::PACKET_JOIN_REQUEST => {
+                    println!("connected");
+                    add_player(server, src, players);
+                }
+                _ => {
+                    match server.clients.get(&src) {
+                        Some(id) =>  {
+                            if *id < players.len() {
+                                handle_packet(&mut players[*id], &buf);
+                            } else {
+                                println!("invalid player idx {}", *id);
+                            }
                         }
+                        None => println!("player without idx"),
                     }
-                    None => println!("player without idx"),
                 }
-                /*println!(
-                    "geto packet from {:?} on channel {}, content {}",
-                    sender.data(), channel_id, std::str::from_utf8(packet.data()).unwrap()
-                );*/
-                //let _ = sender.send_packet(Packet::new(b"from server", PacketMode::ReliableSequenced).unwrap(), 1);
             }
-            _ => {finish = true;}
+        } else {
+            break;
         }
     }
-//  let _ = sender.send_packet(Packet::new(b"from server", PacketMode::ReliableSequenced).unwrap(), 1);
-    
-    /*let s = format!("packet nr {}", i);
-    host.broadcast(Packet::new(s.as_bytes(), PacketMode::ReliableSequenced).unwrap(), 1);
-    i += 1;*/
 }
 
-fn handle_packet(player: &mut core::Player, packet: &Packet) {
-    let tag = ClientEvent::from(packet.data());
+fn handle_packet(player: &mut core::Player, packet: &[u8]) {
+    let tag = ClientEvent::from(packet);
     match tag {
         ClientEvent::Move { x, y } => {
             println!("moved {x} {y}");
@@ -195,23 +196,23 @@ fn handle_packet(player: &mut core::Player, packet: &Packet) {
     }
 }
 
-fn send_game_updates(host: &mut Host<usize>, players: &mut Vec<core::Player>) {
+fn send_game_updates(server: &Server, players: &mut Vec<core::Player>) {
 
-    update_players(host, players);
+    update_players(server, players);
     unsafe {
         let el = std::ptr::addr_of_mut!(core::objects_to_update);
-        let mut data = vec![core::PacketType_PACKET_OBJECTS_UPDATE as u8];
+        let mut data = vec![common::PACKET_OBJECTS_UPDATE];
         InvList_to_bytes(&mut data, el);
-        host.broadcast(Packet::new(&data, PacketMode::UnreliableUnsequenced).unwrap(), 1);
+        server.broadcast(&data);
 
         while (*el).head != std::ptr::null_mut() {
             (*el).remove((*(*el).head).el);
         }
 
         let el = std::ptr::addr_of_mut!(core::objects_to_update_reliable);
-        let mut data = vec![core::PacketType_PACKET_OBJECTS_UPDATE as u8];
+        let mut data = vec![common::PACKET_OBJECTS_UPDATE];
         InvList_to_bytes(&mut data, el);
-        host.broadcast(Packet::new(&data, PacketMode::ReliableSequenced).unwrap(), 1);
+        server.broadcast(&data);
 
         while (*el).head != std::ptr::null_mut() {
             (*el).remove((*(*el).head).el);
