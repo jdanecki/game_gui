@@ -31,6 +31,5 @@ target_link_libraries(pime_SDL
     ${SDL_LDFLAGS} ${SDL2_MIXER_LDFLAGS}
     -lm 
     pime
-    enet
     /home/kamil/data/projects/the_game/the_game_net/target/debug/libthe_game_net.so
 )
