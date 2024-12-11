@@ -450,7 +450,7 @@ void player_interact(int key)
                     if (edible->poison)
                     {
                         int poison = rand() % 5000;
-                        player.health-=edible->poison;
+                        player.health-=poison;
                         if (player.health < 1)
                         {
                             player.health = 1;

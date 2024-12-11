@@ -41,10 +41,10 @@ Player::Player()
 {
 	back_x=0;
 	back_y=0;
-    health=500;
     max_health=1000;
-    energy=250;
+    health=max_health;
     max_energy=1000;
+    energy=max_energy;
     run_usage=5;
     map_x = WORLD_CENTER;
     map_y = WORLD_CENTER;
