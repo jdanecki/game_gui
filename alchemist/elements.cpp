@@ -62,23 +62,21 @@ const char * Plant_phase_name[]=
 
 Edible::Edible()
 {
-   caloric=rand() % 1000;
-   irrigation=rand() % 500;
-   poison=0;
+    power=rand() % 1000;
+   poison=false;
    if (rand() %100 < 10) { // 10%
-       poison = 1 + rand() % 250;
+       poison=true;
    }
 }
 
 void Edible::show()
 {
     printf("      *** Edible ***\n");
-    printf("      caloric = %u\n", caloric);
-    printf("      irrigation = %u\n", irrigation);
+    printf("      power = %u\n", power);
     if (poison)
     {
         printf("           *** Poison ***\n");
-        printf("           poison = %u\n", poison);
+        printf("           poison = %s\n", poison ? "yes" : "no");
     }
 }
 

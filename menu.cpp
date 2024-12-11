@@ -497,8 +497,8 @@ int interact(enum menu_actions a)
             current_menu=menu_music;
             return 0;
         case MENU_REGAIN:
-            player.hunger+=100;
-            player.thirst+=100;
+            player.health+=100;
+            player.energy+=100;
             return 0;
         case MENU_SAVE:
             save(1);

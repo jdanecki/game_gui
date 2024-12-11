@@ -10,8 +10,6 @@ void Player::check_and_move(int new_map_x, int new_map_y, int new_x, int new_y)
     map_y = new_map_y;
     x = new_x;
     y = new_y;
-    hunger -= 3;
-    thirst--;
 }
 
 void Player::move(int dx, int dy)
@@ -43,8 +41,11 @@ Player::Player()
 {
 	back_x=0;
 	back_y=0;
-    hunger=500;
-    thirst=250;
+    health=500;
+    max_health=1000;
+    energy=250;
+    max_energy=1000;
+    run_usage=5;
     map_x = WORLD_CENTER;
     map_y = WORLD_CENTER;
     inventory = new InvList("inventory");

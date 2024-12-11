@@ -424,17 +424,38 @@ void player_interact(int key)
                 Edible * edible = el->get_edible();
                 if (edible)
                 {
-                    player.thirst+=edible->irrigation;
-                    player.hunger+=edible->caloric;
+                    if (player.energy == player.max_energy)
+                    {
+                        sprintf(status_line, "eat: no need (already full)");
+                        status_code = 0;
+                        break;
+                    }
+                    if (edible->power > (player.max_health - player.health))
+                    {
+                        player.energy += edible->power - (player.max_health - player.health);
+                        player.health = player.max_health;
+                        if (player.energy > player.max_energy)
+                        {
+                            player.energy = player.max_energy;
+                        }
+                    }
+                    else
+                    {
+                        player.health+=edible->power;
+                    }
                     player.inventory->remove(el);
                     player.hotbar[active_hotbar]=NULL;
                     sprintf(status_line, "eat");
                     status_code = 1;
                     if (edible->poison)
                     {
-                        player.thirst-=edible->poison*10;
-                        player.hunger-=edible->poison*10;
-                        sprintf(status_line, "eat: GOT POISONED");
+                        int poison = rand() % 5000;
+                        player.health-=edible->poison;
+                        if (player.health < 1)
+                        {
+                            player.health = 1;
+                        }
+                        sprintf(status_line, "eat: GOT POISONED FOR %d HEALTH", poison);
                     }
                 }
                 else
@@ -516,23 +537,23 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
     if (keys[SDL_SCANCODE_LSHIFT])
     {
         player.sneaking = 1;
-        time_period = 200;
+        time_period = 500;
     }
     else
     {
         player.sneaking = 0;
-        if (keys[SDL_SCANCODE_LCTRL] && player.hunger && player.thirst)
+        if (keys[SDL_SCANCODE_LCTRL] && player.energy)
         {
             player.running = 1;
-            time_period = 50;
+            time_period = 100;
         }
         else
         {
             player.running = 0;
-            time_period = 100;
+            time_period = 250;
         }
     }
-      
+    bool moved=false;      
     if (current_menu==NULL && ((current_time - last_time > time_period) || !(*last_frame_press)))
     {
         if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S])
@@ -540,12 +561,14 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
             player.move(0, 1);
             player.direction=direction::down;
             *last_frame_press=1;
+            moved=1;
         }
         else if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
         {
             player.direction=direction::up;
             player.move(0, -1);
             *last_frame_press=1;
+            moved=1;
         }
         if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT])
         {
@@ -553,6 +576,7 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
             player.direction=direction::right;
             player.move(1, 0);
             *last_frame_press=1;
+            moved=1;
         }
         else if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
         {
@@ -560,6 +584,11 @@ Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_pres
             player.direction=direction::left;
             player.move(-1, 0);
             *last_frame_press=1;
+            moved=1;
+        }
+        if (moved && player.running)
+        {
+            player.energy-=player.run_usage;
         }
         if (last_frame_press)
         {
@@ -751,23 +780,23 @@ void draw()
     int tx=width+10;
     int ty=10;
 
-    sprintf(text, "Hunger: %d", player.hunger);
-    write_text(tx, ty, text, player.hunger < 100 ? Red : White, 15,30);
+    sprintf(text, "Health: %d/%d", player.health, player.max_health);
+    write_text(tx, ty, text, player.health < player.max_health/10 ? Red : White, 15, 30);
     ty +=25; 
     
-    sprintf(text, "Irrigation: %d", player.thirst);
-    write_text(tx, ty, text, player.thirst < 100 ? Red : White, 15,30);
+    sprintf(text, "Energy: %d/%d", player.energy, player.max_energy);
+    write_text(tx, ty, text, player.energy < player.max_energy/10 ? Red : White, 15, 30);
     ty +=25; 
 
     sprintf(text, "Direction: %s", direction_names[(int)player.direction]);
-    write_text(tx, ty, text, player.thirst < 100 ? Red : White, 15,30);
+    write_text(tx, ty, text, White, 15,30);
     ty +=25; 
 
-        sprintf(text, "Player@(%d, %d)", 
-			(player.x + player.map_x * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2),
-			(player.y + player.map_y * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2)
-			);
-	write_text(tx, ty+25, text, White,15,30);
+    sprintf(text, "Player@(%d, %d)", 
+        		(player.x + player.map_x * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2),
+        		(player.y + player.map_y * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2)
+        	 );
+    write_text(tx, ty+25, text, White,15,30);
 
             
     
@@ -984,8 +1013,11 @@ int main()
         SDL_Event event;
         clear_window();
 
-        if (player.hunger < 0) player.hunger = 0;
-        if (player.thirst < 0) player.thirst = 0;
+        if (player.health < 0) 
+        {
+            player.health = 0;
+            sprintf(status_line, "Death");
+        }
         
         if (SDL_GetTicks() - last_update_time > UPDATE_DELAY)
         {
@@ -1076,14 +1108,11 @@ int main()
         }
 
         // keyboard handling for move
-        if (player.hunger > 0 || rand() % 3)
+        const Uint8 *currentKeyState = SDL_GetKeyboardState(NULL);
+        Uint64 tmp = move_interact(currentKeyState, last_time, &last_frame_press);
+        if (tmp > 0)
         {
-            const Uint8 *currentKeyState = SDL_GetKeyboardState(NULL);
-            Uint64 tmp = move_interact(currentKeyState, last_time, &last_frame_press);
-            if (tmp > 0)
-            {
-                last_time = tmp;
-            }
+            last_time = tmp;
         }
         // printf("%d\n", last_frame_press);
 

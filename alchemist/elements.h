@@ -15,9 +15,8 @@ typedef void * SDL_Texture;
 class Edible
 {
     public:
-    unsigned int irrigation;
-    unsigned int poison;
-    unsigned int caloric;
+    unsigned int power;
+    bool poison;
 
     Edible();
     void show();
