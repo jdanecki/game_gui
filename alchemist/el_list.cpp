@@ -86,7 +86,8 @@ InventoryElement ** InvList::find_id(enum Item_id id, int *count)
     }
     else 
     {
-            *count = c;
+            if (count)
+                *count = c;
             return a;
     }
 }
