@@ -39,6 +39,11 @@ void Player::move(int dx, int dy)
     check_and_move(new_map_x, new_map_y, new_x, new_y);
 }
 
+void Player::pickup(InventoryElement* item)
+{
+    inventory->add(item);
+}
+
 Player::Player()
 {
 	back_x=0;
@@ -48,6 +53,7 @@ Player::Player()
     map_x = WORLD_CENTER;
     map_y = WORLD_CENTER;
     inventory = new InvList("inventory");
+    direction = direction::right;
 
     x = 0;
 	y = 0;

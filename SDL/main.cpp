@@ -1,7 +1,3 @@
-#include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_mouse.h>
-#include <SDL2/SDL_scancode.h>
-#include <SDL2/SDL_timer.h>
 #include <cstdlib>
 #include <time.h>
 //#include <SDL2/SDL_render.h>
@@ -9,7 +5,6 @@
 #include <stdio.h>
 #include "text.h"
 #include "window.h"
-#include <SDL2/SDL_keycode.h>
 //#include <SDL2/SDL2_framerate.h>
 #include "texture.h"
 #include <sys/types.h>
@@ -24,6 +19,7 @@
 #include "../core/player.h"
 #include "implementations/alchemistSDL.h"
 #include "networking.h"
+#include "inputs.h"
 
 // Normal speed
 #define UPDATE_DELAY 1000
@@ -34,6 +30,8 @@
 
 SDL_Texture *map;
 int auto_explore;
+
+//TODO move it
 int active_hotbar=0;
 
 #define PLAYER_NUM 16
@@ -64,93 +62,8 @@ void load(char with_player)
 {
 }
 
-void update_window_size()
-{
-    int tile_size;
-    int width;
-    SDL_GetWindowSize(main_window, &window_width, &window_height); 
 
-    width = window_width - PANEL_WINDOW;
 
-    if (width < window_height)
-    {
-        tile_size = width/(CHUNK_SIZE);
-    } 
-    else
-    {
-        tile_size = window_height/(CHUNK_SIZE);
-    }
-    if (tile_size<32) tile_size = 32;
-
-    SDL_SetWindowSize(main_window, (tile_size * CHUNK_SIZE) + PANEL_WINDOW, tile_size * CHUNK_SIZE + STATUS_LINE);
-    SDL_GetWindowSize(main_window, &window_width, &window_height); 
-}
-
-void put_element()
-{
-    /*InventoryElement * el = player.hotbar[active_hotbar];
-    if (el) {
-        el->set_posittion(player.x, player.y);
-        set_item_at_ppos(el, &player);
-        player.inventory->remove(el);
-        player.hotbar[active_hotbar]=NULL;
-        printf("item %s placed\n", el->get_name());
-    }*/
-}
-
-void use_tile(int map_x, int map_y, int x, int y)
-{
-    /*InventoryElement ** item_pointer = get_item_at_ppos(&player);
-    if (item_pointer)
-    {
-        InventoryElement * item = *item_pointer;
-        player.inventory->add(item);
-        for (int i = 0; i<10; i++) {
-            if (!player.hotbar[i])
-            {
-                player.hotbar[i]=item;
-                break;
-            }
-        }
-        sprintf(status_line, "got item: %s (%s)", item->get_form_name(), item->get_name()); //player.inventory->get_count(item));
-        *item_pointer=NULL; 
-
-       status_code = 1; 
-    }
-
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
-    {
-        Plant * p = world_table[map_y][map_x]->plants[i];
-        if (p)
-        {
-            int px,py;
-            p->get_posittion(&px, &py);
-            if ((px == x && py == y) && ((p->type == PLANTID_watermelon) || (p->type == PLANTID_pumpkin)) && (p->grown))
-            {
-                Element * el;
-                Element * el2;
-                switch (p->type) {
-                    case PLANTID_watermelon:
-                        el = new Element(base_elements[ID_WATERMELON]);
-                        el2 = new Element(base_elements[ID_WATERMELON_SEEDS]);
-                        break;
-                    case PLANTID_pumpkin:
-                        el = new Element(base_elements[ID_PUMPKIN]);
-                        el2 = new Element(base_elements[ID_PUMPKIN_SEEDS]);
-                        break;
-                }
-
-                el->set_posittion(x, y);
-                set_item_at(el, map_x, map_y, x, y);
-                el2->set_posittion(x, y);
-                set_item_at(el2, map_x, map_y, x, y);
-
-                free(world_table[map_y][map_x]->plants[i]);
-                world_table[map_y][map_x]->plants[i] = NULL;
-            }
-        }
-    }*/
-}
 
 bool plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
 {
@@ -363,241 +276,8 @@ bool plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
     }
     return false;
     */
-}
 
 
-void player_interact(int key)
-{
-    if (menu_interact(key)) return;
-    
-    switch (key)
-    {
-        case SDLK_v:
-            sprintf(status_line, "");
-            status_code = 1;
-            break;
-        case SDLK_t:
-            player->hotbar[active_hotbar]=NULL;
-            break;
-        /*case SDLK_SEMICOLON:
-        {
-            InventoryElement * el = player.hotbar[active_hotbar];
-            if (el)
-                el->show(true);
-            InventoryElement ** at_ppos = get_item_at_ppos(&player);
-
-            if (at_ppos)
-            {
-                el = *at_ppos;
-                if (el)
-                    el->show(true);
-            }
-            Being ** b_at_ppos = get_being_at_ppos(&player);
-            if (b_at_ppos)
-            {
-                Being * b = *b_at_ppos;
-                if (b)
-                    b->show();
-            }
-            Plant ** p_at_ppos = get_plant_at_ppos(&player);
-            if (p_at_ppos)
-            {
-                Plant * p = *p_at_ppos;
-                if (p)
-                    p->show();
-            }
-            Animal ** a_at_ppos = get_animal_at_ppos(&player);
-            if (a_at_ppos)
-            {
-                Animal * a = *a_at_ppos;
-                if (a)
-                    a->show();
-            }
-            Object ** o_at_ppos = get_object_at_ppos(&player);
-            if (o_at_ppos)
-            {
-                Object * o = *o_at_ppos;
-                if (o)
-                    o->show();
-            }
-        }
-        break;
-        
-        case SDLK_f:
-        {
-            InventoryElement * el = player.hotbar[active_hotbar];
-            if (el)
-            {
-                Edible * edible = el->get_edible();
-                if (edible)
-                {
-                    player.thirst+=edible->irrigation;
-                    player.hunger+=edible->caloric;
-                    player.inventory->remove(el);
-                    player.hotbar[active_hotbar]=NULL;
-                    sprintf(status_line, "eat");
-                    status_code = 1;
-                    if (edible->poison)
-                    {
-                        player.thirst-=edible->poison*10;
-                        player.hunger-=edible->poison*10;
-                        sprintf(status_line, "eat: GOT POISONED");
-                    }
-                }
-                else
-                {
-                    sprintf(status_line, "eat: not food");
-                    status_code = 0;
-                }
-            }
-            
-            break;
-        }*/
-        case SDLK_F11:
-            update_window_size();
-            break;
-        case SDLK_1: active_hotbar=0; break;
-        case SDLK_2: active_hotbar=1; break;
-        case SDLK_3: active_hotbar=2; break;
-        case SDLK_4: active_hotbar=3; break;
-        case SDLK_5: active_hotbar=4; break;
-        case SDLK_6: active_hotbar=5; break;
-        case SDLK_7: active_hotbar=6; break;
-        case SDLK_8: active_hotbar=7; break;
-        case SDLK_9: active_hotbar=8; break;
-        case SDLK_0: active_hotbar=9; break;
-    
-		case SDLK_q: put_element(); break;
-
-		case SDLK_BACKQUOTE: active_hotbar--; if (active_hotbar==-1) active_hotbar=9; break;
-        case SDLK_TAB: active_hotbar++; if (active_hotbar==10) active_hotbar=0; break;
-		
-        //case SDLK_MINUS: player.craftbar[active_hotbar]=0;  break;
-        //case SDLK_EQUALS: player.craftbar[active_hotbar]=1;  break;
-
-        case SDLK_F5:
-            auto_explore^=1;
-        break;
-		case SDLK_F4:
-		{
-           /*	InventoryElement ** item_pointer = get_item_at_ppos(&player);
-            if (item_pointer)
-                (*item_pointer)->show();*/
-		}
-		break;
-                    
-
-        case SDLK_RETURN:
-        case SDLK_e:
-/*            InventoryElement * el = player.hotbar[active_hotbar];
-            if (el)
-            {
-                if (el->use(player.map_x, player.map_y, player.x, player.y))
-                    break;
-                if (plant_with_seed(el, player.map_x, player.map_y, player.x, player.y))
-                    break;
-                if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
-                {
-                    if (Plant ** pp = get_plant_at_ppos(&player))
-                    {
-                        if (Plant * p = *pp)
-                        {
-                            p->water += 100;
-                            player.inventory->remove(el);
-                            player.hotbar[active_hotbar]=NULL;
-                            free(el);
-                            break;
-                        }
-                    }
-                }
-            }
-            use_tile(player.map_x, player.map_y, player.x, player.y)*/;
-            break;
-    }
-}
-
-Uint64 move_interact(const Uint8 * keys, Uint64 last_time, int * last_frame_press)
-{
-    Uint64 current_time = SDL_GetTicks64();
-    int time_period = 0;
-    if (keys[SDL_SCANCODE_LSHIFT])
-    {
-        player->sneaking = 1;
-        time_period = 200;
-    }
-    else
-    {
-        player->sneaking = 0;
-        if (keys[SDL_SCANCODE_LCTRL] && player->hunger && player->thirst)
-        {
-            player->running = 1;
-            time_period = 50;
-        }
-        else
-        {
-            player->running = 0;
-            time_period = 100;
-        }
-    }
-      
-    if (current_menu==NULL && ((current_time - last_time > time_period) || !(*last_frame_press)))
-    {
-        if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S])
-        {
-            // TODO clientside movement prediction
-#ifdef LOCAL_ONLY
-            player->move(0, 1);
-            player->direction=direction::down;
-#else
-            send_packet_move(client, 0, 1);
-#endif
-            *last_frame_press=1;
-        }
-        else if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
-        {
-#ifdef LOCAL_ONLY
-            player->direction=direction::up;
-            player->move(client, 0, -1);
-#else
-            send_packet_move(client, 0, -1);
-#endif
-            *last_frame_press=1;
-        }
-        if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT])
-        {
-            player->going_right=1;
-#ifdef LOCAL_ONLY
-            player->direction=direction::right;
-            player->move(1, 0);
-#else
-            send_packet_move(client, 1, 0);
-#endif
-            *last_frame_press=1;
-        }
-        else if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
-        {
-            player->going_right=0;
-#ifdef LOCAL_ONLY
-            player->direction=direction::left;
-            player->move(-1, 0);
-#else
-            send_packet_move(client, -1, 0);
-#endif
-            *last_frame_press=1;
-        }
-        if (last_frame_press)
-        {
-            return SDL_GetTicks64();
-        }
-    }
-    if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
-    {
-        *last_frame_press=1;
-        return 0;
-    }
-
-    *last_frame_press=0;
-    return 0;
 }
 
 int next_to(int x1, int y1, int x2, int y2)
@@ -688,13 +368,13 @@ void draw()
         }
     }
     // render GUI
-    /*int icon_size = game_size/10;
-    if (player.running)
+    int icon_size = game_size/10;
+    if (player->running)
     {
         SDL_Rect running_icon_rect = {(int)(game_size-(icon_size*1.1)), 0, icon_size, icon_size};
         SDL_RenderCopy(renderer, Texture.run_icon, NULL, &running_icon_rect);
     }
-    if (player.sneaking)
+    if (player->sneaking)
     {
         SDL_Rect sneaking_icon_rect = {(int)(game_size-(icon_size*1.1)), 0, icon_size, icon_size};
         SDL_RenderCopy(renderer, Texture.sneak_icon, NULL, &sneaking_icon_rect);
@@ -704,29 +384,28 @@ void draw()
     int tx=width+10;
     int ty=10;
 
-    sprintf(text, "Hunger: %d", player.hunger);
-    write_text(tx, ty, text, player.hunger < 100 ? Red : White, 15,30);
+    sprintf(text, "Hunger: %d", player->hunger);
+    write_text(tx, ty, text, player->hunger < 100 ? Red : White, 15,30);
     ty +=25; 
     
-    sprintf(text, "Irrigation: %d", player.thirst);
-    write_text(tx, ty, text, player.thirst < 100 ? Red : White, 15,30);
+    sprintf(text, "Irrigation: %d", player->thirst);
+    write_text(tx, ty, text, player->thirst < 100 ? Red : White, 15,30);
     ty +=25; 
 
-    sprintf(text, "Direction: %s", direction_names[(int)player.direction]);
-    write_text(tx, ty, text, player.thirst < 100 ? Red : White, 15,30);
+    sprintf(text, "Direction: %s", direction_names[(int)player->direction]);
+    write_text(tx, ty, text, player->thirst < 100 ? Red : White, 15,30);
     ty +=25; 
 
         sprintf(text, "Player@(%d, %d)", 
-			(player.x + player.map_x * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2),
-			(player.y + player.map_y * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2)
+			(player->x + player->map_x * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2),
+			(player->y + player->map_y * CHUNK_SIZE) - (WORLD_SIZE*CHUNK_SIZE/2)
 			);
 	write_text(tx, ty+25, text, White,15,30);
 
             
     
-    InventoryElement ** ip = get_item_at_ppos(&player);
-    if (ip) {
-        InventoryElement * item = *ip;
+    InventoryElement * item = get_item_at_ppos(player);
+    if (item) {
         sprintf(text, "Item: %s (%s)", item->get_form_name(), item->get_name());
         write_text(tx, ty+75, text, White,15,30);
     }
@@ -739,9 +418,9 @@ void draw()
 		rect.w = 48;
 		rect.h = 48;
 
-		if (player.hotbar[i])
+		if (player->hotbar[i])
         {
-            InventoryElement * item = player.hotbar[i];
+            InventoryElement * item = player->hotbar[i];
             // TODO render
 			//SDL_Texture *texture = item->get_texture();
             //SDL_RenderCopy(renderer, texture, NULL, &rect);
@@ -757,7 +436,7 @@ void draw()
 			SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
         }
 
-        if (player.craftbar[i])
+        if (player->craftbar[i])
         {
             if (i == active_hotbar)
     		    {
@@ -802,17 +481,17 @@ void draw()
         }
     }
     
-    unsigned int p=pixels[player.map_y * WORLD_SIZE + player.map_x];
+    unsigned int p=pixels[player->map_y * WORLD_SIZE + player->map_x];
     for (y=0; y < 3; y++)
         for (x=0; x< 3; x++)
         {
-            int py=player.map_y+y-1;
-            int px=player.map_x+x-1;
+            int py=player->map_y+y-1;
+            int px=player->map_x+x-1;
             if (py >=0 && py < WORLD_SIZE && px >= 0 && px < WORLD_SIZE)
                 pixels[py * WORLD_SIZE + px]=0xffffffff;
         }
 
-    switch(world_table[player.map_y][player.map_x]->biome)
+    switch(world_table[player->map_y][player->map_x]->biome)
     {
         case BIOME_DESERT:
             sprintf(text, "biome: desert");
@@ -847,7 +526,6 @@ void draw()
    
     sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed"); 
     write_text(5, window_height - 32, text, White, 15, 30);
-*/
     if (current_menu) current_menu->show();
 }
 
@@ -913,18 +591,6 @@ int init_SDL()
     return 0;
 }
 
-/*#ifdef LOCAL_ONLY
-void convert_elements_to_SDL(chunk* c)
-{
-    ListElement* le = c->objects.head;
-    while (le)
-    {
-        InventoryElement* el = le->el;
-        c->objects.remove(
-    }
-}
-#endif*/
-
 int setup() 
 {
     if (init_SDL() != 0) return 1;
@@ -934,94 +600,7 @@ int setup()
     return 0;
 }
 
-bool handle_SDL_events()
-{
-    int ww=0, wh=0;
-    SDL_Event event;
-    // keyboard handling for not move
-    while (SDL_PollEvent(&event))
-    {
-        if (event.type==SDL_QUIT) {SDL_Quit(); return true;};
-        if(event.type == SDL_KEYDOWN)
-        {
-            int key= event.key.keysym.sym;
 
-            player_interact(key);
-        }
-        if (event.type==SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED )
-        { 
-            //i3 window manager sends these events if window is not floated 
-            if (ww != event.window.data1 && wh != event.window.data2) {
-                printf("window event: resizing to %d, %d\n", event.window.data1, event.window.data2);
-                update_window_size();
-                ww=event.window.data1;
-                wh=event.window.data2;
-            }
-        }
-
-        if (event.type == SDL_MOUSEBUTTONDOWN)
-        {
-         /*   switch (event.button.button)
-            {
-                case 1: break;
-                case 2: break;
-                case 3: break;
-            }
-         */
-            InventoryElement * el = player->hotbar[active_hotbar];
-            int x = 0;
-            int y = 0;
-
-            SDL_GetMouseState(&x, &y);
-
-            int game_size;
-            int tile_dungeon_size;
-            int width = window_width - PANEL_WINDOW;
-
-            if (width < window_height)
-            {
-                game_size = width;
-                tile_dungeon_size = width/(CHUNK_SIZE);
-            } 
-            else
-            {
-                game_size = window_height;
-                tile_dungeon_size = window_height/(CHUNK_SIZE);
-            }
-
-            int tile_x = x/tile_dungeon_size;
-            int tile_y = y/tile_dungeon_size;
-
-            if (tile_x < CHUNK_SIZE && tile_y < CHUNK_SIZE)
-            {
-                if (el)
-                {
-                    if (el->use(player->map_x, player->map_y, tile_x, tile_y)) break;
-                    if (plant_with_seed(el, player->map_x, player->map_y, tile_x, tile_y)) break;
-                    // TODO
-                    /*if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
-                    {
-                        if (Plant ** pp = get_plant_at(player->map_x, player->map_y, tile_x, tile_y))
-                        {
-                            if (Plant * p = *pp)
-                            {
-                                p->water += 100;
-                                player->inventory->remove(el);
-                                player->hotbar[active_hotbar]=NULL;
-                                free(el);
-                                break;
-                            }
-                        }
-                    }*/
-                }
-                use_tile(player->map_x, player->map_y, tile_x, tile_y);
-            }
-            printf("mouse %d,%d %d %d,%d\n", event.button.x, event.button.y, event.button.button, tile_x, tile_y);
-        }
-        
-    }
-    return 0;
-}
 
 void do_auto_explore()
 {
@@ -1048,10 +627,6 @@ void loop()
 {
     //int dst_map_x=player.map_x;
     //int dst_map_y=player.map_y;
-    int last_frame_press=0;
-
-    Uint64 last_time = 0;
-    Uint64 last_update_time = 0;
    
     sprintf(status_line, "Welcome in game!");
     
@@ -1059,35 +634,13 @@ void loop()
     {   
         clear_window();
 
-        
-        if (SDL_GetTicks() - last_update_time > UPDATE_DELAY)
-        {
-            last_update_time = SDL_GetTicks();
-#ifdef LOCAL_ONLY
-            update();
-#endif
-        }
-
         if (handle_SDL_events())
             return;
 
-#ifndef LOCAL_ONLY
         // TODO disconnect
         network_tick(client);
-#endif
-        // keyboard handling for move
-        //if (player.hunger > 0 || rand() % 3)
-        {
-            const Uint8 *currentKeyState = SDL_GetKeyboardState(NULL);
-            Uint64 tmp = move_interact(currentKeyState, last_time, &last_frame_press);
-            if (tmp > 0)
-            {
-                last_time = tmp;
-            }
-        }
-        // printf("%d\n", last_frame_press);
-
-
+            
+        
         /*if (auto_explore) {
             do_auto_explore();
          } else {

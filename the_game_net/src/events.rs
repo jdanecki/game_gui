@@ -4,4 +4,5 @@ extern "C" {
     pub fn got_id(id: usize, seed: i64);
     pub fn update_inventory(data: *mut u8);
     pub fn update_objects(data: *mut u8);
+    pub fn item_picked_up(iid: usize, pid: usize);
 }

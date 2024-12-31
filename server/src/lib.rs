@@ -10,6 +10,7 @@ pub static mut SEED: i64 = 0;
 
 pub enum ClientEvent {
     Move{x: i32, y: i32},
+    Pickup{id: usize},
     Whatever,
 }
 
@@ -30,6 +31,7 @@ impl From<&[u8]> for ClientEvent {
     fn from(value: &[u8]) -> Self {
         match value[0] {
             common::PACKET_PLAYER_MOVE => ClientEvent::Move{x: (value[1] as i8).into(), y: (value[2] as i8).into()},
+            common::PACKET_PLAYER_ACTION_PICKUP => ClientEvent::Pickup{id: usize::from_le_bytes(value[1..9].try_into().unwrap())},
             1 => ClientEvent::Whatever,
             _ => panic!("invalid event {:?}", value)
         }
@@ -96,7 +98,7 @@ fn update_players(server: &Server, players: &mut Vec<core::Player>) {
         data[17..21].clone_from_slice(&p.x.to_le_bytes());
         data[21..25].clone_from_slice(&p.y.to_le_bytes());
 
-        println!("updating players{:?}", data);
+        //println!("updating players{:?}", data);
         server.broadcast(&data);
     }
 }
@@ -111,6 +113,7 @@ fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
         while cur != std::ptr::null_mut() {
             let el = (*cur).el as *mut ::core::ffi::c_void;
             let obj_ptr = core::InventoryElement_to_bytes(el);
+            
             let o = std::slice::from_raw_parts_mut(obj_ptr, core::InventoryElement_get_packet_size(el) as usize);
             data.extend_from_slice(o);
             cur = (*cur).next;
@@ -170,7 +173,7 @@ fn handle_network(server: &mut Server, players: &mut Vec<core::Player>) {
                     match server.clients.get(&src) {
                         Some(id) =>  {
                             if *id < players.len() {
-                                handle_packet(&mut players[*id], &buf);
+                                handle_packet(server, &mut players[*id], &buf, *id);
                             } else {
                                 println!("invalid player idx {}", *id);
                             }
@@ -185,12 +188,23 @@ fn handle_network(server: &mut Server, players: &mut Vec<core::Player>) {
     }
 }
 
-fn handle_packet(player: &mut core::Player, packet: &[u8]) {
+fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], player_id: usize) {
     let tag = ClientEvent::from(packet);
     match tag {
         ClientEvent::Move { x, y } => {
             println!("moved {x} {y}");
             unsafe {player.move_(x, y)}
+        },
+        ClientEvent::Pickup { id } => {
+            println!("player picked {id}");
+            unsafe {
+                let item = (*core::world_table[player.map_y as usize][player.map_x as usize]).find_by_id(id);
+                player.pickup(item);
+                let mut buf = vec![common::PACKET_PLAYER_ACTION_PICKUP];
+                buf.extend_from_slice(&id.to_le_bytes());
+                buf.extend_from_slice(&player_id.to_le_bytes());
+                server.broadcast(&buf);
+            }
         },
         ClientEvent::Whatever => println!("whatever"),
     }

@@ -27,6 +27,10 @@ constexpr static const PacketType PACKET_INVENTORY_UPDATE = 5;
 
 constexpr static const PacketType PACKET_OBJECTS_UPDATE = 6;
 
+constexpr static const PacketType PACKET_PLAYER_ACTION_PICKUP = 7;
+
+constexpr static const PacketType PACKET_PLAYER_ACTION_DROP = 8;
+
 extern "C" {
 
 const NetClient *init();
@@ -37,6 +41,8 @@ void network_tick(const NetClient *client);
 
 void send_packet_move(const NetClient *client, int32_t x, int32_t y);
 
+void send_packet_pickup(const NetClient *client, uintptr_t id);
+
 extern void update_player(uintptr_t id, int32_t map_x, int32_t map_y, int32_t x, int32_t y);
 
 extern void update_chunk(int32_t x, int32_t y, uint8_t *data);
@@ -46,6 +52,8 @@ extern void got_id(uintptr_t id, int64_t seed);
 extern void update_inventory(uint8_t *data);
 
 extern void update_objects(uint8_t *data);
+
+extern void item_picked_up(uintptr_t iid, uintptr_t pid);
 
 }  // extern "C"
 #endif

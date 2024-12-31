@@ -56,7 +56,6 @@ pub extern "C" fn network_tick(client: &NetClient) {
         //println!("{:?}", &value);
         match value[0] {
             common::PACKET_PLAYER_UPDATE => {
-                println!("player update {}", amt);
                 if amt == 25 {
                     unsafe{
                         events::update_player(
@@ -93,6 +92,14 @@ pub extern "C" fn network_tick(client: &NetClient) {
                     events::update_objects(value as *mut u8);
                 }
             }
+            common::PACKET_PLAYER_ACTION_PICKUP => {
+                unsafe {
+                    events::item_picked_up(
+                        usize::from_le_bytes(value[1..9].try_into().unwrap()),
+                        usize::from_le_bytes(value[9..17].try_into().unwrap()),
+                    );
+                }
+            }
             _ => {
                 println!("invalid packet type {:?}", value);
             }
@@ -106,6 +113,13 @@ pub extern "C" fn network_tick(client: &NetClient) {
 #[no_mangle]
 pub extern "C" fn send_packet_move(client: &NetClient, x: i32, y: i32) {
     let buf = [common::PACKET_PLAYER_MOVE, x as u8, y as u8];
+    client.socket.send(&buf).unwrap();
+}
+
+#[no_mangle]
+pub extern "C" fn send_packet_pickup(client: &NetClient, id: usize) {
+    let mut buf = vec![common::PACKET_PLAYER_ACTION_PICKUP];
+    buf.extend_from_slice(&id.to_le_bytes());
     client.socket.send(&buf).unwrap();
 }
 

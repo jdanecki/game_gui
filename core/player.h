@@ -40,6 +40,7 @@ public:
     InventoryElement * hotbar[10];
     int craftbar[10];
 	void move(int x, int z);
+    void pickup(InventoryElement* item);
 	Player();
 
 };

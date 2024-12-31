@@ -47,7 +47,9 @@ class chunk {
     chunk_table table;
     InvList objects;
     InvList beings;
-    void add_object(InventoryElement* object);
+    void add_object(InventoryElement* object, int x, int y);
+    void remove_object(InventoryElement* object);
+    InventoryElement* find_by_id(size_t id);
     chunk();
     /*InventoryElement * items[CHUNK_SIZE*CHUNK_SIZE];
     Being * beings[CHUNK_SIZE*CHUNK_SIZE];

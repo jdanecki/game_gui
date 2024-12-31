@@ -77,22 +77,26 @@ enum Item_id
 class BaseElement
 {
     public:
-        const char * name;
+        const char * name;;
+
         int id; // texture id 
         unsigned int density;
         Edible *edible;
-        Form form;
+        Form form;;
+
         Solid *solid;
         
         BaseElement(int index); 
         void show(bool details=true);
 };        
 class Player;
+class chunk;
 class InventoryElement
 {
 	int x, y, z;
     public:
         size_t uid;
+        chunk* parent_chunk;
         Class_id c_id;
         Form req_form;
         bool known;
@@ -112,6 +116,8 @@ class InventoryElement
         }
         void set_posittion(int _x, int _y) { x=_x; y=_y; }
         void get_posittion(int *_x, int *_y) { *_x=x; *_y=y; }
+        int get_x() {return x;}
+        int get_y() {return y;}
         size_t get_uid() {return uid;}
         virtual unsigned int get_packet_size();
         virtual unsigned char* to_bytes();
@@ -147,7 +153,7 @@ public:
 class Element : virtual public InventoryElement
 #else
 class Element : public InventoryElement
-#endif
+#endif       
 {
     BaseElement * base;
     public:

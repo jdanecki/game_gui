@@ -107,7 +107,7 @@ void update_player(uintptr_t id, int32_t map_x, int32_t map_y, int32_t x, int32_
         player->x = x;
         player->y = y;
 
-        printf("updated player %d: %d %d %d %d\n", id, player->map_x, player->map_y, player->x, player->y);
+        //printf("updated player %ld: %d %d %d %d\n", id, player->map_x, player->map_y, player->x, player->y);
     }
 }
 
@@ -129,10 +129,11 @@ void update_chunk(int32_t x, int32_t y, uint8_t *data)
         for (int i = 0; i < item_num; i++)
         {
             InventoryElementSDL* el = el_from_data(&data[1028 + i*28]);
-
+            int item_x, item_y;
             if (el)
             {
-                world_table[y][x]->add_object(el);
+                el->get_posittion(&item_x,&item_y);
+                world_table[y][x]->add_object(el, item_x, item_y);
             }
         }
     }
@@ -144,10 +145,10 @@ void got_id(uintptr_t id, int64_t seed)
     players[id] = new Player;
     player = players[id];
 
-    printf("seed: %d\n", seed);
+    printf("seed: %ld\n", seed);
     srand(seed);
     init_elements();
-    printf("got id %d\n", id);
+    printf("got id %ld\n", id);
 
 }
 
@@ -162,7 +163,7 @@ void update_inventory(uint8_t *data)
         if (el)
         {
             player->inventory->add(el);
-            printf("invent %d %d", el->c_id, el->uid);
+            printf("invent %d %ld\n", el->c_id, el->uid);
         }
         else
         {
@@ -211,4 +212,34 @@ void update_objects(uint8_t *data)
         }
     }
 }
+
+void item_picked_up(uintptr_t iid, uintptr_t pid)
+{
+    if (pid >= 0 && pid < PLAYER_NUM && players[pid])
+    {
+        InventoryElement* item = find_by_uid(iid);
+        item->parent_chunk->remove_object(item);
+        if (item)
+        {
+            players[pid]->pickup(item);
+            if (players[pid] == player)
+            {
+                for (int i = 0; i<10; i++) {
+                    if (!player->hotbar[i])
+                    {
+                        player->hotbar[i]=item;
+                        break;
+                    }
+                }
+            }
+            printf("player %ld picked up %ld\n", pid, iid);
+            player->inventory->show();
+        }   
+        else 
+            printf("picked inexisting item\n");
+    }
+    else
+        printf("inexisting player\n");
+}
+
 }

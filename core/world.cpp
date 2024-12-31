@@ -39,9 +39,7 @@ void create_biome_plains(chunk * chunk)
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
-            o->set_posittion(x, y);
-
-            chunk->add_object(o);
+            chunk->add_object(o, x, y);
         }
     }
     if (rand() % 2)
@@ -54,9 +52,7 @@ void create_biome_plains(chunk * chunk)
 
             p->type = PLANTID_strawberry;
 
-            p->set_posittion(x, y);
-
-            chunk->add_object(p);
+            chunk->add_object(p, x, y);
         }
     }
     if (rand() % 2)
@@ -69,9 +65,8 @@ void create_biome_plains(chunk * chunk)
 
             p->type = PLANTID_watermelon;
 
-            p->set_posittion(x, y);
 
-            chunk->add_object(p);
+            chunk->add_object(p, x, y);
         }
     }
     if (rand() % 2)
@@ -84,9 +79,7 @@ void create_biome_plains(chunk * chunk)
 
             p->type = PLANTID_pumpkin;
 
-            p->set_posittion(x, y);
-
-            chunk->add_object(p);
+            chunk->add_object(p, x, y);
         }
     }
     if (/*rand() % 2*/1)
@@ -99,9 +92,7 @@ void create_biome_plains(chunk * chunk)
 
             a->type = ANIMALID_pig;
 
-            a->set_posittion(x, y);
-
-            chunk->add_object(a);
+            chunk->add_object(a, x, y);
         }
     }
 }
@@ -123,9 +114,7 @@ void create_biome_forest(chunk * chunk)
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
-        o->set_posittion(x, y);
-
-        chunk->add_object(o);
+        chunk->add_object(o, x, y);
     }
 
 
@@ -152,8 +141,6 @@ void create_biome_forest(chunk * chunk)
             }
         
         }*/
-
-        tree->set_posittion(x, y);
         switch (rand() % 3) {
             case 0:
                 tree->type=PLANTID_tree;
@@ -167,7 +154,7 @@ void create_biome_forest(chunk * chunk)
         
         }
 
-        chunk->add_object(tree);
+        chunk->add_object(tree, x, y);
     }
 }
 
@@ -189,9 +176,7 @@ void create_biome_desert(chunk * chunk)
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
-        o->set_posittion(x, y);
-
-        chunk->add_object(o);
+        chunk->add_object(o, x, y);
     }
 
 
@@ -342,27 +327,21 @@ Plant **get_plant_at_ppos(Player * player)
 }
 
 
-InventoryElement **get_item_at(int chunk_x, int chunk_y, int x, int y)
+InventoryElement *get_item_at(int chunk_x, int chunk_y, int x, int y)
 {
-    // TODO
-    /*for (int i = 0; i < 128; i++)
+    ListElement* le = world_table[chunk_y][chunk_x]->objects.head;
+    while (le)
     {
-        InventoryElement *el = world_table[chunk_y][chunk_x]->items[i];
-        if (el)
+        if (le->el->get_x() == x && le->el->get_y() == y)
         {
-            int el_x, el_y;
-            el->get_posittion(&el_x, &el_y);
-
-            if (el_x == x && el_y == y)
-            {
-                return &world_table[chunk_y][chunk_x]->items[i];
-            }
+            return le->el;
         }
-    }*/
-    return NULL;
+        le = le->next;
+    }
+    return nullptr;
 }
 
-InventoryElement **get_item_at_ppos(Player * player)
+InventoryElement *get_item_at_ppos(Player * player)
 {
     return get_item_at(player->map_x, player->map_y, player->x, player->y);
 }

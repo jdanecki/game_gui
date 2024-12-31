@@ -166,6 +166,8 @@ void InvList::add(ListElement *entry)
 
 void InvList::remove(InventoryElement *el)
 {
+    if (!head)
+        return;
    ListElement * cur = head;
    ListElement * tmp;
    if (head->el == el)
