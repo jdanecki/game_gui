@@ -9,6 +9,12 @@ pub struct NetClient {
     socket: UdpSocket,
 }
 
+impl NetClient {
+    fn send(&self, data: &[u8]) {
+        self.socket.send(data).unwrap();
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn init() -> *const NetClient {
     Box::into_raw(Box::new(init_internal().expect("failed to init NetClient")))
@@ -91,13 +97,53 @@ pub extern "C" fn network_tick(client: &NetClient) {
                 unsafe {
                     events::update_objects(value as *mut u8);
                 }
-            }
+            },
             common::PACKET_PLAYER_ACTION_PICKUP => {
                 unsafe {
                     events::item_picked_up(
                         usize::from_le_bytes(value[1..9].try_into().unwrap()),
                         usize::from_le_bytes(value[9..17].try_into().unwrap()),
                     );
+                }
+            },
+            common::PACKET_PLAYER_ACTION_DROP => {
+                unsafe {
+                    events::item_dropped(
+                        usize::from_le_bytes(value[1..9].try_into().unwrap()),
+                        usize::from_le_bytes(value[9..17].try_into().unwrap()),
+                    );
+                }
+            },
+            common::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT => {
+                unsafe {
+                    events::item_used_on_object(
+                        usize::from_le_bytes(value[1..9].try_into().unwrap()),
+                        usize::from_le_bytes(value[9..17].try_into().unwrap()),
+                        usize::from_le_bytes(value[17..25].try_into().unwrap()),
+                    );
+                }
+            },
+            common::PACKET_LOCATION_UPDATES => {
+                unsafe {
+                    events::update_item_location(((amt-1)/56) as i32, &mut value[1] as *mut u8)
+                }
+            },
+            common::PACKET_CREATE_OBJECTS_IN_CHUNK => {
+                unsafe {
+                    events::create_objects_in_chunk(
+                        i32::from(value[1]),
+                        i32::from(value[2]),
+                        ((amt-3)/28) as u32,
+                        &mut value[7] as *mut u8,
+                    );
+                }
+            },
+            common::PACKET_DESTROY_OBJECT => {
+                unsafe {
+                    events::destroy_object(
+                        usize::from_le_bytes(value[1..9].try_into().unwrap()),
+                        &mut value[9] as *mut u8,
+                        );
                 }
             }
             _ => {
@@ -113,14 +159,37 @@ pub extern "C" fn network_tick(client: &NetClient) {
 #[no_mangle]
 pub extern "C" fn send_packet_move(client: &NetClient, x: i32, y: i32) {
     let buf = [common::PACKET_PLAYER_MOVE, x as u8, y as u8];
-    client.socket.send(&buf).unwrap();
+    client.send(&buf);
 }
 
 #[no_mangle]
 pub extern "C" fn send_packet_pickup(client: &NetClient, id: usize) {
     let mut buf = vec![common::PACKET_PLAYER_ACTION_PICKUP];
     buf.extend_from_slice(&id.to_le_bytes());
-    client.socket.send(&buf).unwrap();
+    client.send(&buf);
+}
+
+#[no_mangle]
+pub extern "C" fn send_packet_drop(client: &NetClient, id: usize) {
+    let mut buf = vec![common::PACKET_PLAYER_ACTION_DROP];
+    buf.extend_from_slice(&id.to_le_bytes());
+    client.send(&buf);
+}
+
+#[no_mangle]
+pub extern "C" fn send_packet_item_used_on_object(client: &NetClient, iid: usize, oid: usize) {
+    let mut buf = vec![common::PACKET_PLAYER_ACTION_DROP];
+    buf.extend_from_slice(&iid.to_le_bytes());
+    buf.extend_from_slice(&oid.to_le_bytes());
+    client.send(&buf);
+}
+
+#[no_mangle]
+pub extern "C" fn send_packet_craft(client: &NetClient, prod_id: usize, iid: usize) {
+    let mut buf = vec![common::PACKET_PLAYER_ACTION_CRAFT];
+    buf.extend_from_slice(&prod_id.to_le_bytes());
+    buf.extend_from_slice(&iid.to_le_bytes());
+    client.send(&buf);
 }
 
 pub fn add(left: u64, right: u64) -> u64 {

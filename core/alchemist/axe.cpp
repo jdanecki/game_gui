@@ -10,7 +10,7 @@ Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_A
 
 }
 
-bool Axe::use(int map_x, int map_y, int x, int y)
+/*bool Axe::use(int map_x, int map_y, int x, int y)
 {
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
         // TODO
@@ -86,6 +86,12 @@ bool Axe::use(int map_x, int map_y, int x, int y)
         }
     }
     return false;
+}*/
+
+bool Axe::use(Plant* plant)
+{
+    printf("use on plant\n");
+    return true;
 }
 
 bool Axe::check_ing()

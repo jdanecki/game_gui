@@ -2,28 +2,39 @@
 
 #include "../core/world.h"
 #include "networking.h"
+#include "../core/player.h"
 
 extern const NetClient* client;
+extern Player* player;
+extern int active_hotbar;
 
 void put_element()
 {
-    /*InventoryElement * el = player.hotbar[active_hotbar];
+    InventoryElement * el = player->hotbar[active_hotbar];
     if (el) {
-        el->set_posittion(player.x, player.y);
+        send_packet_drop(client, el->uid);
+        player->hotbar[active_hotbar] = NULL;
+        /*el->set_posittion(player.x, player.y);
         set_item_at_ppos(el, &player);
         player.inventory->remove(el);
         player.hotbar[active_hotbar]=NULL;
-        printf("item %s placed\n", el->get_name());
-    }*/
+        printf("item %s placed\n", el->get_name());*/
+    }
 }
 
 void use_tile(int map_x, int map_y, int x, int y)
 {
-    InventoryElement* item = get_item_at(map_x, map_y, x, y);
-    if (item)
+    InventoryElement* object = get_item_at(map_x, map_y, x, y);
+    if (!object)
+        return;
+
+    if (Product* item = dynamic_cast<Product*>(player->hotbar[active_hotbar]))
     {
-        send_packet_pickup(client, item->uid);
+        send_packet_item_used_on_object(client, item->uid, object->uid);
+        return;
     }
+
+    send_packet_pickup(client, object->uid);
     /*if (item_pointer)
     {
         InventoryElement * item = *item_pointer;

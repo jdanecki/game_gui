@@ -9,15 +9,38 @@ void chunk::add_object(InventoryElement* object, int x, int y)
         beings.add(object);
     }
 #endif
-    object->set_posittion(x, y);
-    object->parent_chunk = this;
+
+    ItemLocation location;
+    location.type = LOCATION_CHUNK;
+    location.data.chunk.map_y = map_y;
+    location.data.chunk.map_x = map_x;
+    location.data.chunk.x = x;
+    location.data.chunk.y = y;
+    object->location = location;
+
+#ifndef FUNNY_STUFF_FOR_SDL
+    object->to_bytes();
+#endif
+
 }
+
+// move object to chunk from other location
+void chunk::move_object(InventoryElement* object, int x, int y)
+{
+    ItemLocation location;
+    location.type = LOCATION_CHUNK;
+    location.data.chunk.map_y = map_y;
+    location.data.chunk.map_x = map_x;
+    location.data.chunk.x = x;
+    location.data.chunk.y = y;
+    update_location(object, location);
+}
+
 
 void chunk::remove_object(InventoryElement* object)
 {
     objects.remove(object);
     beings.remove(object);
-    object->parent_chunk = nullptr;
 }
 
 InventoryElement* chunk::find_by_id(size_t id)
@@ -32,6 +55,6 @@ InventoryElement* chunk::find_by_id(size_t id)
     return nullptr;
 }
 
-chunk::chunk()
+chunk::chunk(int map_x, int map_y): map_x(map_x), map_y(map_y)
 {
 }

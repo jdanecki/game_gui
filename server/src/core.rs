@@ -2877,17 +2877,85 @@ impl BaseElement {
         __bindgen_tmp.assume_init()
     }
 }
+pub const ItemLocationType_LOCATION_CHUNK: ItemLocationType = 0;
+pub const ItemLocationType_LOCATION_PLAYER_INV: ItemLocationType = 1;
+pub type ItemLocationType = ::std::os::raw::c_uint;
 #[repr(C)]
-pub struct InventoryElement__bindgen_vtable(::std::os::raw::c_void);
+#[derive(Copy, Clone)]
+pub union ItemLocationData {
+    pub chunk: ItemLocationData__bindgen_ty_1,
+    pub player: ItemLocationData__bindgen_ty_2,
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct InventoryElement {
-    pub vtable_: *const InventoryElement__bindgen_vtable,
+pub struct ItemLocationData__bindgen_ty_1 {
+    pub map_x: ::std::os::raw::c_int,
+    pub map_y: ::std::os::raw::c_int,
     pub x: ::std::os::raw::c_int,
     pub y: ::std::os::raw::c_int,
     pub z: ::std::os::raw::c_int,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of ItemLocationData__bindgen_ty_1"]
+        [::std::mem::size_of::<ItemLocationData__bindgen_ty_1>() - 20usize];
+    ["Alignment of ItemLocationData__bindgen_ty_1"]
+        [::std::mem::align_of::<ItemLocationData__bindgen_ty_1>() - 4usize];
+    ["Offset of field: ItemLocationData__bindgen_ty_1::map_x"]
+        [::std::mem::offset_of!(ItemLocationData__bindgen_ty_1, map_x) - 0usize];
+    ["Offset of field: ItemLocationData__bindgen_ty_1::map_y"]
+        [::std::mem::offset_of!(ItemLocationData__bindgen_ty_1, map_y) - 4usize];
+    ["Offset of field: ItemLocationData__bindgen_ty_1::x"]
+        [::std::mem::offset_of!(ItemLocationData__bindgen_ty_1, x) - 8usize];
+    ["Offset of field: ItemLocationData__bindgen_ty_1::y"]
+        [::std::mem::offset_of!(ItemLocationData__bindgen_ty_1, y) - 12usize];
+    ["Offset of field: ItemLocationData__bindgen_ty_1::z"]
+        [::std::mem::offset_of!(ItemLocationData__bindgen_ty_1, z) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ItemLocationData__bindgen_ty_2 {
+    pub id: ::std::os::raw::c_int,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of ItemLocationData__bindgen_ty_2"]
+        [::std::mem::size_of::<ItemLocationData__bindgen_ty_2>() - 4usize];
+    ["Alignment of ItemLocationData__bindgen_ty_2"]
+        [::std::mem::align_of::<ItemLocationData__bindgen_ty_2>() - 4usize];
+    ["Offset of field: ItemLocationData__bindgen_ty_2::id"]
+        [::std::mem::offset_of!(ItemLocationData__bindgen_ty_2, id) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of ItemLocationData"][::std::mem::size_of::<ItemLocationData>() - 20usize];
+    ["Alignment of ItemLocationData"][::std::mem::align_of::<ItemLocationData>() - 4usize];
+    ["Offset of field: ItemLocationData::chunk"]
+        [::std::mem::offset_of!(ItemLocationData, chunk) - 0usize];
+    ["Offset of field: ItemLocationData::player"]
+        [::std::mem::offset_of!(ItemLocationData, player) - 0usize];
+};
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ItemLocation {
+    pub type_: ItemLocationType,
+    pub data: ItemLocationData,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of ItemLocation"][::std::mem::size_of::<ItemLocation>() - 24usize];
+    ["Alignment of ItemLocation"][::std::mem::align_of::<ItemLocation>() - 4usize];
+    ["Offset of field: ItemLocation::type_"][::std::mem::offset_of!(ItemLocation, type_) - 0usize];
+    ["Offset of field: ItemLocation::data"][::std::mem::offset_of!(ItemLocation, data) - 4usize];
+};
+#[repr(C)]
+pub struct InventoryElement__bindgen_vtable(::std::os::raw::c_void);
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct InventoryElement {
+    pub vtable_: *const InventoryElement__bindgen_vtable,
+    pub location: ItemLocation,
     pub uid: usize,
-    pub parent_chunk: *mut chunk,
     pub c_id: Class_id,
     pub req_form: Form,
     pub known: bool,
@@ -2896,13 +2964,10 @@ pub struct InventoryElement {
 const _: () = {
     ["Size of InventoryElement"][::std::mem::size_of::<InventoryElement>() - 56usize];
     ["Alignment of InventoryElement"][::std::mem::align_of::<InventoryElement>() - 8usize];
-    ["Offset of field: InventoryElement::x"][::std::mem::offset_of!(InventoryElement, x) - 8usize];
-    ["Offset of field: InventoryElement::y"][::std::mem::offset_of!(InventoryElement, y) - 12usize];
-    ["Offset of field: InventoryElement::z"][::std::mem::offset_of!(InventoryElement, z) - 16usize];
+    ["Offset of field: InventoryElement::location"]
+        [::std::mem::offset_of!(InventoryElement, location) - 8usize];
     ["Offset of field: InventoryElement::uid"]
-        [::std::mem::offset_of!(InventoryElement, uid) - 24usize];
-    ["Offset of field: InventoryElement::parent_chunk"]
-        [::std::mem::offset_of!(InventoryElement, parent_chunk) - 32usize];
+        [::std::mem::offset_of!(InventoryElement, uid) - 32usize];
     ["Offset of field: InventoryElement::c_id"]
         [::std::mem::offset_of!(InventoryElement, c_id) - 40usize];
     ["Offset of field: InventoryElement::req_form"]
@@ -2922,13 +2987,16 @@ extern "C" {
         this: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_uchar;
 }
+extern "C" {
+    pub fn update_location(el: *mut InventoryElement, location: ItemLocation);
+}
 pub const object_types_OBJECT_wall: object_types = 0;
 pub type object_types = ::std::os::raw::c_uint;
 extern "C" {
     pub static mut object_names: [*const ::std::os::raw::c_char; 0usize];
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Object {
     pub _base: InventoryElement,
     pub base: *mut BaseElement,
@@ -2944,7 +3012,7 @@ const _: () = {
     ["Offset of field: Object::information"][::std::mem::offset_of!(Object, information) - 72usize];
 };
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Element {
     pub _base: InventoryElement,
     pub base: *mut BaseElement,
@@ -2989,6 +3057,7 @@ pub const Ingredient_id_ING_AXE_BLADE: Ingredient_id = 0;
 pub const Ingredient_id_ING_AXE_HANDLE: Ingredient_id = 1;
 pub const Ingredient_id_ING_KNIFE_BLADE: Ingredient_id = 2;
 pub const Ingredient_id_ING_KNIFE_HANDLE: Ingredient_id = 3;
+pub const Ingredient_id_ING_NUM: Ingredient_id = 4;
 pub type Ingredient_id = ::std::os::raw::c_uint;
 pub const Product_id_PROD_AXE: Product_id = 0;
 pub const Product_id_PROD_KNIFE: Product_id = 1;
@@ -3006,7 +3075,7 @@ extern "C" {
     pub static mut food_name: [*const ::std::os::raw::c_char; 0usize];
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Ingredient {
     pub _base: InventoryElement,
     pub name: *const ::std::os::raw::c_char,
@@ -3054,7 +3123,7 @@ extern "C" {
     pub fn Ingredient_show(this: *mut ::std::os::raw::c_void, details: bool);
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Product {
     pub _base: InventoryElement,
     pub name: *const ::std::os::raw::c_char,
@@ -3148,7 +3217,7 @@ pub const plant_types_PLANTID_pumpkin: plant_types = 4;
 pub const plant_types_PLANTID_watermelon: plant_types = 5;
 pub type plant_types = ::std::os::raw::c_uint;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Being {
     pub _base: InventoryElement,
     pub name: *const ::std::os::raw::c_char,
@@ -3170,7 +3239,7 @@ const _: () = {
 pub const animal_types_ANIMALID_pig: animal_types = 0;
 pub type animal_types = ::std::os::raw::c_uint;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Animal {
     pub _base: Being,
     pub type_: animal_types,
@@ -3211,7 +3280,7 @@ extern "C" {
     pub static mut Plant_phase_name: [*const ::std::os::raw::c_char; 0usize];
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Plant {
     pub _base: Being,
     pub seedling_time: ::std::os::raw::c_uint,
@@ -3265,28 +3334,28 @@ extern "C" {
     pub fn show_base_elements(details: bool);
 }
 extern "C" {
-    #[link_name = "\u{1}_Z15craft_axe_bladeP6Player"]
-    pub fn craft_axe_blade(player: *mut Player) -> *mut InventoryElement;
+    #[link_name = "\u{1}_Z5craftiiPKmP6Player"]
+    pub fn craft(
+        product_id: ::std::os::raw::c_int,
+        ingredients_num: ::std::os::raw::c_int,
+        ingredients_ids: *const usize,
+        player: *mut Player,
+    );
 }
 extern "C" {
-    #[link_name = "\u{1}_Z16craft_axe_handleP6Player"]
-    pub fn craft_axe_handle(player: *mut Player) -> *mut InventoryElement;
+    #[link_name = "\u{1}_Z15craft_axe_bladeP16InventoryElement"]
+    pub fn craft_axe_blade(el: *mut InventoryElement) -> *mut InventoryElement;
 }
 extern "C" {
-    #[link_name = "\u{1}_Z9craft_axeP6Player"]
-    pub fn craft_axe(player: *mut Player) -> *mut InventoryElement;
+    #[link_name = "\u{1}_Z16craft_axe_handleP16InventoryElement"]
+    pub fn craft_axe_handle(el: *mut InventoryElement) -> *mut InventoryElement;
 }
 extern "C" {
-    #[link_name = "\u{1}_Z17craft_knife_bladeP6Player"]
-    pub fn craft_knife_blade(player: *mut Player) -> *mut InventoryElement;
-}
-extern "C" {
-    #[link_name = "\u{1}_Z18craft_knife_handleP6Player"]
-    pub fn craft_knife_handle(player: *mut Player) -> *mut InventoryElement;
-}
-extern "C" {
-    #[link_name = "\u{1}_Z11craft_knifeP6Player"]
-    pub fn craft_knife(player: *mut Player) -> *mut InventoryElement;
+    #[link_name = "\u{1}_Z9craft_axeP16InventoryElementS0_"]
+    pub fn craft_axe(
+        el1: *mut InventoryElement,
+        el2: *mut InventoryElement,
+    ) -> *mut InventoryElement;
 }
 extern "C" {
     #[link_name = "\u{1}_Z12print_statusPKcz"]
@@ -3626,6 +3695,7 @@ pub type direction = ::std::os::raw::c_int;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Player {
+    pub id: ::std::os::raw::c_int,
     pub map_y: ::std::os::raw::c_int,
     pub map_x: ::std::os::raw::c_int,
     pub y: ::std::os::raw::c_int,
@@ -3647,19 +3717,20 @@ pub struct Player {
 const _: () = {
     ["Size of Player"][::std::mem::size_of::<Player>() - 176usize];
     ["Alignment of Player"][::std::mem::align_of::<Player>() - 8usize];
-    ["Offset of field: Player::map_y"][::std::mem::offset_of!(Player, map_y) - 0usize];
-    ["Offset of field: Player::map_x"][::std::mem::offset_of!(Player, map_x) - 4usize];
-    ["Offset of field: Player::y"][::std::mem::offset_of!(Player, y) - 8usize];
-    ["Offset of field: Player::x"][::std::mem::offset_of!(Player, x) - 12usize];
-    ["Offset of field: Player::back_y"][::std::mem::offset_of!(Player, back_y) - 16usize];
-    ["Offset of field: Player::back_x"][::std::mem::offset_of!(Player, back_x) - 20usize];
-    ["Offset of field: Player::running"][::std::mem::offset_of!(Player, running) - 24usize];
-    ["Offset of field: Player::sneaking"][::std::mem::offset_of!(Player, sneaking) - 25usize];
-    ["Offset of field: Player::going_right"][::std::mem::offset_of!(Player, going_right) - 26usize];
-    ["Offset of field: Player::direction"][::std::mem::offset_of!(Player, direction) - 28usize];
-    ["Offset of field: Player::in_"][::std::mem::offset_of!(Player, in_) - 32usize];
-    ["Offset of field: Player::thirst"][::std::mem::offset_of!(Player, thirst) - 36usize];
-    ["Offset of field: Player::hunger"][::std::mem::offset_of!(Player, hunger) - 40usize];
+    ["Offset of field: Player::id"][::std::mem::offset_of!(Player, id) - 0usize];
+    ["Offset of field: Player::map_y"][::std::mem::offset_of!(Player, map_y) - 4usize];
+    ["Offset of field: Player::map_x"][::std::mem::offset_of!(Player, map_x) - 8usize];
+    ["Offset of field: Player::y"][::std::mem::offset_of!(Player, y) - 12usize];
+    ["Offset of field: Player::x"][::std::mem::offset_of!(Player, x) - 16usize];
+    ["Offset of field: Player::back_y"][::std::mem::offset_of!(Player, back_y) - 20usize];
+    ["Offset of field: Player::back_x"][::std::mem::offset_of!(Player, back_x) - 24usize];
+    ["Offset of field: Player::running"][::std::mem::offset_of!(Player, running) - 28usize];
+    ["Offset of field: Player::sneaking"][::std::mem::offset_of!(Player, sneaking) - 29usize];
+    ["Offset of field: Player::going_right"][::std::mem::offset_of!(Player, going_right) - 30usize];
+    ["Offset of field: Player::direction"][::std::mem::offset_of!(Player, direction) - 32usize];
+    ["Offset of field: Player::in_"][::std::mem::offset_of!(Player, in_) - 36usize];
+    ["Offset of field: Player::thirst"][::std::mem::offset_of!(Player, thirst) - 40usize];
+    ["Offset of field: Player::hunger"][::std::mem::offset_of!(Player, hunger) - 44usize];
     ["Offset of field: Player::inventory"][::std::mem::offset_of!(Player, inventory) - 48usize];
     ["Offset of field: Player::hotbar"][::std::mem::offset_of!(Player, hotbar) - 56usize];
     ["Offset of field: Player::craftbar"][::std::mem::offset_of!(Player, craftbar) - 136usize];
@@ -3673,8 +3744,24 @@ extern "C" {
     pub fn Player_pickup(this: *mut Player, item: *mut InventoryElement);
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN6PlayerC1Ev"]
-    pub fn Player_Player(this: *mut Player);
+    #[link_name = "\u{1}_ZN6Player4dropEP16InventoryElement"]
+    pub fn Player_drop(this: *mut Player, item: *mut InventoryElement);
+}
+extern "C" {
+    #[link_name = "\u{1}_ZN6Player15get_item_by_uidEm"]
+    pub fn Player_get_item_by_uid(this: *mut Player, id: usize) -> *mut InventoryElement;
+}
+extern "C" {
+    #[link_name = "\u{1}_ZN6Player18use_item_on_objectEP16InventoryElementS1_"]
+    pub fn Player_use_item_on_object(
+        this: *mut Player,
+        item: *mut InventoryElement,
+        object: *mut InventoryElement,
+    );
+}
+extern "C" {
+    #[link_name = "\u{1}_ZN6PlayerC1Ei"]
+    pub fn Player_Player(this: *mut Player, id: ::std::os::raw::c_int);
 }
 impl Player {
     #[inline]
@@ -3686,9 +3773,25 @@ impl Player {
         Player_pickup(self, item)
     }
     #[inline]
-    pub unsafe fn new() -> Self {
+    pub unsafe fn drop(&mut self, item: *mut InventoryElement) {
+        Player_drop(self, item)
+    }
+    #[inline]
+    pub unsafe fn get_item_by_uid(&mut self, id: usize) -> *mut InventoryElement {
+        Player_get_item_by_uid(self, id)
+    }
+    #[inline]
+    pub unsafe fn use_item_on_object(
+        &mut self,
+        item: *mut InventoryElement,
+        object: *mut InventoryElement,
+    ) {
+        Player_use_item_on_object(self, item, object)
+    }
+    #[inline]
+    pub unsafe fn new(id: ::std::os::raw::c_int) -> Self {
         let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-        Player_Player(__bindgen_tmp.as_mut_ptr());
+        Player_Player(__bindgen_tmp.as_mut_ptr(), id);
         __bindgen_tmp.assume_init()
     }
 }
@@ -3724,6 +3827,8 @@ pub type chunk_table = [[tile; 16usize]; 16usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct chunk {
+    pub map_x: ::std::os::raw::c_int,
+    pub map_y: ::std::os::raw::c_int,
     pub biome: biomes,
     pub table: chunk_table,
     pub objects: InvList,
@@ -3731,16 +3836,27 @@ pub struct chunk {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of chunk"][::std::mem::size_of::<chunk>() - 1112usize];
+    ["Size of chunk"][::std::mem::size_of::<chunk>() - 1120usize];
     ["Alignment of chunk"][::std::mem::align_of::<chunk>() - 8usize];
-    ["Offset of field: chunk::biome"][::std::mem::offset_of!(chunk, biome) - 0usize];
-    ["Offset of field: chunk::table"][::std::mem::offset_of!(chunk, table) - 4usize];
-    ["Offset of field: chunk::objects"][::std::mem::offset_of!(chunk, objects) - 1032usize];
-    ["Offset of field: chunk::beings"][::std::mem::offset_of!(chunk, beings) - 1072usize];
+    ["Offset of field: chunk::map_x"][::std::mem::offset_of!(chunk, map_x) - 0usize];
+    ["Offset of field: chunk::map_y"][::std::mem::offset_of!(chunk, map_y) - 4usize];
+    ["Offset of field: chunk::biome"][::std::mem::offset_of!(chunk, biome) - 8usize];
+    ["Offset of field: chunk::table"][::std::mem::offset_of!(chunk, table) - 12usize];
+    ["Offset of field: chunk::objects"][::std::mem::offset_of!(chunk, objects) - 1040usize];
+    ["Offset of field: chunk::beings"][::std::mem::offset_of!(chunk, beings) - 1080usize];
 };
 extern "C" {
     #[link_name = "\u{1}_ZN5chunk10add_objectEP16InventoryElementii"]
     pub fn chunk_add_object(
+        this: *mut chunk,
+        object: *mut InventoryElement,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    #[link_name = "\u{1}_ZN5chunk11move_objectEP16InventoryElementii"]
+    pub fn chunk_move_object(
         this: *mut chunk,
         object: *mut InventoryElement,
         x: ::std::os::raw::c_int,
@@ -3756,8 +3872,12 @@ extern "C" {
     pub fn chunk_find_by_id(this: *mut chunk, id: usize) -> *mut InventoryElement;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN5chunkC1Ev"]
-    pub fn chunk_chunk(this: *mut chunk);
+    #[link_name = "\u{1}_ZN5chunkC1Eii"]
+    pub fn chunk_chunk(
+        this: *mut chunk,
+        map_x: ::std::os::raw::c_int,
+        map_y: ::std::os::raw::c_int,
+    );
 }
 impl chunk {
     #[inline]
@@ -3770,6 +3890,15 @@ impl chunk {
         chunk_add_object(self, object, x, y)
     }
     #[inline]
+    pub unsafe fn move_object(
+        &mut self,
+        object: *mut InventoryElement,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+    ) {
+        chunk_move_object(self, object, x, y)
+    }
+    #[inline]
     pub unsafe fn remove_object(&mut self, object: *mut InventoryElement) {
         chunk_remove_object(self, object)
     }
@@ -3778,9 +3907,9 @@ impl chunk {
         chunk_find_by_id(self, id)
     }
     #[inline]
-    pub unsafe fn new() -> Self {
+    pub unsafe fn new(map_x: ::std::os::raw::c_int, map_y: ::std::os::raw::c_int) -> Self {
         let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-        chunk_chunk(__bindgen_tmp.as_mut_ptr());
+        chunk_chunk(__bindgen_tmp.as_mut_ptr(), map_x, map_y);
         __bindgen_tmp.assume_init()
     }
 }
@@ -4200,6 +4329,9 @@ extern "C" {
 }
 extern "C" {
     pub static mut objects_to_update_reliable: InvList;
+}
+extern "C" {
+    pub static mut objects_to_create: InvList;
 }
 pub const PacketType_PACKET_PLAYER_UPDATE: PacketType = 0;
 pub const PacketType_PACKET_PLAYER_ID: PacketType = 1;

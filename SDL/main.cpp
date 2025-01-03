@@ -340,8 +340,9 @@ void draw()
         InventoryElementSDL * o = dynamic_cast<InventoryElementSDL*>(el->el);
         if (o) 
         {
-            int x, y;
-            o->get_posittion(&x, &y);
+            int x = o->location.data.chunk.x;
+            int y = o->location.data.chunk.y;
+            //o->get_posittion(&x, &y);
             SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
         }
@@ -420,10 +421,9 @@ void draw()
 
 		if (player->hotbar[i])
         {
-            InventoryElement * item = player->hotbar[i];
-            // TODO render
-			//SDL_Texture *texture = item->get_texture();
-            //SDL_RenderCopy(renderer, texture, NULL, &rect);
+            InventoryElementSDL * item = dynamic_cast<InventoryElementSDL*>(player->hotbar[i]);
+			SDL_Texture *texture = item->get_texture();
+            SDL_RenderCopy(renderer, texture, NULL, &rect);
             if (i == active_hotbar) {
                 sprintf(text, "%s (%s)", item->get_form_name(), item->get_name() );
 	    	    write_text(tx + 3 , rect.y+50, text, Yellow, 10,20);

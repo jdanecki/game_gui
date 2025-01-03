@@ -8,6 +8,7 @@
 #include "alchemist/knife.h"
 #include "player.h"
 #include <cstdio>
+#include "networking.h"
 
 #include "engine_hooks.h"
 
@@ -16,7 +17,92 @@
 //extern int active_hotbar;
 int active_hotbar = 0;
 
-InventoryElement * craft_axe_blade(Player* player)
+void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, Player* player)
+{
+    InventoryElement* crafted = nullptr;
+    if (product_id < ING_NUM)
+    {
+        if (ingredients_num < 1)
+            return;
+
+        InventoryElement* el = player->get_item_by_uid(ingredients_ids[0]);
+        if (!el)
+        {
+            printf("craft from invalid element");
+            return;
+        }
+        player->inventory->remove(el);
+
+        switch (product_id)
+        {
+        case ING_AXE_BLADE:
+            crafted = craft_axe_blade(el);
+            break;
+        case ING_AXE_HANDLE:
+            crafted = craft_axe_handle(el);
+            break;
+        }
+    }
+    if (crafted)
+    {
+        player->pickup(crafted);
+    }
+}
+
+InventoryElement * craft_axe_blade(InventoryElement* el)
+{
+    if (el) {
+        print_status("crafting: axe blade from %s", el->get_name());
+    
+        AxeBlade * axe_blade=new AxeBlade(el);
+        if (axe_blade->craft()) {
+            axe_blade->show();
+
+            return axe_blade;
+        } else delete axe_blade;
+    }
+    return NULL;
+}
+
+InventoryElement * craft_axe_handle(InventoryElement* el)
+{
+    if (el) {
+        print_status("crafting: axe handle from %s", el->get_name());
+    
+        AxeHandle * axe_handle=new AxeHandle(el);
+        if (axe_handle->craft())
+        {
+            axe_handle->show();
+
+            return axe_handle;
+        } else delete axe_handle;
+    }
+    return NULL;
+}
+
+InventoryElement * craft_axe(InventoryElement* el1, InventoryElement* el2)
+{
+    if (el1 && el2) 
+    {
+        print_status("crafting: axe from %s and %s", el1->get_name(), el2->get_name());
+    
+        Axe * axe=new Axe(el1, el2);
+        if (axe->craft())
+        {
+            axe->show();
+            return axe;
+        } else delete axe;
+    }
+    return NULL;
+
+}
+
+//InventoryElement * craft_knife_blade(InventoryElement* el);
+//InventoryElement * craft_knife_handle(InventoryElement* el);
+//InventoryElement * craft_knife(InventoryElement* el1, InventoryElement* el2);
+
+
+/*InventoryElement * craft_axe_blade(Player* player)
 {
     InventoryElement * el = player->hotbar[active_hotbar];
     if (el) {
@@ -165,4 +251,4 @@ InventoryElement * craft_knife(Player* player)
         } else delete knife;
     }
     return NULL;
-}
+}*/

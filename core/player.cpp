@@ -3,6 +3,7 @@
 #include "time.h"
 #include "world.h"
 #include <stdlib.h>
+//#include "alchemist/el_list.h"
 
 void Player::check_and_move(int new_map_x, int new_map_y, int new_x, int new_y)
 {
@@ -42,9 +43,47 @@ void Player::move(int dx, int dy)
 void Player::pickup(InventoryElement* item)
 {
     inventory->add(item);
+
+    ItemLocation location;
+    location.type = LOCATION_PLAYER_INV;
+    location.data.player.id = id;
+
+    printf("chunk %d %d\n", item->location.data.chunk.map_x, item->location.data.chunk.map_y);
+    update_location(item, location);
+    printf("after update %d %d\n", item->location.type, item->location.data.player.id);
+
 }
 
-Player::Player()
+void Player::drop(InventoryElement* item)
+{
+    inventory->remove(item);
+}
+
+InventoryElement* Player::get_item_by_uid(size_t id)
+{
+    ListElement* cur = inventory->head;
+    while (cur)
+    {
+        if (cur->el->uid == id)
+            return cur->el;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+void Player::use_item_on_object(InventoryElement* item, InventoryElement* object)
+{
+#ifndef FUNNY_STUFF_FOR_SDL
+    Product* i = (Product*)item;
+#else
+    Product* i = dynamic_cast<Product*>(item);
+#endif
+
+    i->use(object);
+
+}
+
+Player::Player(int id): id(id)
 {
 	back_x=0;
 	back_y=0;

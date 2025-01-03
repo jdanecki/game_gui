@@ -21,6 +21,7 @@ enum class direction
 class Player
 {
 	void check_and_move(int new_map_x, int new_map_y, int new_x, int new_z);
+    int id;
 
 public:
     int map_y;
@@ -41,7 +42,11 @@ public:
     int craftbar[10];
 	void move(int x, int z);
     void pickup(InventoryElement* item);
-	Player();
+    void drop(InventoryElement* item);
+    InventoryElement* get_item_by_uid(size_t id);
+    void use_item_on_object(InventoryElement* item, InventoryElement* object);
+    int get_id() {return id;}
+	Player(int id);
 
 };
 

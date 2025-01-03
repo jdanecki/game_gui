@@ -90,13 +90,36 @@ class BaseElement
         void show(bool details=true);
 };        
 class Player;
+
+enum ItemLocationType 
+{
+    LOCATION_CHUNK,
+    LOCATION_PLAYER_INV,
+};
+
+union ItemLocationData
+{
+    struct {
+        int map_x, map_y, x, y, z;
+    } chunk;
+    struct {
+        int id;
+    } player;
+};
+
+class ItemLocation
+{
+public:
+    enum ItemLocationType type;
+    ItemLocationData data;
+};
 class chunk;
 class InventoryElement
 {
-	int x, y, z;
+	//int x, y, z;
     public:
+        ItemLocation location;
         size_t uid;
-        chunk* parent_chunk;
         Class_id c_id;
         Form req_form;
         bool known;
@@ -114,14 +137,16 @@ class InventoryElement
             printf("missing craft function\n");
             return false; 
         }
-        void set_posittion(int _x, int _y) { x=_x; y=_y; }
-        void get_posittion(int *_x, int *_y) { *_x=x; *_y=y; }
-        int get_x() {return x;}
-        int get_y() {return y;}
+        int get_x() {return location.data.chunk.x;}
+        int get_y() {return location.data.chunk.y;}
         size_t get_uid() {return uid;}
         virtual unsigned int get_packet_size();
         virtual unsigned char* to_bytes();
 };
+
+extern "C" {
+    void update_location(InventoryElement* el, ItemLocation location);
+}
 
 enum object_types
 {
@@ -191,6 +216,8 @@ enum Ingredient_id
 
     ING_KNIFE_BLADE,
     ING_KNIFE_HANDLE,
+
+    ING_NUM,
     
 };
 
@@ -258,6 +285,7 @@ class Product : public InventoryElement
        
         bool craft();
         virtual bool check_ing() { return false; }
+        virtual bool use(InventoryElement*) {return false;}
         void show(bool details=true);
 };
 

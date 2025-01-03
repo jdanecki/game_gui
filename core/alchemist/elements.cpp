@@ -179,20 +179,21 @@ unsigned char* InventoryElement::to_bytes()
     offset += sizeof(uid);
     memcpy(&bytes[offset], &c_id, sizeof(Class_id));
     offset += sizeof(Class_id);
-    memcpy(&bytes[offset], &x, sizeof(x));
-    offset += sizeof(x);
-    memcpy(&bytes[offset], &y, sizeof(y));
-    offset += sizeof(y);
-    memcpy(&bytes[offset], &z, sizeof(z));
-    offset += sizeof(z);
+    memcpy(&bytes[offset], &location.data.chunk.x, sizeof(location.data.chunk.x));
+    offset += sizeof(location.data.chunk.x);
+    memcpy(&bytes[offset], &location.data.chunk.y, sizeof(location.data.chunk.y));
+    offset += sizeof(location.data.chunk.y);
+    memcpy(&bytes[offset], &location.data.chunk.z, sizeof(location.data.chunk.z));
+    offset += sizeof(location.data.chunk.z);
 
-    printf("class %d - uid: %ld - %d %d", c_id, uid, x, y);
+    printf("class %d - uid: %ld - %d %d", c_id, uid, location.data.chunk.x, location.data.chunk.y);
     if (get_base())
     {
         memcpy(&bytes[offset], &get_base()->id, sizeof(int));
         offset += sizeof(int);
         printf(", id %d", get_base()->id);
     }
+    offset += sizeof(int);
     printf("\n");
     return bytes;
 }
@@ -362,9 +363,10 @@ Animal::Animal()
 void Animal::move()
 {
     // TODO: send info about movement for animations
-    int _x, _y;
+    int _x = location.data.chunk.x;
+    int _y =  location.data.chunk.y;
 
-    get_posittion(&_x, &_y);
+    //get_posittion(&_x, &_y);
 
     switch (rand() % 4)
     {
@@ -390,7 +392,9 @@ void Animal::move()
     if (_y < 0) _y=0;
     if (_x < 0) _x=0;
 
-    set_posittion(_x, _y);
+    //set_posittion(_x, _y);
+    location.data.chunk.x = 7;
+    location.data.chunk.y = 0;
 
     objects_to_update.add(this);
 }

@@ -2,3 +2,5 @@
 
 InvList objects_to_update;
 InvList objects_to_update_reliable;
+
+InvList object_to_create;

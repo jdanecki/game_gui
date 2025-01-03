@@ -6,6 +6,8 @@
 extern InvList objects_to_update;
 extern InvList objects_to_update_reliable;
 
+extern InvList objects_to_create;
+
 enum PacketType {
     PACKET_PLAYER_UPDATE = 0,
     PACKET_PLAYER_ID,

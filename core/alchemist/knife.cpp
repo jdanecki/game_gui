@@ -12,7 +12,7 @@ Knife::Knife(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PR
 
 bool Knife::use(int map_x, int map_y, int x, int y)
 {
-    for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
+    /*for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++) {
         Plant * p = NULL; //world_table[map_y][map_x]->plants[i];
         if (p)
         {
@@ -51,7 +51,7 @@ bool Knife::use(int map_x, int map_y, int x, int y)
                 a->alive=false;
         }
     }
-    return false;
+    return false;*/
 }
 
 bool Knife::check_ing()

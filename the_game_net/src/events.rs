@@ -5,4 +5,9 @@ extern "C" {
     pub fn update_inventory(data: *mut u8);
     pub fn update_objects(data: *mut u8);
     pub fn item_picked_up(iid: usize, pid: usize);
+    pub fn item_dropped(iid: usize, pid: usize);
+    pub fn item_used_on_object(iid: usize, oid: usize, pid: usize);
+    pub fn update_item_location(updates_number: i32, data: *mut u8);
+    pub fn create_objects_in_chunk(x: i32, y: i32, num: u32, data: *mut u8);
+    pub fn destroy_object(id: usize, data: *mut u8);
 }

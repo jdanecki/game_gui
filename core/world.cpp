@@ -84,6 +84,7 @@ void create_biome_plains(chunk * chunk)
     }
     if (/*rand() % 2*/1)
     {
+        /*
         for (int i = 0; i < 2; i++)
         {
             Animal *a = new Animal();
@@ -93,7 +94,7 @@ void create_biome_plains(chunk * chunk)
             a->type = ANIMALID_pig;
 
             chunk->add_object(a, x, y);
-        }
+        }*/
     }
 }
 
@@ -201,7 +202,7 @@ char load_chunk(int x, int y)
     {
         if (world_table[y][x] == NULL) 
         {
-            chunk* c = (chunk*) calloc(1, sizeof(chunk));
+            chunk* c = new chunk(x, y);
 //            printf("load %d %d\n", x, y);
             generate_chunk(c, x, y);
             world_table[y][x] = c;
