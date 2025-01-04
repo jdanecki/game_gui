@@ -9,6 +9,7 @@
 #include "player.h"
 #include <cstdio>
 #include "networking.h"
+#include "world.h"
 
 #include "engine_hooks.h"
 
@@ -45,7 +46,12 @@ void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, P
     }
     if (crafted)
     {
-        player->pickup(crafted);
+#ifndef FUNNY_STUFF_FOR_SDL
+        world_table[player->map_y][player->map_x]->add_object(crafted, player->x, player->y);
+        objects_to_create.add(crafted);
+#endif
+        printf("crafted\n");
+//        player->pickup(crafted);
     }
 }
 

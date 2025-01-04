@@ -6,7 +6,9 @@
 extern InvList objects_to_update;
 extern InvList objects_to_update_reliable;
 
+#ifndef FUNNY_STUFF_FOR_SDL
 extern InvList objects_to_create;
+#endif
 
 enum PacketType {
     PACKET_PLAYER_UPDATE = 0,

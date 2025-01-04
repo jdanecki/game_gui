@@ -287,7 +287,16 @@ fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], play
             }
         },
         ClientEvent::Craft { product_id, ingredients_num, ingredients_ids } => {
-            unsafe { core::craft(product_id as i32, ingredients_num as i32, ingredients_ids.as_ptr() as *const usize, player) };
+            unsafe { 
+                core::craft(product_id as i32, ingredients_num as i32, ingredients_ids.as_ptr() as *const usize, player);
+                let id = usize::from_le_bytes(ingredients_ids[0..8].try_into().unwrap());
+                let el = player.get_item_by_uid(id);
+                if !el.is_null() {
+                    destroy_object(server, (*el).uid, (*el).location);
+                } else {
+                    println!("invalid id {}", id); 
+                }
+            };
         }
         ClientEvent::Whatever => println!("whatever"),
     }
@@ -296,8 +305,16 @@ fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], play
 fn send_game_updates(server: &Server, players: &mut Vec<core::Player>) {
 
     update_players(server, players);
-    send_location_updates(server);
     unsafe {
+        let el = std::ptr::addr_of_mut!(core::objects_to_create);
+        let mut data = vec![common::PACKET_CREATE_OBJECTS_IN_CHUNK, 128 as u8, 128 as u8];
+        InvList_to_bytes(&mut data, el);
+        server.broadcast(&data);
+
+        while (*el).head != std::ptr::null_mut() {
+            (*el).remove((*(*el).head).el);
+        }
+
         let el = std::ptr::addr_of_mut!(core::objects_to_update);
         let mut data = vec![common::PACKET_OBJECTS_UPDATE];
         InvList_to_bytes(&mut data, el);
@@ -316,6 +333,7 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::Player>) {
             (*el).remove((*(*el).head).el);
         }
     }
+    send_location_updates(server);
 }
 
 fn send_location_updates(server: &Server) {
@@ -332,8 +350,7 @@ fn send_location_updates(server: &Server) {
     }
 }
 
-#[no_mangle]
-extern "C" fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
+fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
     let mut buf = vec![common::PACKET_DESTROY_OBJECT];
     buf.extend_from_slice(&id.to_le_bytes());
 

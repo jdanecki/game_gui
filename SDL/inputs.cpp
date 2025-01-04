@@ -147,8 +147,8 @@ void key_pressed(int key)
         case SDLK_0: active_hotbar=9; break;
     
 		case SDLK_q: put_element(); break;
-        case SDLK_u: send_packet_craft(client, 0, player->hotbar[active_hotbar]->uid);
-        case SDLK_j: send_packet_craft(client, 1, player->hotbar[active_hotbar]->uid);
+        case SDLK_u: send_packet_craft(client, 0, player->hotbar[active_hotbar]->uid);break;
+        case SDLK_j: send_packet_craft(client, 1, player->hotbar[active_hotbar]->uid);break;
 
 		case SDLK_BACKQUOTE: active_hotbar--; if (active_hotbar==-1) active_hotbar=9; break;
         case SDLK_TAB: active_hotbar++; if (active_hotbar==10) active_hotbar=0; break;
