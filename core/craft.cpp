@@ -20,6 +20,7 @@ int active_hotbar = 0;
 
 void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, Player* player)
 {
+    printf("id in craft %ld\n", ingredients_ids[0]);
     InventoryElement* crafted = nullptr;
     if (product_id < ING_NUM)
     {
@@ -32,7 +33,6 @@ void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, P
             printf("craft from invalid element");
             return;
         }
-        player->inventory->remove(el);
 
         switch (product_id)
         {
@@ -44,6 +44,25 @@ void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, P
             break;
         }
     }
+    else
+    {
+        if (ingredients_num != 2)
+            return;
+
+        InventoryElement* el1 = player->get_item_by_uid(ingredients_ids[0]);
+        InventoryElement* el2 = player->get_item_by_uid(ingredients_ids[1]);
+        if (!el1 || !el2)
+        {
+            printf("craft from invalid element");
+            return;
+        }
+        
+        switch (product_id)
+        {
+        case ING_NUM+PROD_AXE:
+            crafted = craft_axe(el1, el2);
+        }
+    }
     if (crafted)
     {
 #ifndef FUNNY_STUFF_FOR_SDL
@@ -52,6 +71,10 @@ void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, P
 #endif
         printf("crafted\n");
 //        player->pickup(crafted);
+    }
+    else
+    {
+        printf("failed to craft\n");
     }
 }
 

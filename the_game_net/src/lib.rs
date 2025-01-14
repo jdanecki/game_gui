@@ -185,10 +185,14 @@ pub extern "C" fn send_packet_item_used_on_object(client: &NetClient, iid: usize
 }
 
 #[no_mangle]
-pub extern "C" fn send_packet_craft(client: &NetClient, prod_id: usize, iid: usize) {
+pub extern "C" fn send_packet_craft(client: &NetClient, prod_id: usize, ingredients_num: usize, iid: *const usize) {
     let mut buf = vec![common::PACKET_PLAYER_ACTION_CRAFT];
     buf.extend_from_slice(&prod_id.to_le_bytes());
-    buf.extend_from_slice(&iid.to_le_bytes());
+    for i in 0..ingredients_num {
+        unsafe {
+            buf.extend_from_slice(&(*iid.add(i)).to_le_bytes());
+        }
+    }
     client.send(&buf);
 }
 

@@ -336,7 +336,6 @@ void draw()
     ListElement* el = c->objects.head;
     while (el)
     {
-#ifndef LOCAL_ONLY
         InventoryElementSDL * o = dynamic_cast<InventoryElementSDL*>(el->el);
         if (o) 
         {
@@ -346,14 +345,7 @@ void draw()
             SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
         }
-#else
-        InventoryElement* o = el->el;
-        int x, y;
-        o->get_posittion(&x, &y);
-        SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-        // TODO use proper texture not 0
-        SDL_RenderCopy(renderer, all_textures[o->c_id][0], NULL, &img_rect);
-#endif
+
         el = el->next;
     }
     }
@@ -426,7 +418,9 @@ void draw()
 			SDL_Texture *texture = item->get_texture();
             SDL_RenderCopy(renderer, texture, NULL, &rect);
             if (i == active_hotbar) {
-                sprintf(text, "%s (%s)", item->get_form_name(), item->get_name() );
+                //TODO
+                //sprintf(text, "%s (%s)", item->get_form_name(), item->get_name() );
+                sprintf(text, "%s", item->get_name() );
 	    	    write_text(tx + 3 , rect.y+50, text, Yellow, 10,20);
             }
 		}

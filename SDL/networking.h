@@ -57,7 +57,10 @@ void send_packet_drop(const NetClient *client, uintptr_t id);
 
 void send_packet_item_used_on_object(const NetClient *client, uintptr_t iid, uintptr_t oid);
 
-void send_packet_craft(const NetClient *client, uintptr_t prod_id, uintptr_t iid);
+void send_packet_craft(const NetClient *client,
+                       uintptr_t prod_id,
+                       uintptr_t ingredients_num,
+                       const uintptr_t *iid);
 
 extern void update_player(uintptr_t id, int32_t map_x, int32_t map_y, int32_t x, int32_t y);
 

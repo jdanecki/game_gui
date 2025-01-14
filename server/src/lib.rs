@@ -33,7 +33,7 @@ extern "C" fn update_location(item: *mut core::InventoryElement, location: core:
         println!("begin {} {}", (*item).location.type_, (*item).location.data.player.id);
         LOCATION_UPDATES.push(LocationUpdate{
             id: (*item).uid,
-            old: (*item).location,
+            old: (*item).location.clone(),
             new: location,
         });
         (*item).location = location;
@@ -290,11 +290,24 @@ fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], play
             unsafe { 
                 core::craft(product_id as i32, ingredients_num as i32, ingredients_ids.as_ptr() as *const usize, player);
                 let id = usize::from_le_bytes(ingredients_ids[0..8].try_into().unwrap());
-                let el = player.get_item_by_uid(id);
+                let el = player.get_item_by_uid(id);                
+                println!("id after CRAFT{:?}", el);
                 if !el.is_null() {
                     destroy_object(server, (*el).uid, (*el).location);
+                    player.drop(el);
                 } else {
                     println!("invalid id {}", id); 
+                }
+                if product_id > 4 {
+                    let id2 = usize::from_le_bytes(ingredients_ids[0..8].try_into().unwrap());
+                    let el2 = player.get_item_by_uid(id);
+                    player.drop(el2);
+                if !el2.is_null() {
+                    destroy_object(server, (*el2).uid, (*el2).location);
+                    player.drop(el2);
+                } else {
+                    println!("invalid id {}", id2); 
+                }
                 }
             };
         }

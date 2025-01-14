@@ -360,7 +360,10 @@ void destroy_object(uintptr_t id, uint8_t *data)
     }
 
     if (el)
+    {
+        printf("delete %ld\n", id);
         delete el;
+    }
     else
         printf("deleting inexisting item %ld\n", id);
 }
