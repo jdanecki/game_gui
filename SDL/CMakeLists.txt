@@ -25,6 +25,25 @@ add_executable(pime_SDL
     implementations/BeingSDL.cpp
 )
 
+include(ExternalProject)
+
+# Set default ExternalProject root directory
+set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/Rust)
+
+# Add rust_example as a CMake target
+ExternalProject_Add(
+    the_game_networking
+    DOWNLOAD_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND cargo build COMMAND cargo build --release
+    BINARY_DIR "${CMAKE_SOURCE_DIR}/../the_game_net/"
+    BUILD_ALWAYS 1
+    INSTALL_COMMAND ""
+    LOG_BUILD ON)
+
+# Create dependency of Example on rust_example
+add_dependencies(pime_SDL the_game_networking)
+
 target_link_directories(pime_SDL PRIVATE ${CMAKE_SOURCE_DIR}/../the_game_net/target/debug/)
 
 target_link_libraries(pime_SDL
