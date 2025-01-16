@@ -19,7 +19,7 @@ void chunk::add_object(InventoryElement* object, int x, int y)
     object->location = location;
 
 #ifndef FUNNY_STUFF_FOR_SDL
-    object->to_bytes();
+    //object->to_bytes();
 #endif
 
 }

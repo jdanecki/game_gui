@@ -4,21 +4,21 @@
 #include "../../core/alchemist/elements.h"
 #include "../texture.h"
 
-class InventoryElementSDL : virtual public InventoryElement
+class Renderable
 {
     public:
         virtual SDL_Texture * get_texture() {return NULL; }
 };
 
 
-class IngredientSDL : public Ingredient, public InventoryElementSDL
+class IngredientSDL : public Ingredient, public Renderable
 {
     public:
         SDL_Texture * get_texture();
         IngredientSDL(int id);
 };
 
-class ProductSDL : public Product, public InventoryElementSDL
+class ProductSDL : public Product, public Renderable
 {
     public:
         SDL_Texture * get_texture();
@@ -26,7 +26,7 @@ class ProductSDL : public Product, public InventoryElementSDL
 
 };
 
-class ObjectSDL : public Object, public InventoryElementSDL
+class ObjectSDL : public Object, public Renderable
 {
     public:
         SDL_Texture * get_texture();
@@ -34,7 +34,7 @@ class ObjectSDL : public Object, public InventoryElementSDL
 
 };
 
-class ElementSDL : public Element, public InventoryElementSDL
+class ElementSDL : public Element, public Renderable
 {
     public:
         SDL_Texture * get_texture();

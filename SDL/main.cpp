@@ -336,14 +336,19 @@ void draw()
     ListElement* el = c->objects.head;
     while (el)
     {
-        InventoryElementSDL * o = dynamic_cast<InventoryElementSDL*>(el->el);
-        if (o) 
+        InventoryElement * o = (el->el);
+        Renderable* r = dynamic_cast<Renderable*>(o);
+        if (o && r) 
         {
             int x = o->location.data.chunk.x;
             int y = o->location.data.chunk.y;
             //o->get_posittion(&x, &y);
             SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-            SDL_RenderCopy(renderer, o->get_texture(), NULL, &img_rect);
+            SDL_RenderCopy(renderer, r->get_texture(), NULL, &img_rect);
+        }
+        else
+        {
+            printf("unrenderable\n");
         }
 
         el = el->next;
@@ -414,8 +419,9 @@ void draw()
 
 		if (player->hotbar[i])
         {
-            InventoryElementSDL * item = dynamic_cast<InventoryElementSDL*>(player->hotbar[i]);
-			SDL_Texture *texture = item->get_texture();
+            InventoryElement* item = player->hotbar[i];
+            Renderable * r = dynamic_cast<Renderable*>(player->hotbar[i]);
+			SDL_Texture *texture = r->get_texture();
             SDL_RenderCopy(renderer, texture, NULL, &rect);
             if (i == active_hotbar) {
                 //TODO

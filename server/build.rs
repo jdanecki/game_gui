@@ -3,6 +3,7 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    println!("cargo:rerun-if-changed=../core");
     let dst = Config::new("../core").build_target("pime").build();
 
     println!("cargo:rustc-link-search=native={}/build/", dst.display());

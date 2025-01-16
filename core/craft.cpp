@@ -20,10 +20,11 @@ int active_hotbar = 0;
 
 void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, Player* player)
 {
-    printf("id in craft %ld\n", ingredients_ids[0]);
+    //printf("id in craft %ld\n", ingredients_ids[0]);
     InventoryElement* crafted = nullptr;
     if (product_id < ING_NUM)
     {
+        printf("crafting ingredient %d\n", product_id);
         if (ingredients_num < 1)
             return;
 
@@ -47,8 +48,12 @@ void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, P
     else
     {
         if (ingredients_num != 2)
+        {
+            printf("invalid num of ingredients %d\n", ingredients_num);
             return;
+        }
 
+        printf("crafting product %d", product_id);
         InventoryElement* el1 = player->get_item_by_uid(ingredients_ids[0]);
         InventoryElement* el2 = player->get_item_by_uid(ingredients_ids[1]);
         if (!el1 || !el2)
@@ -61,6 +66,7 @@ void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, P
         {
         case ING_NUM+PROD_AXE:
             crafted = craft_axe(el1, el2);
+            printf("crafted axe\n");
         }
     }
     if (crafted)

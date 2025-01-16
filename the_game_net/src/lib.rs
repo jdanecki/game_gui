@@ -133,7 +133,7 @@ pub extern "C" fn network_tick(client: &NetClient) {
                     events::create_objects_in_chunk(
                         i32::from(value[1]),
                         i32::from(value[2]),
-                        ((amt-3)/28) as u32,
+                        (amt-3) as u32,
                         &mut value[7] as *mut u8,
                     );
                 }
@@ -191,8 +191,10 @@ pub extern "C" fn send_packet_craft(client: &NetClient, prod_id: usize, ingredie
     for i in 0..ingredients_num {
         unsafe {
             buf.extend_from_slice(&(*iid.add(i)).to_le_bytes());
+            println!("extended");
         }
     }
+    println!("{:?}", buf);
     client.send(&buf);
 }
 

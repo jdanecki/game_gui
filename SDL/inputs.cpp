@@ -147,14 +147,14 @@ void key_pressed(int key)
         case SDLK_0: active_hotbar=9; break;
     
 		case SDLK_q: put_element(); break;
-        case SDLK_u: send_packet_craft(client, 0, 1, &player->hotbar[active_hotbar]->uid);player->hotbar[active_hotbar] = NULL; break;
-        case SDLK_j: send_packet_craft(client, 1, 1, &player->hotbar[active_hotbar]->uid);player->hotbar[active_hotbar] = NULL; break;
+        case SDLK_u: send_packet_craft(client, 0, 1, &player->hotbar[active_hotbar]->uid);/*player->hotbar[active_hotbar] = NULL;*/ break;
+        case SDLK_j: send_packet_craft(client, 1, 1, &player->hotbar[active_hotbar]->uid);/*player->hotbar[active_hotbar] = NULL;*/ break;
         case SDLK_k:
         {
             size_t ingredients[2] = {player->hotbar[active_hotbar]->uid, player->hotbar[active_hotbar+1]->uid};
             send_packet_craft(client, 4, 2, ingredients);
-            player->hotbar[active_hotbar] = NULL;
-            player->hotbar[active_hotbar+1] = NULL;
+            //player->hotbar[active_hotbar] = NULL;
+            //player->hotbar[active_hotbar+1] = NULL;
             break;
         }
 		case SDLK_BACKQUOTE: active_hotbar--; if (active_hotbar==-1) active_hotbar=9; break;

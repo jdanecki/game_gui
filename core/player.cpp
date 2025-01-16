@@ -48,9 +48,9 @@ void Player::pickup(InventoryElement* item)
     location.type = LOCATION_PLAYER_INV;
     location.data.player.id = id;
 
-    printf("chunk %d %d\n", item->location.data.chunk.map_x, item->location.data.chunk.map_y);
+    //printf("chunk %d %d\n", item->location.data.chunk.map_x, item->location.data.chunk.map_y);
     update_location(item, location);
-    printf("after update %d %d\n", item->location.type, item->location.data.player.id);
+    //printf("after update %d %d\n", item->location.type, item->location.data.player.id);
 
 }
 

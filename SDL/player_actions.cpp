@@ -13,7 +13,7 @@ void put_element()
     InventoryElement * el = player->hotbar[active_hotbar];
     if (el) {
         send_packet_drop(client, el->uid);
-        player->hotbar[active_hotbar] = NULL;
+        //player->hotbar[active_hotbar] = NULL;
         /*el->set_posittion(player.x, player.y);
         set_item_at_ppos(el, &player);
         player.inventory->remove(el);

@@ -28,7 +28,7 @@ InventoryElement* find_by_uid(size_t uid)
 
 
 
-InventoryElementSDL* el_from_data(unsigned char* data)
+InventoryElement* el_from_data(unsigned char* data)
 {
     int offset = 0;
 
@@ -38,53 +38,87 @@ InventoryElementSDL* el_from_data(unsigned char* data)
     Class_id c_id = (Class_id)data[offset];
     offset += sizeof(Class_id);
     
-    int ox = *((int*)&data[offset]);
+    /*int ox = *((int*)&data[offset]);
     offset += sizeof(int);
     
     int oy = data[offset];
     offset += sizeof(int);
     
     int oz = data[offset];
-    offset += sizeof(int);
-    
-    int id = data[offset];
-    offset += sizeof(int);
+    offset += sizeof(int);*/
+    ItemLocation* location = ((ItemLocation*)&data[offset]);
+    offset += sizeof(ItemLocation);
 
-    InventoryElementSDL* el = NULL;
+    int id = -1;
+
+    InventoryElement* el = NULL;
     switch (c_id)
     {
         case Class_Element:
+        {
+            offset += sizeof(unsigned int) * 7;
+            int id = data[offset];
+            offset += sizeof(int);
             el = new ElementSDL(id);
-            printf("element(1) %ld - %d,%d - %d\n", uid, ox, oy, id);
+            printf("element(1) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
             break;
+        }
         case Class_Ingredient:
+        {
+            offset += sizeof(unsigned int) * 3;
+            int id = data[offset];
+            offset += sizeof(int);
             el = new IngredientSDL(id);
-            printf("ingredient(2) %ld - %d,%d - %d\n", uid, ox, oy, id);
+            printf("ingredient(2) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
             break;
+        }
         case Class_Product:
+        {
+            offset += sizeof(unsigned int) * 3;
+            int id = data[offset];
+            offset += sizeof(int);
             el = new ProductSDL(id);
-            printf("product(3) %ld - %d,%d - %d\n", uid, ox, oy, id);
+            printf("product(3) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
             break;
+        }
         case Class_Plant:
             el = new PlantSDL();
-            printf("plant(4) %ld - %d,%d - %d\n", uid, ox, oy, id);
+            printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
             break;
         case Class_Animal:
             el = new AnimalSDL();
-            printf("animal(5) %ld - %d,%d - %d\n", uid, ox, oy, id);
+            printf("animal(5) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
             break;
         default:
-            printf("something(%d) %ld - %d,%d - %d\n", c_id, uid, ox, oy, id);
+            printf("something(%d) %ld - %d,%d - %d\n", c_id, uid, location->data.chunk.x, location->data.chunk.y, id);
             abort();
     }
     if (el)
     {
         el->uid = uid;
         //el->set_posittion(ox, oy);
-        el->location.data.chunk.x = ox;
-        el->location.data.chunk.y = oy;
+        //el->location.data.chunk.x = ox;
+        //el->location.data.chunk.y = oy;
+        el->location = *location;
     }
     return el;
+}
+
+void update_hotbar()
+{
+    for (int i = 0; i < 10; i++)
+        player->hotbar[i] = nullptr;
+    ListElement* le = player->inventory->head;
+    int i = 0;
+    while (le)
+    {
+        if (i >= 10)
+            break;
+        if (le->el)
+            player->hotbar[i] = le->el;
+        le = le->next;
+        i++;
+    }
 }
 
 extern "C" {
@@ -146,7 +180,8 @@ void got_id(uintptr_t id, int64_t seed)
 
 void update_inventory(uint8_t *data)
 {
-    int offset = 1;
+    printf("THAT HAPPENED\n");
+    /*int offset = 1;
     int item_num = *(int*)&data[offset];
     for (int i = 0; i < item_num; i++)
     {
@@ -161,7 +196,7 @@ void update_inventory(uint8_t *data)
         {
             printf("invalid item\n");
         }
-    }
+    }*/
 }
 
 void update_objects(uint8_t *data)
@@ -276,18 +311,22 @@ void update_item_location(int32_t updates_number, uint8_t *data)
         switch (old_location.type)
         {
             case LOCATION_CHUNK:
-                {
+            {
                 printf("removed %ld from chunk %d %d\n", id, old_location.data.chunk.map_x, old_location.data.chunk.map_y);
                 el = world_table[old_location.data.chunk.map_y][old_location.data.chunk.map_x]->find_by_id(id);
                 world_table[old_location.data.chunk.map_y][old_location.data.chunk.map_x]->remove_object(el);
                 break;
-                }
+            }
             case LOCATION_PLAYER_INV:
-                {
+            {
                 printf("removed %ld from player %d\n", id, old_location.data.player.id);
                 el = players[old_location.data.player.id]->get_item_by_uid(id);
                 players[old_location.data.player.id]->drop(el);
+                if (old_location.data.player.id == player->get_id())
+                {
+                    update_hotbar();
                 }
+            }
 
         }
         if (!el)
@@ -309,13 +348,7 @@ void update_item_location(int32_t updates_number, uint8_t *data)
                 players[new_location.data.player.id]->pickup(el);
                 if (new_location.data.player.id == player->get_id())
                 {
-                    for (int i = 0; i<10; i++) {
-                        if (!player->hotbar[i])
-                        {
-                            player->hotbar[i]=el;
-                            break;
-                        }
-                    }
+                    update_hotbar();
                 }
             }
         }
@@ -327,15 +360,19 @@ void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
 {
     if (world_table[y][x])
     {
+        int offset = 0;
         for (int i = 0; i < num; i++)
         {
-            InventoryElementSDL* el = el_from_data(&data[i*28]);
+            if (offset + 30 > num)
+                break;
+            InventoryElement* el = el_from_data(&data[offset]);
             if (el)
             {
                 int item_x = el->location.data.chunk.x;
                 int item_y = el->location.data.chunk.y;
                 //el->get_posittion(&item_x,&item_y);
                 world_table[y][x]->add_object(el, item_x, item_y);
+                offset += el->get_packet_size();
             }
         }
     } else {
@@ -356,6 +393,10 @@ void destroy_object(uintptr_t id, uint8_t *data)
         case LOCATION_PLAYER_INV:
             el = players[loc->data.player.id]->get_item_by_uid(id);
             players[loc->data.player.id]->drop(el);
+            if (loc->data.player.id == player->get_id())
+            {
+                update_hotbar();
+            }
             break;
     }
 

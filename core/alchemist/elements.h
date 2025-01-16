@@ -141,8 +141,11 @@ class InventoryElement
         int get_y() {return location.data.chunk.y;}
         size_t get_uid() {return uid;}
         virtual unsigned int get_packet_size();
-        virtual unsigned char* to_bytes();
+        virtual void to_bytes(unsigned char* buf);
 };
+
+void to_bytes_binding(InventoryElement* el, unsigned char* buf);
+unsigned int get_packet_size_binding(InventoryElement* el);
 
 extern "C" {
     void update_location(InventoryElement* el, ItemLocation location);
@@ -174,11 +177,7 @@ public:
     }
 };
 
-#ifdef FUNNY_STUFF_FOR_SDL
-class Element : virtual public InventoryElement
-#else
 class Element : public InventoryElement
-#endif       
 {
     BaseElement * base;
     public:
@@ -207,6 +206,8 @@ class Element : public InventoryElement
         }
         const char * get_form_name() { return Form_name[base->form]; }
         int get_id() {return base->id; }
+        unsigned int get_packet_size() override;
+        void to_bytes(unsigned char* buf) override;
 };
 
 enum Ingredient_id
@@ -232,11 +233,7 @@ extern const char * Product_name[];
 extern const char * items_name[];
 extern const char * food_name[];
 
-#ifdef FUNNY_STUFF_FOR_SDL
-class Ingredient : virtual public InventoryElement
-#else
 class Ingredient : public InventoryElement
-#endif
 {
     const char * name;
     public:
@@ -255,13 +252,11 @@ class Ingredient : public InventoryElement
         Edible * get_edible() {return el->get_edible();}
         Ingredient(InventoryElement * from, Ingredient_id i, Form f);
         void show(bool details=true);
+        unsigned int get_packet_size() override;
+        void to_bytes(unsigned char* buf) override;
 };
 
-#ifdef FUNNY_STUFF_FOR_SDL
-class Product : virtual public InventoryElement
-#else
 class Product : public InventoryElement
-#endif
 {
     const char * name;
     void init(Product_id i, int c, Form f);
@@ -287,6 +282,8 @@ class Product : public InventoryElement
         virtual bool check_ing() { return false; }
         virtual bool use(InventoryElement*) {return false;}
         void show(bool details=true);
+        unsigned int get_packet_size() override;
+        void to_bytes(unsigned char* buf) override;
 };
 
 enum being_types
@@ -305,11 +302,7 @@ enum plant_types
 
 #define PLANTS 6
 
-#ifdef FUNNY_STUFF_FOR_SDL
-class Being : virtual public InventoryElement
-#else
 class Being : public InventoryElement
-#endif
 {
     public:
         const char * name;

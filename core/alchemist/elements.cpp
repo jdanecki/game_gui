@@ -167,35 +167,33 @@ void BaseElement::show(bool details)
 unsigned int InventoryElement::get_packet_size()
 {
     //if (get_base())
-        return sizeof(size_t) + sizeof(int) * 4 + sizeof(Class_id);
+        return sizeof(size_t) + sizeof(Class_id) + sizeof(ItemLocation);
     //return sizeof(int)*4;
 }
 
-unsigned char* InventoryElement::to_bytes()
+void InventoryElement::to_bytes(unsigned char* buf)
 {
-    unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
+//    unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
     int offset = 0;
-    memcpy(&bytes[offset], &uid, sizeof(uid));
+    memcpy(&buf[offset], &uid, sizeof(uid));
     offset += sizeof(uid);
-    memcpy(&bytes[offset], &c_id, sizeof(Class_id));
+    memcpy(&buf[offset], &c_id, sizeof(Class_id));
     offset += sizeof(Class_id);
-    memcpy(&bytes[offset], &location.data.chunk.x, sizeof(location.data.chunk.x));
-    offset += sizeof(location.data.chunk.x);
-    memcpy(&bytes[offset], &location.data.chunk.y, sizeof(location.data.chunk.y));
-    offset += sizeof(location.data.chunk.y);
-    memcpy(&bytes[offset], &location.data.chunk.z, sizeof(location.data.chunk.z));
-    offset += sizeof(location.data.chunk.z);
 
-    printf("class %d - uid: %ld - %d %d", c_id, uid, location.data.chunk.x, location.data.chunk.y);
-    if (get_base())
-    {
-        memcpy(&bytes[offset], &get_base()->id, sizeof(int));
-        offset += sizeof(int);
-        printf(", id %d", get_base()->id);
-    }
-    offset += sizeof(int);
-    printf("\n");
-    return bytes;
+    memcpy(&buf[offset], &location, sizeof(location));
+    offset += sizeof(location);
+
+    printf("class %d - uid: %ld - %d %d\n", c_id, uid, location.data.chunk.x, location.data.chunk.y);
+}
+
+void to_bytes_binding(InventoryElement* el, unsigned char* buf)
+{
+    el->to_bytes(buf);
+}
+
+unsigned int get_packet_size_binding(InventoryElement* el)
+{
+    return el->get_packet_size();
 }
 
 Element::Element(BaseElement *b)
@@ -220,6 +218,37 @@ void Element::show(bool details)
     printf("smoothness = %u\n", smoothness); //gładkość
     printf("mass = %u: l=%u w=%u h=%u \n", mass, length, width, height);
     base->show(details);
+}
+
+unsigned int Element::get_packet_size()
+{
+    return InventoryElement::get_packet_size() + sizeof(unsigned int) * 7 + sizeof(int);
+}
+
+void Element::to_bytes(unsigned char* buf)
+{
+    InventoryElement::to_bytes(buf);
+    int offset = InventoryElement::get_packet_size();
+    //printf("packet size %d\n", offset);
+
+    memcpy(&buf[offset], &sharpness, sizeof(sharpness));
+    offset += sizeof(sharpness);
+    memcpy(&buf[offset], &smoothness, sizeof(smoothness));
+    offset += sizeof(smoothness);
+    memcpy(&buf[offset], &mass, sizeof(mass));
+    offset += sizeof(mass);
+    memcpy(&buf[offset], &length, sizeof(length));
+    offset += sizeof(length);
+    memcpy(&buf[offset], &width, sizeof(width));
+    offset += sizeof(width);
+    memcpy(&buf[offset], &height, sizeof(height));
+    offset += sizeof(height);
+    memcpy(&buf[offset], &volume, sizeof(volume));
+    offset += sizeof(volume);
+
+    memcpy(&buf[offset], &base->id, sizeof(base->id));
+    offset += sizeof(base->id);
+    printf("element %d\n", base->id);
 }
 
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
@@ -252,6 +281,27 @@ void Ingredient::show(bool details)
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
     el->show(details);
+}
+
+unsigned int Ingredient::get_packet_size()
+{
+    return InventoryElement::get_packet_size() + sizeof(Ingredient_id) + sizeof(int) * 3;
+}
+
+void Ingredient::to_bytes(unsigned char* buf)
+{
+    InventoryElement::to_bytes(buf);
+    int offset = InventoryElement::get_packet_size();
+
+    memcpy(&buf[offset], &quality, sizeof(quality));
+    offset += sizeof(quality);
+    memcpy(&buf[offset], &resilience, sizeof(resilience));
+    offset += sizeof(resilience);
+    memcpy(&buf[offset], &usage, sizeof(usage));
+    offset += sizeof(usage);
+
+    memcpy(&buf[offset], &id, sizeof(id));
+    offset += sizeof(id);
 }
         
 void Product::init(Product_id i, int c, Form f)
@@ -334,6 +384,28 @@ const char * Product::get_form_name()
 { 
     return Form_name[get_form()]; 
 }
+
+unsigned int Product::get_packet_size()
+{
+    return InventoryElement::get_packet_size() + sizeof(Product_id) + sizeof(int) * 3;
+}
+
+void Product::to_bytes(unsigned char* buf)
+{
+    InventoryElement::to_bytes(buf);
+    int offset = InventoryElement::get_packet_size();
+
+    memcpy(&buf[offset], &quality, sizeof(quality));
+    offset += sizeof(quality);
+    memcpy(&buf[offset], &resilience, sizeof(resilience));
+    offset += sizeof(resilience);
+    memcpy(&buf[offset], &usage, sizeof(usage));
+    offset += sizeof(usage);
+
+    memcpy(&buf[offset], &id, sizeof(id));
+    offset += sizeof(id);
+}
+
 void init_elements()
 {
     for (int i=0; i < BASE_ELEMENTS; i++)

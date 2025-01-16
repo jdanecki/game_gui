@@ -73,7 +73,7 @@ impl<'a> From<&'a [u8]> for ClientEvent<'a> {
             common::PACKET_PLAYER_ACTION_PICKUP => ClientEvent::Pickup{id: usize::from_le_bytes(value[1..9].try_into().unwrap())},
             common::PACKET_PLAYER_ACTION_DROP => ClientEvent::Drop{id: usize::from_le_bytes(value[1..9].try_into().unwrap())},
             common::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT => ClientEvent::ItemUsedOnObject{iid: usize::from_le_bytes(value[1..9].try_into().unwrap()), oid: usize::from_le_bytes(value[9..17].try_into().unwrap())},
-            common::PACKET_PLAYER_ACTION_CRAFT => ClientEvent::Craft{product_id: usize::from_le_bytes(value[1..9].try_into().unwrap()), ingredients_num: ((value.len()-1)/8) as u32, ingredients_ids: &value[9..]},
+            common::PACKET_PLAYER_ACTION_CRAFT => ClientEvent::Craft{product_id: usize::from_le_bytes(value[1..9].try_into().unwrap()), ingredients_num: 2/*((value.len()-1)/8)*/ as u32, ingredients_ids: &value[9..]},
             1 => ClientEvent::Whatever,
             _ => panic!("invalid event {:?}", value)
         }
@@ -153,13 +153,16 @@ fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
         data.extend_from_slice(&object_num.to_le_bytes());
         let mut cur = list.head;
         while cur != std::ptr::null_mut() {
-            let el = (*cur).el as *mut ::core::ffi::c_void;
-            let obj_ptr = core::InventoryElement_to_bytes(el);
+            let el = (*cur).el;
+            let size = core::get_packet_size_binding((*cur).el) as usize;
+            let mut buf = vec![0 as u8];
+            buf.resize(size, 0);
+            core::to_bytes_binding(el, buf.as_mut_ptr());
+            //println!("{:?}", buf);
             
-            let o = std::slice::from_raw_parts_mut(obj_ptr, core::InventoryElement_get_packet_size(el) as usize);
+            let o = std::slice::from_raw_parts(buf.as_ptr(), size);
             data.extend_from_slice(o);
             cur = (*cur).next;
-            core::free(obj_ptr as *mut ::core::ffi::c_void);
         }
     }
 }
@@ -246,7 +249,7 @@ fn handle_network(server: &mut Server, players: &mut Vec<core::Player>) {
     }
 }
 
-fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], player_id: usize) {
+fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], _player_id: usize) {
     let tag = ClientEvent::from(packet);
     match tag {
         ClientEvent::Move { x, y } => {
@@ -295,18 +298,18 @@ fn handle_packet(server: &Server, player: &mut core::Player, packet: &[u8], play
                 if !el.is_null() {
                     destroy_object(server, (*el).uid, (*el).location);
                     player.drop(el);
+                    println!("deleted {}", id);
                 } else {
                     println!("invalid id {}", id); 
                 }
-                if product_id > 4 {
-                    let id2 = usize::from_le_bytes(ingredients_ids[0..8].try_into().unwrap());
-                    let el2 = player.get_item_by_uid(id);
-                    player.drop(el2);
+                if product_id >= 4 {
+                    let id2 = usize::from_le_bytes(ingredients_ids[8..16].try_into().unwrap());
+                    let el2 = player.get_item_by_uid(id2);
                 if !el2.is_null() {
                     destroy_object(server, (*el2).uid, (*el2).location);
                     player.drop(el2);
                 } else {
-                    println!("invalid id {}", id2); 
+                    println!("invalid id2 {}", id2); 
                 }
                 }
             };
@@ -374,5 +377,6 @@ fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
         buf.extend_from_slice(slice);
     }
     server.broadcast(&buf);
+
 }
 

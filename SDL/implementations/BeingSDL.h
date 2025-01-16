@@ -5,23 +5,23 @@
 #include "alchemistSDL.h"
 #include "../texture.h"
 
-class BeingSDL : public Being
+class BeingSDL : public Being, public Renderable
 {
     public:
-        SDL_Texture * get_texture();
+        SDL_Texture * get_texture() override;
 };
 
-class PlantSDL : public Plant, public InventoryElementSDL
+class PlantSDL : public Plant, public Renderable
 {
     public:
-        SDL_Texture * get_texture();
+        SDL_Texture * get_texture() override;
 
 };
 
-class AnimalSDL : public Animal, public InventoryElementSDL
+class AnimalSDL : public Animal, public Renderable
 {
     public:
-        SDL_Texture * get_texture();
+        SDL_Texture * get_texture() override;
         bool going_right;
 };
 
