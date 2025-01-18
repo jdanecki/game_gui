@@ -1,8 +1,8 @@
 use std::error::Error;
 use std::net::UdpSocket;
 
-mod events;
 mod common;
+mod events;
 
 #[repr(C)]
 pub struct NetClient {
@@ -30,7 +30,10 @@ fn init_internal() -> Result<NetClient, Box<dyn Error>> {
     socket.recv(&mut buf)?;
     if buf[0] == common::PACKET_PLAYER_ID {
         unsafe {
-            events::got_id(usize::from_le_bytes(buf[1..9].try_into().unwrap()), i64::from_le_bytes(buf[9..17].try_into().unwrap()));
+            events::got_id(
+                usize::from_le_bytes(buf[1..9].try_into().unwrap()),
+                i64::from_le_bytes(buf[9..17].try_into().unwrap()),
+            );
         };
     } else {
         println!("did not get id");
@@ -38,10 +41,8 @@ fn init_internal() -> Result<NetClient, Box<dyn Error>> {
     }
 
     socket.set_nonblocking(true)?;
-    
-    Ok(NetClient {
-        socket,
-    })
+
+    Ok(NetClient { socket })
 }
 
 #[no_mangle]
@@ -53,106 +54,93 @@ pub extern "C" fn foo(a: &NetClient) {
 #[no_mangle]
 pub extern "C" fn network_tick(client: &NetClient) {
     let socket = &client.socket;
-    
-    let mut buf = [0;2048];
+
+    let mut buf = [0; 2048];
     loop {
-    if let Ok((amt, _src)) = socket.recv_from(&mut buf) {
-        //println!("{:?}", &buf);
-        let value = &mut buf;
-        //println!("{:?}", &value);
-        match value[0] {
-            common::PACKET_PLAYER_UPDATE => {
-                if amt == 25 {
-                    unsafe{
-                        events::update_player(
-                            usize::from_le_bytes(value[1..9].try_into().unwrap()), 
-                            i32::from_le_bytes(value[9..13].try_into().unwrap()),
-                            i32::from_le_bytes(value[13..17].try_into().unwrap()),
-                            i32::from_le_bytes(value[17..21].try_into().unwrap()),
-                            i32::from_le_bytes(value[21..25].try_into().unwrap()),
-                        );
+        if let Ok((amt, _src)) = socket.recv_from(&mut buf) {
+            //println!("{:?}", &buf);
+            let value = &mut buf;
+            //println!("{:?}", &value);
+            match value[0] {
+                common::PACKET_PLAYER_UPDATE => {
+                    if amt == 25 {
+                        unsafe {
+                            events::update_player(
+                                usize::from_le_bytes(value[1..9].try_into().unwrap()),
+                                i32::from_le_bytes(value[9..13].try_into().unwrap()),
+                                i32::from_le_bytes(value[13..17].try_into().unwrap()),
+                                i32::from_le_bytes(value[17..21].try_into().unwrap()),
+                                i32::from_le_bytes(value[21..25].try_into().unwrap()),
+                            );
+                        }
+                    } else {
+                        println!("invalid player update");
                     }
-                } else {
-                    println!("invalid player update");
                 }
-            },
-            common::PACKET_CHUNK_UPDATE => {
-                println!("chunk update {}", amt);
-                unsafe {
-                    events::update_chunk(
-                        //i32::from_le_bytes(value[1..5].try_into().unwrap()),
-                        //i32::from_le_bytes(value[5..9].try_into().unwrap()),
-                        i32::from(value[1]),
-                        i32::from(value[2]),
-                        &mut value[3] as *mut u8
-                    )
+                common::PACKET_CHUNK_UPDATE => {
+                    println!("chunk update {}", amt);
+                    unsafe {
+                        events::update_chunk(
+                            //i32::from_le_bytes(value[1..5].try_into().unwrap()),
+                            //i32::from_le_bytes(value[5..9].try_into().unwrap()),
+                            i32::from(value[1]),
+                            i32::from(value[2]),
+                            &mut value[3] as *mut u8,
+                        )
+                    }
                 }
-            },
-            common::PACKET_INVENTORY_UPDATE => {
-                unsafe {
+                common::PACKET_INVENTORY_UPDATE => unsafe {
                     events::update_inventory(value as *mut u8);
-                }
-            },
-            common::PACKET_OBJECTS_UPDATE => {
-                unsafe {
+                },
+                common::PACKET_OBJECTS_UPDATE => unsafe {
                     events::update_objects(value as *mut u8);
-                }
-            },
-            common::PACKET_PLAYER_ACTION_PICKUP => {
-                unsafe {
+                },
+                common::PACKET_PLAYER_ACTION_PICKUP => unsafe {
                     events::item_picked_up(
                         usize::from_le_bytes(value[1..9].try_into().unwrap()),
                         usize::from_le_bytes(value[9..17].try_into().unwrap()),
                     );
-                }
-            },
-            common::PACKET_PLAYER_ACTION_DROP => {
-                unsafe {
+                },
+                common::PACKET_PLAYER_ACTION_DROP => unsafe {
                     events::item_dropped(
                         usize::from_le_bytes(value[1..9].try_into().unwrap()),
                         usize::from_le_bytes(value[9..17].try_into().unwrap()),
                     );
-                }
-            },
-            common::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT => {
-                unsafe {
+                },
+                common::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT => unsafe {
                     events::item_used_on_object(
                         usize::from_le_bytes(value[1..9].try_into().unwrap()),
                         usize::from_le_bytes(value[9..17].try_into().unwrap()),
                         usize::from_le_bytes(value[17..25].try_into().unwrap()),
                     );
-                }
-            },
-            common::PACKET_LOCATION_UPDATES => {
-                unsafe {
-                    events::update_item_location(((amt-1)/56) as i32, &mut value[1] as *mut u8)
-                }
-            },
-            common::PACKET_CREATE_OBJECTS_IN_CHUNK => {
-                unsafe {
+                },
+                common::PACKET_LOCATION_UPDATES => unsafe {
+                    events::update_item_location(((amt - 1) / 56) as i32, &mut value[1] as *mut u8)
+                },
+                common::PACKET_CREATE_OBJECTS_IN_CHUNK => unsafe {
                     events::create_objects_in_chunk(
                         i32::from(value[1]),
                         i32::from(value[2]),
-                        (amt-3) as u32,
+                        (amt - 3) as u32,
                         &mut value[7] as *mut u8,
                     );
-                }
-            },
-            common::PACKET_DESTROY_OBJECT => {
-                unsafe {
+                },
+                common::PACKET_DESTROY_OBJECT => unsafe {
                     events::destroy_object(
                         usize::from_le_bytes(value[1..9].try_into().unwrap()),
                         &mut value[9] as *mut u8,
-                        );
+                    );
+                },
+                common::PACKET_FAILED_CRAFT => unsafe {
+                    events::failed_craft();
+                },
+                _ => {
+                    println!("invalid packet type {:?}", value);
                 }
             }
-            _ => {
-                println!("invalid packet type {:?}", value);
-            }
+        } else {
+            break;
         }
-    } else {
-        break;
-    }
     }
 }
 
@@ -178,14 +166,19 @@ pub extern "C" fn send_packet_drop(client: &NetClient, id: usize) {
 
 #[no_mangle]
 pub extern "C" fn send_packet_item_used_on_object(client: &NetClient, iid: usize, oid: usize) {
-    let mut buf = vec![common::PACKET_PLAYER_ACTION_DROP];
+    let mut buf = vec![common::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT];
     buf.extend_from_slice(&iid.to_le_bytes());
     buf.extend_from_slice(&oid.to_le_bytes());
     client.send(&buf);
 }
 
 #[no_mangle]
-pub extern "C" fn send_packet_craft(client: &NetClient, prod_id: usize, ingredients_num: usize, iid: *const usize) {
+pub extern "C" fn send_packet_craft(
+    client: &NetClient,
+    prod_id: usize,
+    ingredients_num: usize,
+    iid: *const usize,
+) {
     let mut buf = vec![common::PACKET_PLAYER_ACTION_CRAFT];
     buf.extend_from_slice(&prod_id.to_le_bytes());
     for i in 0..ingredients_num {

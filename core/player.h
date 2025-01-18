@@ -44,7 +44,7 @@ public:
     void pickup(InventoryElement* item);
     void drop(InventoryElement* item);
     InventoryElement* get_item_by_uid(size_t id);
-    void use_item_on_object(InventoryElement* item, InventoryElement* object);
+    bool use_item_on_object(InventoryElement* item, InventoryElement* object);
     int get_id() {return id;}
 	Player(int id);
 

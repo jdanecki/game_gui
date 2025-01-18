@@ -71,16 +71,12 @@ InventoryElement* Player::get_item_by_uid(size_t id)
     return NULL;
 }
 
-void Player::use_item_on_object(InventoryElement* item, InventoryElement* object)
+bool Player::use_item_on_object(InventoryElement* item, InventoryElement* object)
 {
-#ifndef FUNNY_STUFF_FOR_SDL
     Product* i = (Product*)item;
-#else
-    Product* i = dynamic_cast<Product*>(item);
-#endif
 
-    i->use(object);
-
+    printf("used %d on %ld", i->get_id(), object->uid);
+    return i->use(object);
 }
 
 Player::Player(int id): id(id)

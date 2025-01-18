@@ -41,6 +41,8 @@ constexpr static const PacketType PACKET_CREATE_OBJECTS_IN_CHUNK = 12;
 
 constexpr static const PacketType PACKET_DESTROY_OBJECT = 13;
 
+constexpr static const PacketType PACKET_FAILED_CRAFT = 14;
+
 extern "C" {
 
 const NetClient *init();
@@ -83,6 +85,8 @@ extern void update_item_location(int32_t updates_number, uint8_t *data);
 extern void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data);
 
 extern void destroy_object(uintptr_t id, uint8_t *data);
+
+extern void failed_craft();
 
 }  // extern "C"
 #endif

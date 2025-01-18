@@ -3,7 +3,7 @@
 
 #include "alchemist/elements.h"
 
-void craft(int product_id, int ingredients_num, const size_t* ingredients_ids, Player* player);
+bool craft(int product_id, int ingredients_num, const size_t* ingredients_ids, Player* player);
 
 InventoryElement * craft_axe_blade(InventoryElement* el);
 InventoryElement * craft_axe_handle(InventoryElement* el);

@@ -21,6 +21,7 @@ extern int auto_explore;
 
 int last_frame_press=0;
 Uint64 last_time = 0;
+extern void print_status(const char * format, ...);
 
 // TODO cleanup this
 void update_window_size()
@@ -319,6 +320,7 @@ Uint64 handle_keyboard_state(const Uint8 * keys)
     }
     if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
     {
+        print_status("");
         last_frame_press=1;
         return 0;
     }

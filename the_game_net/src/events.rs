@@ -10,4 +10,5 @@ extern "C" {
     pub fn update_item_location(updates_number: i32, data: *mut u8);
     pub fn create_objects_in_chunk(x: i32, y: i32, num: u32, data: *mut u8);
     pub fn destroy_object(id: usize, data: *mut u8);
+    pub fn failed_craft();
 }

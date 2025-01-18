@@ -30,6 +30,7 @@ void use_tile(int map_x, int map_y, int x, int y)
 
     if (Product* item = dynamic_cast<Product*>(player->hotbar[active_hotbar]))
     {
+        printf("used item on object\n");
         send_packet_item_used_on_object(client, item->uid, object->uid);
         return;
     }

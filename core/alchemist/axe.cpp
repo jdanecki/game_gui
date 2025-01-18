@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdio>
 #include "../player.h"
+#include "../networking.h"
 #include "../world.h"
 #include "elements.h"
 
@@ -22,47 +23,6 @@ Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_A
             p->get_posittion(&px, &py);
             if (x == px && y == py && p->grown)
             {
-                if (p->type == PLANTID_tree || p->type == PLANTID_tree1 || p->type == PLANTID_tree2)
-                {
-                    
-                    switch (p->type) {
-                        case PLANTID_tree:
-                        {
-                            Element * el = new Element(base_elements[ID_LOG]);
-                            el->set_posittion(x, y);
-                            set_item_at(el, map_x, map_y, x, y);
-                            Element * el_seed = new Element(base_elements[ID_ACORN]);
-                            el_seed->set_posittion(x, y);
-                            set_item_at(el_seed, map_x, map_y, x, y);
-                            break;
-                        }
-                        case PLANTID_tree1:
-                        {
-                            Element * el = new Element(base_elements[ID_LOG1]);
-                            el->set_posittion(x, y);
-                            set_item_at(el, map_x, map_y, x, y);
-                            Element * el_seed = new Element(base_elements[ID_ACORN1]);
-                            el_seed->set_posittion(x, y);
-                            set_item_at(el_seed, map_x, map_y, x, y);
-                            break;
-                        }
-                        case PLANTID_tree2:
-                        {
-                            Element * el = new Element(base_elements[ID_LOG2]);
-                            el->set_posittion(x, y);
-                            set_item_at(el, map_x, map_y, x, y);
-                            Element * el_seed = new Element(base_elements[ID_ACORN2]);
-                            el_seed->set_posittion(x, y);
-                            set_item_at(el_seed, map_x, map_y, x, y);
-                            break;
-                        }
-                    }
-                    free(p);
-                    p=NULL;
-                    //                    TODO
-                    //world_table[map_y][map_x]->plants[i]=NULL;
-                    return true;
-                }
                 // TODO    break when used too much
             }
         }
@@ -88,9 +48,49 @@ Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_A
     return false;
 }*/
 
-bool Axe::use(Plant* plant)
+bool Axe::use(InventoryElement* object)
 {
-    printf("use on plant\n");
+    Plant* p = dynamic_cast<Plant*>(object);
+    
+    if (p && (p->type == PLANTID_tree || p->type == PLANTID_tree1 || p->type == PLANTID_tree2))
+    {
+        Element* el = nullptr;
+        Element* el_seed = nullptr;
+        
+        switch (p->type) {
+            case PLANTID_tree:
+            {
+                el = new Element(base_elements[ID_LOG]);
+                el_seed = new Element(base_elements[ID_ACORN]);
+                break;
+            }
+            case PLANTID_tree1:
+            {
+                el = new Element(base_elements[ID_LOG1]);
+                el_seed = new Element(base_elements[ID_ACORN1]);
+                break;
+            }
+            case PLANTID_tree2:
+            {
+                el = new Element(base_elements[ID_LOG2]);
+                el_seed = new Element(base_elements[ID_ACORN2]);
+                break;
+            }
+        }
+        ItemLocation loc = p->location;
+        world_table[loc.data.chunk.map_y][loc.data.chunk.map_x]->add_object(el, loc.data.chunk.x, loc.data.chunk.y);
+        world_table[loc.data.chunk.map_y][loc.data.chunk.map_x]->add_object(el_seed, loc.data.chunk.x, loc.data.chunk.y);
+        objects_to_create.add(el);
+        objects_to_create.add(el_seed);
+
+        destroy(p);
+        p=NULL;
+        //                    TODO
+        //world_table[map_y][map_x]->plants[i]=NULL;
+        return true;
+    }
+
+    
     return true;
 }
 

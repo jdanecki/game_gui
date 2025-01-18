@@ -125,6 +125,7 @@ class InventoryElement
         bool known;
         InventoryElement() { req_form = Form_none; known = true; uid = (size_t)this;}
         virtual bool use(int map_x, int map_y, int x, int y) { return false; }
+        virtual bool use(InventoryElement* object) {return false;}
         virtual void show(bool details=true) { }
         virtual bool tick() { return false;}
         virtual Form get_form() {return Form_none; }
@@ -149,7 +150,10 @@ unsigned int get_packet_size_binding(InventoryElement* el);
 
 extern "C" {
     void update_location(InventoryElement* el, ItemLocation location);
+    void notify_destroy(size_t id, ItemLocation location);
 }
+
+void destroy(InventoryElement* el);
 
 enum object_types
 {
@@ -280,7 +284,6 @@ class Product : public InventoryElement
        
         bool craft();
         virtual bool check_ing() { return false; }
-        virtual bool use(InventoryElement*) {return false;}
         void show(bool details=true);
         unsigned int get_packet_size() override;
         void to_bytes(unsigned char* buf) override;

@@ -6,6 +6,7 @@
 #include "names.h"
 #include "../tiles.h"
 #include "../networking.h"
+#include "../world.h"
 
 BaseElement *base_elements[BASE_ELEMENTS];
 
@@ -302,6 +303,16 @@ void Ingredient::to_bytes(unsigned char* buf)
 
     memcpy(&buf[offset], &id, sizeof(id));
     offset += sizeof(id);
+}
+
+void destroy(InventoryElement* el)
+{
+    notify_destroy(el->get_uid(), el->location);
+    if (el->location.type == LOCATION_CHUNK)
+    {
+        world_table[el->location.data.chunk.map_y][el->location.data.chunk.map_x]->remove_object(el);
+    }
+    delete el;
 }
         
 void Product::init(Product_id i, int c, Form f)

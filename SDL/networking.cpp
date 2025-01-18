@@ -12,6 +12,7 @@
 #define PLAYER_NUM 16
 extern Player* players[PLAYER_NUM];
 extern Player* player;
+extern void print_status(const char* format, ...);
 
 
 InventoryElement* find_by_uid(size_t uid)
@@ -409,9 +410,17 @@ void destroy_object(uintptr_t id, uint8_t *data)
         printf("deleting inexisting item %ld\n", id);
 }
 
+void failed_craft()
+{
+    printf("failed craft\n");
+    print_status("failed craft");
+}
+
 void update_location(InventoryElement* el, ItemLocation location)
 {
 
 }
+
+void notify_destroy(size_t id, ItemLocation location) {}
 
 }
