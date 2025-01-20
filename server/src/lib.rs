@@ -35,7 +35,7 @@ extern "C" fn update_location(item: *mut core::InventoryElement, location: core:
             (*item).location.type_,
             (*item).location.data.player.id
         );
-        (*(&raw mut LOCATION_UPDATES)).push(LocationUpdate {
+        LOCATION_UPDATES.push(LocationUpdate {
             id: (*item).uid,
             old: (*item).location.clone(),
             new: location,
@@ -54,7 +54,7 @@ extern "C" fn update_location(item: *mut core::InventoryElement, location: core:
 #[no_mangle]
 extern "C" fn notify_destroy(id: usize, location: core::ItemLocation) {
     unsafe {
-        (*&raw mut DESTROY_ITEMS).push((id, location));
+        DESTROY_ITEMS.push((id, location));
     }
 }
 
@@ -457,22 +457,22 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::Player>) {
 
 fn send_location_updates(server: &Server) {
     unsafe {
-        if (*&raw const LOCATION_UPDATES).len() > 0 {
+        if LOCATION_UPDATES.len() > 0 {
             let mut data = vec![common::PACKET_LOCATION_UPDATES];
-            for update in (*&raw const LOCATION_UPDATES).iter() {
+            for update in LOCATION_UPDATES.iter() {
                 data.extend_from_slice(&update.to_le_bytes());
             }
             println!("{:?}", data);
             server.broadcast(&data);
-            (*&raw mut LOCATION_UPDATES).clear();
+            LOCATION_UPDATES.clear();
         }
     }
 }
 
 fn send_destroy_updates(server: &Server) {
     unsafe {
-        if (*&raw const DESTROY_ITEMS).len() > 0 {
-            for (id, location) in (*&raw mut DESTROY_ITEMS).iter() {
+        if DESTROY_ITEMS.len() > 0 {
+            for (id, location) in DESTROY_ITEMS.iter() {
                 let mut buf = vec![common::PACKET_DESTROY_OBJECT];
                 buf.extend_from_slice(&id.to_le_bytes());
 
@@ -482,7 +482,7 @@ fn send_destroy_updates(server: &Server) {
                 buf.extend_from_slice(slice);
                 server.broadcast(&buf);
             }
-            (*&raw mut DESTROY_ITEMS).clear();
+            DESTROY_ITEMS.clear();
         }
     }
 }

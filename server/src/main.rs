@@ -6,7 +6,7 @@ fn main() {
     if let Ok(mut server) = server {
         unsafe {
             SEED = core::time(std::ptr::null_mut());
-            println!("{}", *&raw const SEED);
+            println!("{}", SEED);
             core::srand(SEED as u32);
             core::init_elements();
             core::generator();
