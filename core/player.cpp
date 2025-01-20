@@ -4,6 +4,7 @@
 #include "world.h"
 #include <stdlib.h>
 //#include "alchemist/el_list.h"
+extern InvList objects_to_create;
 
 void Player::check_and_move(int new_map_x, int new_map_y, int new_x, int new_y)
 {
@@ -42,6 +43,8 @@ void Player::move(int dx, int dy)
 
 void Player::pickup(InventoryElement* item)
 {
+    // TODO
+    world_table[item->location.data.chunk.map_y][item->location.data.chunk.map_x]->remove_object(item);
     inventory->add(item);
 
     ItemLocation location;
@@ -77,6 +80,63 @@ bool Player::use_item_on_object(InventoryElement* item, InventoryElement* object
 
     printf("used %d on %ld", i->get_id(), object->uid);
     return i->use(object);
+}
+
+
+bool Player::plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
+{
+    if (get_tile_at_ppos(this) == TILE_GRASS || get_tile_at_ppos(this) == TILE_DIRT)
+    {
+        int id = el->get_id();
+        if (id == ID_ACORN || id == ID_ACORN1 || id == ID_ACORN2)
+        {
+            Plant* p = new Plant();
+            switch (id)
+            {
+                case ID_ACORN:
+                    p->type = PLANTID_tree;
+                    break;
+                case ID_ACORN1:
+                    p->type = PLANTID_tree1;
+                    break;
+                case ID_ACORN2:
+                    p->type = PLANTID_tree2;
+                    break;
+                case ID_PUMPKIN_SEEDS:
+                    p->type = PLANTID_pumpkin;
+                    break;
+                case ID_WATERMELON_SEEDS:
+                    p->type = PLANTID_watermelon;
+                    break;
+                case ID_STRAWBERRY_SEEDS:
+                    p->type = PLANTID_strawberry;
+                    break;
+                default:
+                    delete p;
+                    p = nullptr; 
+            }
+            if (!p)
+                return false;
+            ListElement* le = world_table[map_y][map_x]->objects.head;
+            while (le)
+            {
+                if (le->el->location.data.chunk.x == x && le->el->location.data.chunk.y == y)
+                    return false;
+                le = le->next;
+            }
+            world_table[map_y][map_x]->add_object(p, x, y);
+            objects_to_create.add(p);
+            
+            p->phase=Plant_seed;
+            p->grown=false;
+            p->age=1;
+
+            drop(el);
+            destroy(el);
+            return true;
+        }
+    }
+    return false;
 }
 
 Player::Player(int id): id(id)

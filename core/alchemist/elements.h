@@ -381,6 +381,8 @@ public:
     enum plant_types type;
     Plant_phase phase;
     Plant();
+    unsigned int get_packet_size() override;
+    void to_bytes(unsigned char * buf) override;
     void show(bool details=true) {
        printf("Plant -> %d name=%s age=%d/%d grown=%d\n", c_id, name, age, max_age, grown);
        if (details) {

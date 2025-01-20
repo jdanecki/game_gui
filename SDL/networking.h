@@ -43,6 +43,8 @@ constexpr static const PacketType PACKET_DESTROY_OBJECT = 13;
 
 constexpr static const PacketType PACKET_FAILED_CRAFT = 14;
 
+constexpr static const PacketType PACKET_PLAYER_ACTION_USE_ITEM_ON_TILE = 15;
+
 extern "C" {
 
 const NetClient *init();
@@ -50,19 +52,6 @@ const NetClient *init();
 void foo(const NetClient *a);
 
 void network_tick(const NetClient *client);
-
-void send_packet_move(const NetClient *client, int32_t x, int32_t y);
-
-void send_packet_pickup(const NetClient *client, uintptr_t id);
-
-void send_packet_drop(const NetClient *client, uintptr_t id);
-
-void send_packet_item_used_on_object(const NetClient *client, uintptr_t iid, uintptr_t oid);
-
-void send_packet_craft(const NetClient *client,
-                       uintptr_t prod_id,
-                       uintptr_t ingredients_num,
-                       const uintptr_t *iid);
 
 extern void update_player(uintptr_t id, int32_t map_x, int32_t map_y, int32_t x, int32_t y);
 
@@ -87,6 +76,26 @@ extern void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t 
 extern void destroy_object(uintptr_t id, uint8_t *data);
 
 extern void failed_craft();
+
+void send_packet_move(const NetClient *client, int32_t x, int32_t y);
+
+void send_packet_pickup(const NetClient *client, uintptr_t id);
+
+void send_packet_drop(const NetClient *client, uintptr_t id);
+
+void send_packet_item_used_on_object(const NetClient *client, uintptr_t iid, uintptr_t oid);
+
+void send_packet_item_used_on_tile(const NetClient *client,
+                                   uintptr_t iid,
+                                   int32_t map_x,
+                                   int32_t map_y,
+                                   int32_t x,
+                                   int32_t y);
+
+void send_packet_craft(const NetClient *client,
+                       uintptr_t prod_id,
+                       uintptr_t ingredients_num,
+                       const uintptr_t *iid);
 
 }  // extern "C"
 #endif

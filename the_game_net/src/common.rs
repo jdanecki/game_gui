@@ -13,5 +13,6 @@ pub const PACKET_LOCATION_UPDATES: PacketType = 11;
 pub const PACKET_CREATE_OBJECTS_IN_CHUNK: PacketType = 12;
 pub const PACKET_DESTROY_OBJECT: PacketType = 13;
 pub const PACKET_FAILED_CRAFT: PacketType = 14;
+pub const PACKET_PLAYER_ACTION_USE_ITEM_ON_TILE: PacketType = 15;
 
 pub type PacketType = u8;

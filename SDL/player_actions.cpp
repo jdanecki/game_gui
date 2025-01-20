@@ -26,7 +26,15 @@ void use_tile(int map_x, int map_y, int x, int y)
 {
     InventoryElement* object = get_item_at(map_x, map_y, x, y);
     if (!object)
+    {
+        if (InventoryElement* item = player->hotbar[active_hotbar])
+        {
+            send_packet_item_used_on_tile(client, item->uid, map_x, map_y, x, y);
+            printf("plant seed\n");
+        }
+        
         return;
+    }
 
     if (Product* item = dynamic_cast<Product*>(player->hotbar[active_hotbar]))
     {

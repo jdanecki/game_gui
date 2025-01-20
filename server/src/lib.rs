@@ -83,6 +83,13 @@ pub enum ClientEvent<'a> {
         ingredients_num: u32,
         ingredients_ids: &'a [u8],
     },
+    ItemUsedOnTile {
+        iid: usize,
+        map_x: i32,
+        map_y: i32,
+        x: i32,
+        y: i32,
+    },
     Whatever,
 }
 
@@ -120,6 +127,13 @@ impl<'a> From<&'a [u8]> for ClientEvent<'a> {
                 product_id: usize::from_le_bytes(value[1..9].try_into().unwrap()),
                 ingredients_num: 2/*((value.len()-1)/8)*/ as u32,
                 ingredients_ids: &value[9..],
+            },
+            common::PACKET_PLAYER_ACTION_USE_ITEM_ON_TILE => ClientEvent::ItemUsedOnTile {
+                iid: usize::from_le_bytes(value[1..9].try_into().unwrap()),
+                map_x: i32::from_le_bytes(value[9..13].try_into().unwrap()),
+                map_y: i32::from_le_bytes(value[13..17].try_into().unwrap()),
+                x: i32::from_le_bytes(value[17..21].try_into().unwrap()),
+                y: i32::from_le_bytes(value[21..25].try_into().unwrap()),
             },
             1 => ClientEvent::Whatever,
             _ => panic!("invalid event {:?}", value),
@@ -389,6 +403,20 @@ fn handle_packet(
                 }
             };
         }
+        ClientEvent::ItemUsedOnTile {
+            iid,
+            map_x,
+            map_y,
+            x,
+            y,
+        } => unsafe {
+            let item = player.get_item_by_uid(iid);
+            if player.plant_with_seed(item, map_x, map_y, x, y) {
+                println!("planted OK");
+            } else {
+                println!("failed to plant");
+            }
+        },
         ClientEvent::Whatever => println!("whatever"),
     }
 }

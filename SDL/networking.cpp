@@ -83,9 +83,18 @@ InventoryElement* el_from_data(unsigned char* data)
             break;
         }
         case Class_Plant:
-            el = new PlantSDL();
+        {
+            PlantSDL* p = new PlantSDL();
+            p->type = *((enum plant_types*)&data[offset]);
+            offset += sizeof(p->type);
+            p->phase = *((Plant_phase*)&data[offset]);
+            offset += sizeof(p->phase);
+            p->grown = *((bool*)&data[offset]);
+            offset += sizeof(p->grown);
+            el = p;
             printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
             break;
+        }
         case Class_Animal:
             el = new AnimalSDL();
             printf("animal(5) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
@@ -212,26 +221,39 @@ void update_objects(uint8_t *data)
         
         Class_id c_id = (Class_id)data[offset];
         offset += sizeof(Class_id);
-        
-        int ox = *((int*)&data[offset]);
-        offset += sizeof(int);
-        
-        int oy = data[offset];
-        offset += sizeof(int);
-        
-        int oz = data[offset];
-        offset += sizeof(int);
-        
-        int id = data[offset];
-        offset += sizeof(int);
 
+        ItemLocation* location = ((ItemLocation*)&data[offset]);
+        offset += sizeof(ItemLocation);
+        
         InventoryElement * el = find_by_uid(uid);
+        
         if (el && el->c_id == c_id)
         {
-            //el->set_posittion(ox, oy);
-            el->location.data.chunk.x = ox;
-            el->location.data.chunk.y = oy;
-            printf("%ld moved to %d %d\n", uid, ox, oy);
+            el->location = *location;
+            printf("%ld moved to %d %d\n", uid, el->location.data.chunk.x, el->location.data.chunk.y);
+
+            switch(c_id)
+            {
+                case Class_Element:
+                    {
+                        offset += sizeof(unsigned int) * 7 + sizeof(int);   
+                    }
+                    break;
+                case Class_Ingredient:
+                    offset += sizeof(unsigned int) * 3 + sizeof(int);
+                    break;
+                case Class_Product:
+                    offset += sizeof(unsigned int) *3 + sizeof(int);
+                    break;
+                case Class_Plant:
+                    Plant* p = dynamic_cast<Plant*>(el);
+                    offset += sizeof(p->type);
+                    p->phase = *((Plant_phase*)&data[offset]);
+                    offset += sizeof(p->phase);
+                    p->grown = *((bool*)&data[offset]);
+                    offset += sizeof(p->grown);
+                    break;
+            }
         }
         else
         {

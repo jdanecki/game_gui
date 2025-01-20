@@ -45,6 +45,7 @@ public:
     void drop(InventoryElement* item);
     InventoryElement* get_item_by_uid(size_t id);
     bool use_item_on_object(InventoryElement* item, InventoryElement* object);
+    bool plant_with_seed(InventoryElement* el, int map_x, int map_y, int x, int y);
     int get_id() {return id;}
 	Player(int id);
 

@@ -506,12 +506,64 @@ bool Plant::grow()
 {
     if (grown) return false;
     if (!water) return !grown;
-    water--;
+    //water--;
     age++;
-    if (age >= max_age) grown = true;
-    if (age >= max_age) { change_phase(Plant_fruits); return !grown; }
-    if (age >= flowers_time) { change_phase(Plant_flowers); return !grown; }
-    if (age >= growing_time) { change_phase(Plant_growing); return !grown; }
-    if (age >= seedling_time) { change_phase(Plant_seedling); return !grown; }
+    
+    if (age >= max_age) 
+    { 
+        if (phase != Plant_fruits)
+        {
+            grown = true; 
+            change_phase(Plant_fruits); 
+            objects_to_update.add(this); 
+        }
+            return !grown; 
+    }
+    if (age >= flowers_time)
+    {
+        if (phase != Plant_flowers)
+        {
+         change_phase(Plant_flowers); 
+         objects_to_update.add(this);  
+         }
+         return !grown; 
+    }
+    if (age >= growing_time)
+    {
+        if (phase != Plant_growing)
+        {
+         change_phase(Plant_growing); 
+         objects_to_update.add(this);  
+         }
+         return !grown; 
+    }
+    if (age >= seedling_time)
+    {
+        if (phase != Plant_seedling)
+        {
+         change_phase(Plant_seedling);
+          objects_to_update.add(this); 
+           }
+           return !grown;
+    }
     return !grown;
+}
+
+unsigned int Plant::get_packet_size()
+{
+    return InventoryElement::get_packet_size() + sizeof(type) + sizeof(phase) + sizeof(grown);
+}
+
+void Plant::to_bytes(unsigned char* buf)
+{
+    InventoryElement::to_bytes(buf);
+    int offset = InventoryElement::get_packet_size();
+
+    memcpy(&buf[offset], &type, sizeof(type));
+    offset += sizeof(type);
+    memcpy(&buf[offset], &phase, sizeof(phase));
+    offset += sizeof(phase);
+    memcpy(&buf[offset], &grown, sizeof(grown));
+    offset += sizeof(grown);
+
 }
