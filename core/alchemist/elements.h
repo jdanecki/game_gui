@@ -145,16 +145,6 @@ class InventoryElement
         virtual void to_bytes(unsigned char* buf);
 };
 
-void to_bytes_binding(InventoryElement* el, unsigned char* buf);
-unsigned int get_packet_size_binding(InventoryElement* el);
-
-extern "C" {
-    void update_location(InventoryElement* el, ItemLocation location);
-    void notify_destroy(size_t id, ItemLocation location);
-}
-
-void destroy(InventoryElement* el);
-
 enum object_types
 {
     OBJECT_wall,
@@ -348,12 +338,10 @@ class Animal : public Being
     public:
         enum animal_types type;
         Animal();
-        void move();
         void show(bool details=true) {
                printf("Animal %s age=%d/%d alive=%d\n", name, age, max_age, alive);
         }
         bool tick() {
-            move();
             return grow();
         }
 };
@@ -371,6 +359,7 @@ extern const char * Plant_phase_name[];
 
 class Plant: public Being
 {    
+protected:
     unsigned int seedling_time;
     unsigned int growing_time;
     unsigned int flowers_time;
@@ -400,7 +389,6 @@ public:
         }
         phase=p;
     }
-    bool grow();
 
 };
 

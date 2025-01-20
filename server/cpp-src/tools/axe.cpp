@@ -1,10 +1,8 @@
 #include "axe.h"
 #include <cstddef>
 #include <cstdio>
-#include "../player.h"
 #include "../networking.h"
-#include "../world.h"
-#include "elements.h"
+#include "../world_server.h"
 
 Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_AXE, Form_solid)
 {

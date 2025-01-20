@@ -49,7 +49,6 @@ class chunk {
     InvList objects;
     InvList beings;
     void add_object(InventoryElement* object, int x, int y);
-    void move_object(InventoryElement* object, int x, int y);
     void remove_object(InventoryElement* object);
     InventoryElement* find_by_id(size_t id);
     chunk(int map_x, int map_y);

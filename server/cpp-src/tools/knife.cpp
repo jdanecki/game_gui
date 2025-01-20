@@ -1,9 +1,7 @@
 #include "knife.h"
-#include "elements.h"
 #include <cstdio>
 #include <cstdlib>
-#include "../world.h"
-#include "../player.h"
+#include "../world_server.h"
 
 Knife::Knife(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_KNIFE, Form_solid)
 {
@@ -50,8 +48,8 @@ bool Knife::use(int map_x, int map_y, int x, int y)
             if (x == ax && y == ay)
                 a->alive=false;
         }
-    }
-    return false;*/
+    }*/
+    return false;
 }
 
 bool Knife::check_ing()

@@ -92,7 +92,7 @@ InventoryElement* el_from_data(unsigned char* data)
             p->grown = *((bool*)&data[offset]);
             offset += sizeof(p->grown);
             el = p;
-            printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
+            printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, p->type);
             break;
         }
         case Class_Animal:
@@ -437,12 +437,5 @@ void failed_craft()
     printf("failed craft\n");
     print_status("failed craft");
 }
-
-void update_location(InventoryElement* el, ItemLocation location)
-{
-
-}
-
-void notify_destroy(size_t id, ItemLocation location) {}
 
 }

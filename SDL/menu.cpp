@@ -4,10 +4,7 @@
 #include "window.h"
 #include "music.h"
 #include "../core/alchemist/elements.h"
-#include "../core/alchemist/axe.h"
-#include "../core/alchemist/knife.h"
 #include "../core/world.h"
-#include "../core/craft.h"
 #include "../core/player.h"
 #include <cstddef>
 #include <cstdio>

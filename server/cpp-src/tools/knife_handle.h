@@ -1,7 +1,7 @@
 #ifndef KNIFE_HANDLE_H
 #define KNIFE_HANDLE_H
 
-#include "elements.h"
+#include "../elements_server.h"
 
 class KnifeHandle : public Ingredient
 {

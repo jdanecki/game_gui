@@ -1,7 +1,7 @@
 #ifndef CRATFING_H
 #define CRATFING_H
 
-#include "alchemist/elements.h"
+#include "elements_server.h"
 
 bool craft(int product_id, int ingredients_num, const size_t* ingredients_ids, Player* player);
 

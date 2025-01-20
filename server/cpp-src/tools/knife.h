@@ -1,7 +1,7 @@
 #ifndef KNIFE_H
 #define KNIFE_H
 
-#include "elements.h"
+#include "../elements_server.h"
 
 class Knife : public Product
 {
