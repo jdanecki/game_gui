@@ -72,17 +72,17 @@ void create_biome_plains(chunk * chunk)
     }
     if (/*rand() % 2*/1)
     {
-        /*
+        
         for (int i = 0; i < 2; i++)
         {
-            Animal *a = new Animal();
+            Animal *a = new AnimalServer();
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
             a->type = ANIMALID_pig;
 
             chunk->add_object(a, x, y);
-        }*/
+        }
     }
 }
 
