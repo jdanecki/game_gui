@@ -2,8 +2,10 @@ use std::error::Error;
 use std::net::UdpSocket;
 
 mod common;
+mod core;
 mod events;
 mod send_packets;
+mod types;
 
 #[repr(C)]
 pub struct NetClient {
@@ -18,6 +20,9 @@ impl NetClient {
 
 #[no_mangle]
 pub extern "C" fn init() -> *const NetClient {
+    unsafe {
+        let a = core::Player::new(1);
+    }
     Box::into_raw(Box::new(init_internal().expect("failed to init NetClient")))
 }
 
@@ -46,11 +51,11 @@ fn init_internal() -> Result<NetClient, Box<dyn Error>> {
     Ok(NetClient { socket })
 }
 
-#[no_mangle]
-pub extern "C" fn foo(a: &NetClient) {
-    println!("{:?}", a.socket);
-    a.socket.send(&[1, 2, 3]).expect("foo");
-}
+// #[no_mangle]
+// pub extern "C" fn foo(a: &NetClient) {
+//     println!("{:?}", a.socket);
+//     a.socket.send(&[1, 2, 3]).expect("foo");
+// }
 
 #[no_mangle]
 pub extern "C" fn network_tick(client: &NetClient) {
@@ -80,14 +85,19 @@ pub extern "C" fn network_tick(client: &NetClient) {
                 }
                 common::PACKET_CHUNK_UPDATE => {
                     println!("chunk update {}", amt);
-                    unsafe {
-                        events::update_chunk(
-                            //i32::from_le_bytes(value[1..5].try_into().unwrap()),
-                            //i32::from_le_bytes(value[5..9].try_into().unwrap()),
-                            i32::from(value[1]),
-                            i32::from(value[2]),
-                            &mut value[3] as *mut u8,
-                        )
+                    if amt == size_of::<core::chunk_table>() + 3 {
+                        unsafe {
+                            println!("OK");
+                            events::update_chunk(
+                                //i32::from_le_bytes(value[1..5].try_into().unwrap()),
+                                //i32::from_le_bytes(value[5..9].try_into().unwrap()),
+                                i32::from(value[1]),
+                                i32::from(value[2]),
+                                &mut *(&mut value[3] as *mut u8 as *mut core::chunk_table),
+                            )
+                        }
+                    } else {
+                        println!("BAD");
                     }
                 }
                 common::PACKET_INVENTORY_UPDATE => unsafe {
@@ -119,11 +129,15 @@ pub extern "C" fn network_tick(client: &NetClient) {
                     events::update_item_location(((amt - 1) / 56) as i32, &mut value[1] as *mut u8)
                 },
                 common::PACKET_CREATE_OBJECTS_IN_CHUNK => unsafe {
-                    events::create_objects_in_chunk(
+                    // TODO more
+                    println!("value {:?}", &value[3..amt]);
+                    events::create_object_in_chunk(
                         i32::from(value[1]),
                         i32::from(value[2]),
-                        (amt - 3) as u32,
-                        &mut value[7] as *mut u8,
+                        //(amt - 3) as u32,
+                        //&mut value[7] as *mut u8,
+                        bincode::deserialize(&value[3..amt])
+                            .expect("Failed to create item from data"),
                     );
                 },
                 common::PACKET_DESTROY_OBJECT => unsafe {

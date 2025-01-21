@@ -3,6 +3,8 @@
 
 #include "tiles.h"
 
+class Player;
+
 extern char traversable_tiles[TILE_MAX_NUM];
 
 extern chunk * world_table[WORLD_SIZE][WORLD_SIZE];

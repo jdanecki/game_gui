@@ -6,9 +6,118 @@ class UdpSocket {};
 #include <cstdlib>
 #include <ostream>
 #include <new>
+#include "../core/world.h"
 
 struct NetClient {
   UdpSocket socket;
+};
+
+struct ItemLocationLol {
+  enum class Tag {
+    Chunk,
+    Player,
+  };
+
+  struct Chunk_Body {
+    int32_t x;
+    int32_t y;
+  };
+
+  struct Player_Body {
+    uintptr_t id;
+  };
+
+  Tag tag;
+  union {
+    Chunk_Body chunk;
+    Player_Body player;
+  };
+};
+
+struct InventoryElementData {
+  uintptr_t uid;
+  Class_id el_type;
+  ItemLocationLol location;
+};
+
+struct ElementData {
+  InventoryElementData base;
+  int32_t id;
+  uint32_t sharpness;
+  uint32_t smoothness;
+  uint32_t mass;
+  uint32_t length;
+  uint32_t width;
+  uint32_t height;
+  uint32_t volume;
+};
+
+struct IngredientData {
+  InventoryElementData base;
+  Ingredient_id id;
+  int32_t quality;
+  int32_t resilience;
+  int32_t usage;
+};
+
+struct ProductData {
+  InventoryElementData base;
+  Product_id id;
+  int32_t quality;
+  int32_t resilience;
+  int32_t usage;
+};
+
+struct PlantData {
+  InventoryElementData base;
+  plant_types id;
+  Plant_phase phase;
+  bool grown;
+};
+
+struct ObjectData {
+  enum class Tag {
+    InvElement,
+    Element,
+    Ingredient,
+    Product,
+    Plant,
+    Animal,
+  };
+
+  struct InvElement_Body {
+    InventoryElementData data;
+  };
+
+  struct Element_Body {
+    ElementData data;
+  };
+
+  struct Ingredient_Body {
+    IngredientData data;
+  };
+
+  struct Product_Body {
+    ProductData data;
+  };
+
+  struct Plant_Body {
+    PlantData data;
+  };
+
+  struct Animal_Body {
+    InventoryElementData data;
+  };
+
+  Tag tag;
+  union {
+    InvElement_Body inv_element;
+    Element_Body element;
+    Ingredient_Body ingredient;
+    Product_Body product;
+    Plant_Body plant;
+    Animal_Body animal;
+  };
 };
 
 using PacketType = uint8_t;
@@ -49,13 +158,11 @@ extern "C" {
 
 const NetClient *init();
 
-void foo(const NetClient *a);
-
 void network_tick(const NetClient *client);
 
 extern void update_player(uintptr_t id, int32_t map_x, int32_t map_y, int32_t x, int32_t y);
 
-extern void update_chunk(int32_t x, int32_t y, uint8_t *data);
+extern void update_chunk(int32_t x, int32_t y, const chunk_table *data);
 
 extern void got_id(uintptr_t id, int64_t seed);
 
@@ -71,7 +178,7 @@ extern void item_used_on_object(uintptr_t iid, uintptr_t oid, uintptr_t pid);
 
 extern void update_item_location(int32_t updates_number, uint8_t *data);
 
-extern void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data);
+extern void create_object_in_chunk(int32_t x, int32_t y, ObjectData data);
 
 extern void destroy_object(uintptr_t id, uint8_t *data);
 
@@ -96,6 +203,8 @@ void send_packet_craft(const NetClient *client,
                        uintptr_t prod_id,
                        uintptr_t ingredients_num,
                        const uintptr_t *iid);
+
+ObjectData foo();
 
 }  // extern "C"
 #endif

@@ -3,7 +3,7 @@
 
 #include "../../core/player.h"
 
-class PlayerServer : Player
+class PlayerServer : public Player
 {
 public:
 	  void check_and_move(int new_map_x, int new_map_y, int new_x, int new_z);

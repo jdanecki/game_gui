@@ -5,7 +5,6 @@
 #include "elements.h"
 #include "names.h"
 #include "../tiles.h"
-#include "../world.h"
 
 BaseElement *base_elements[BASE_ELEMENTS];
 
@@ -162,6 +161,11 @@ void BaseElement::show(bool details)
         default: break;
     }
     if (edible) edible->show();
+}
+
+int InventoryElement::get_id()
+{
+    return -1; 
 }
 
 unsigned int InventoryElement::get_packet_size()

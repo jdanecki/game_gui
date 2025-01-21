@@ -29,89 +29,128 @@ InventoryElement* find_by_uid(size_t uid)
 
 
 
-InventoryElement* el_from_data(unsigned char* data)
+// InventoryElement* el_from_data(unsigned char* data)
+// {
+//     int offset = 0;
+
+//     size_t uid = *(size_t*)&data[offset];
+//     offset += sizeof(size_t);
+    
+//     Class_id c_id = (Class_id)data[offset];
+//     offset += sizeof(Class_id);
+    
+//     /*int ox = *((int*)&data[offset]);
+//     offset += sizeof(int);
+    
+//     int oy = data[offset];
+//     offset += sizeof(int);
+    
+//     int oz = data[offset];
+//     offset += sizeof(int);*/
+//     ItemLocation* location = ((ItemLocation*)&data[offset]);
+//     offset += sizeof(ItemLocation);
+
+//     int id = -1;
+
+//     InventoryElement* el = NULL;
+//     switch (c_id)
+//     {
+//         case Class_Element:
+//         {
+//             offset += sizeof(unsigned int) * 7;
+//             int id = data[offset];
+//             offset += sizeof(int);
+//             el = new ElementSDL(id);
+//             printf("element(1) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
+//             break;
+//         }
+//         case Class_Ingredient:
+//         {
+//             offset += sizeof(unsigned int) * 3;
+//             int id = data[offset];
+//             offset += sizeof(int);
+//             el = new IngredientSDL(id);
+//             printf("ingredient(2) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
+//             break;
+//         }
+//         case Class_Product:
+//         {
+//             offset += sizeof(unsigned int) * 3;
+//             int id = data[offset];
+//             offset += sizeof(int);
+//             el = new ProductSDL(id);
+//             printf("product(3) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
+//             break;
+//         }
+//         case Class_Plant:
+//         {
+//             PlantSDL* p = new PlantSDL();
+//             p->type = *((enum plant_types*)&data[offset]);
+//             offset += sizeof(p->type);
+//             p->phase = *((Plant_phase*)&data[offset]);
+//             offset += sizeof(p->phase);
+//             p->grown = *((bool*)&data[offset]);
+//             offset += sizeof(p->grown);
+//             el = p;
+//             printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, p->type);
+//             break;
+//         }
+//         case Class_Animal:
+//             el = new AnimalSDL();
+//             printf("animal(5) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
+//             break;
+//         default:
+//             printf("something(%d) %ld - %d,%d - %d\n", c_id, uid, location->data.chunk.x, location->data.chunk.y, id);
+//             abort();
+//     }
+//     if (el)
+//     {
+//         el->uid = uid;
+//         //el->set_posittion(ox, oy);
+//         //el->location.data.chunk.x = ox;
+//         //el->location.data.chunk.y = oy;
+//         el->location = *location;
+//     }
+//     return el;
+// }
+
+InventoryElement* el_from_data(ObjectData data)
 {
-    int offset = 0;
-
-    size_t uid = *(size_t*)&data[offset];
-    offset += sizeof(size_t);
-    
-    Class_id c_id = (Class_id)data[offset];
-    offset += sizeof(Class_id);
-    
-    /*int ox = *((int*)&data[offset]);
-    offset += sizeof(int);
-    
-    int oy = data[offset];
-    offset += sizeof(int);
-    
-    int oz = data[offset];
-    offset += sizeof(int);*/
-    ItemLocation* location = ((ItemLocation*)&data[offset]);
-    offset += sizeof(ItemLocation);
-
-    int id = -1;
-
-    InventoryElement* el = NULL;
-    switch (c_id)
+    InventoryElement* el = nullptr;
+    switch (data.tag)
     {
-        case Class_Element:
-        {
-            offset += sizeof(unsigned int) * 7;
-            int id = data[offset];
-            offset += sizeof(int);
-            el = new ElementSDL(id);
-            printf("element(1) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-            break;
-        }
-        case Class_Ingredient:
-        {
-            offset += sizeof(unsigned int) * 3;
-            int id = data[offset];
-            offset += sizeof(int);
-            el = new IngredientSDL(id);
-            printf("ingredient(2) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-            break;
-        }
-        case Class_Product:
-        {
-            offset += sizeof(unsigned int) * 3;
-            int id = data[offset];
-            offset += sizeof(int);
-            el = new ProductSDL(id);
-            printf("product(3) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-            break;
-        }
-        case Class_Plant:
-        {
-            PlantSDL* p = new PlantSDL();
-            p->type = *((enum plant_types*)&data[offset]);
-            offset += sizeof(p->type);
-            p->phase = *((Plant_phase*)&data[offset]);
-            offset += sizeof(p->phase);
-            p->grown = *((bool*)&data[offset]);
-            offset += sizeof(p->grown);
-            el = p;
-            printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, p->type);
-            break;
-        }
-        case Class_Animal:
-            el = new AnimalSDL();
-            printf("animal(5) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-            break;
-        default:
-            printf("something(%d) %ld - %d,%d - %d\n", c_id, uid, location->data.chunk.x, location->data.chunk.y, id);
-            abort();
+    case ObjectData::Tag::InvElement:
+        break;
+    case ObjectData::Tag::Element:
+        el = new ElementSDL(data.element.data.id);
+        break;
+    case ObjectData::Tag::Ingredient:
+        el = new IngredientSDL(data.ingredient.data.id);
+        break;
+    case ObjectData::Tag::Product:
+        el = new ProductSDL(data.product.data.id);
+        break;
+    case ObjectData::Tag::Plant:
+    {
+        Plant* p = new PlantSDL();
+        p->type = data.plant.data.id;
+        p->grown = data.plant.data.grown;
+        el = p;
+        break;
+    }
+    case ObjectData::Tag::Animal:
+        el = new AnimalSDL();
+        break;
     }
     if (el)
     {
-        el->uid = uid;
-        //el->set_posittion(ox, oy);
-        //el->location.data.chunk.x = ox;
-        //el->location.data.chunk.y = oy;
-        el->location = *location;
+        el->uid = data.inv_element.data.uid;
+        el->location.type = LOCATION_CHUNK;//(ItemLocationType)data.inv_element.data.location.tag;
+        el->location.data.chunk.map_x = 128;
+        el->location.data.chunk.map_y = 128;
+        el->location.data.chunk.x = data.inv_element.data.location.chunk.x;
+        el->location.data.chunk.y = data.inv_element.data.location.chunk.y;
     }
-    return el;
 }
 
 void update_hotbar()
@@ -158,7 +197,7 @@ void update_player(uintptr_t id, int32_t map_x, int32_t map_y, int32_t x, int32_
     }
 }
 
-void update_chunk(int32_t x, int32_t y, uint8_t *data)
+void update_chunk(int32_t x, int32_t y, const chunk_table *data)
 {
     if (!world_table[y][x])
     {
@@ -379,16 +418,17 @@ void update_item_location(int32_t updates_number, uint8_t *data)
     }
 }
 
-void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
+//void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
+void create_object_in_chunk(int32_t x, int32_t y, ObjectData data)
 {
     if (world_table[y][x])
     {
         int offset = 0;
-        for (int i = 0; i < num; i++)
-        {
-            if (offset + 30 > num)
-                break;
-            InventoryElement* el = el_from_data(&data[offset]);
+        //for (int i = 0; i < num; i++)
+        //{
+          //  if (offset + 30 > num)
+            //    break;
+            InventoryElement* el = el_from_data(data);
             if (el)
             {
                 int item_x = el->location.data.chunk.x;
@@ -397,7 +437,7 @@ void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
                 world_table[y][x]->add_object(el, item_x, item_y);
                 offset += el->get_packet_size();
             }
-        }
+        //}
     } else {
         printf("inexisting chunk\n");
     }

@@ -3,7 +3,9 @@ use std::error::Error;
 use std::net::SocketAddr;
 use std::net::UdpSocket;
 
+mod convert_types;
 mod core;
+mod types;
 
 #[allow(dead_code)]
 pub struct LocationUpdate {
@@ -152,7 +154,7 @@ pub fn main_loop(server: &mut Server) {
         unsafe {
             core::update();
         }
-        send_game_updates(server, &mut players);
+        //send_game_updates(server, &mut players);
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
 }
@@ -268,18 +270,27 @@ fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8))
 }
 
 fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
-    let mut data = vec![core::PACKET_CREATE_OBJECTS_IN_CHUNK, coords.0, coords.1];
-
     let mut chunk;
     unsafe {
         chunk = *core::world_table[coords.1 as usize][coords.0 as usize];
-        if chunk.objects.size() <= 64 {
+
+        let mut le = chunk.objects.head;
+        while le != std::ptr::null_mut() {
+            let mut data = vec![core::PACKET_CREATE_OBJECTS_IN_CHUNK, coords.0, coords.1];
+            let obj = convert_types::convert_to_data(&*(*le).el);
+            let obj_data = &bincode::serialize(&obj).unwrap()[..];
+            println!("data {:?}", obj_data);
+            data.extend_from_slice(obj_data);
+
+            le = (*le).next;
+            server.socket.send_to(&data, peer).unwrap();
+        }
+        /*if chunk.objects.size() <= 64 {
             InvList_to_bytes(&mut data, &mut chunk.objects);
         } else {
             println!("TODO to much items in chunk");
-        }
+        }*/
     }
-    server.socket.send_to(&data, peer).unwrap();
 }
 
 fn handle_network(server: &mut Server, players: &mut Vec<core::PlayerServer>) {
