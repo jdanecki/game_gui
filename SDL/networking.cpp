@@ -151,6 +151,7 @@ InventoryElement* el_from_data(ObjectData data)
         el->location.data.chunk.x = data.inv_element.data.location.chunk.x;
         el->location.data.chunk.y = data.inv_element.data.location.chunk.y;
     }
+    return el;
 }
 
 void update_hotbar()
@@ -248,59 +249,36 @@ void update_inventory(uint8_t *data)
     }*/
 }
 
-void update_objects(uint8_t *data)
+void update_object(ObjectData data)
 {
-    int offset = 1;
-    int obj_num = *(int*)&data[offset];
-    offset += sizeof(int);
-    for (int i = 0; i < obj_num; i++)
+    size_t uid = data.inv_element.data.uid;
+    Class_id c_id = data.inv_element.data.el_type;
+        
+    InventoryElement * el = find_by_uid(data.inv_element.data.uid);
+        
+    if (el && el->c_id == c_id)
     {
-        size_t uid = *(size_t*)&data[offset];
-        offset += sizeof(size_t);
-        
-        Class_id c_id = (Class_id)data[offset];
-        offset += sizeof(Class_id);
-
-        ItemLocation* location = ((ItemLocation*)&data[offset]);
-        offset += sizeof(ItemLocation);
-        
-        InventoryElement * el = find_by_uid(uid);
-        
-        if (el && el->c_id == c_id)
+        switch(c_id)
         {
-            el->location = *location;
-            printf("%ld moved to %d %d\n", uid, el->location.data.chunk.x, el->location.data.chunk.y);
-
-            switch(c_id)
-            {
-                case Class_Element:
-                    {
-                        offset += sizeof(unsigned int) * 7 + sizeof(int);   
-                    }
-                    break;
-                case Class_Ingredient:
-                    offset += sizeof(unsigned int) * 3 + sizeof(int);
-                    break;
-                case Class_Product:
-                    offset += sizeof(unsigned int) *3 + sizeof(int);
-                    break;
-                case Class_Plant:
-                    Plant* p = dynamic_cast<Plant*>(el);
-                    offset += sizeof(p->type);
-                    p->phase = *((Plant_phase*)&data[offset]);
-                    offset += sizeof(p->phase);
-                    p->grown = *((bool*)&data[offset]);
-                    offset += sizeof(p->grown);
-                    break;
-            }
+            case Class_Element:
+                break;
+            case Class_Ingredient:
+                break;
+            case Class_Product:
+                break;
+            case Class_Plant:
+                Plant* p = dynamic_cast<Plant*>(el);
+                p->phase = data.plant.data.phase;
+                p->grown = data.plant.data.grown;
+                break;
         }
+    }
+    else
+    {
+        if (el)
+            printf("bad data for update object %ld %d real %d\n", uid, c_id, el->c_id);
         else
-        {
-            if (el)
-                printf("bad data for update object %ld %d real %d\n", uid, c_id, el->c_id);
-            else
-                printf("non existing object for update object %ld %d\n", uid, c_id);
-        }
+            printf("non existing object for update object %ld %d\n", uid, c_id);
     }
 }
 
@@ -362,6 +340,7 @@ void update_item_location(int32_t updates_number, uint8_t *data)
     int offset = 0;
     for (int i = 0; i < updates_number; i++)
     {
+        printf("LOL\n");
         size_t id = *((size_t*)&data[offset]);
         offset += sizeof(size_t);
         ItemLocation old_location = *((ItemLocation*)&data[offset]);

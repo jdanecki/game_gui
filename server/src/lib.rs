@@ -154,7 +154,7 @@ pub fn main_loop(server: &mut Server) {
         unsafe {
             core::update();
         }
-        //send_game_updates(server, &mut players);
+        send_game_updates(server, &mut players);
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
 }
@@ -276,7 +276,7 @@ fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords
 
         let mut le = chunk.objects.head;
         while le != std::ptr::null_mut() {
-            let mut data = vec![core::PACKET_CREATE_OBJECTS_IN_CHUNK, coords.0, coords.1];
+            let mut data = vec![core::PACKET_OBJECT_CREATE, coords.0, coords.1];
             let obj = convert_types::convert_to_data(&*(*le).el);
             let obj_data = &bincode::serialize(&obj).unwrap()[..];
             println!("data {:?}", obj_data);
@@ -435,29 +435,35 @@ fn handle_packet(
 fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
     update_players(server, players);
     unsafe {
-        let el = std::ptr::addr_of_mut!(core::objects_to_create);
-        let mut data = vec![core::PACKET_CREATE_OBJECTS_IN_CHUNK, 128 as u8, 128 as u8];
-        InvList_to_bytes(&mut data, el);
-        server.broadcast(&data);
+        let list = std::ptr::addr_of_mut!(core::objects_to_create);
+        let mut le = (*list).head;
+        while le != std::ptr::null_mut() {
+            let mut data = vec![core::PACKET_OBJECT_CREATE];
+            let obj = convert_types::convert_to_data(&*(*le).el);
+            let obj_data = &bincode::serialize(&obj).unwrap()[..];
+            println!("data {:?}", obj_data);
+            data.extend_from_slice(obj_data);
 
-        while (*el).head != std::ptr::null_mut() {
-            (*el).remove((*(*el).head).el);
+            le = (*le).next;
+            server.broadcast(&data);
+        }
+
+        while (*list).head != std::ptr::null_mut() {
+            (*list).remove((*(*list).head).el);
         }
 
         let el = std::ptr::addr_of_mut!(core::objects_to_update);
-        let mut data = vec![core::PACKET_OBJECTS_UPDATE];
-        InvList_to_bytes(&mut data, el);
-        server.broadcast(&data);
+        let mut le = (*el).head;
+        while le != std::ptr::null_mut() {
+            let mut data = vec![core::PACKET_OBJECT_UPDATE];
+            let obj = convert_types::convert_to_data(&*(*le).el);
+            let obj_data = &bincode::serialize(&obj).unwrap()[..];
+            println!("data {:?}", obj_data);
+            data.extend_from_slice(obj_data);
 
-        while (*el).head != std::ptr::null_mut() {
-            (*el).remove((*(*el).head).el);
+            le = (*le).next;
+            server.broadcast(&data);
         }
-
-        let el = std::ptr::addr_of_mut!(core::objects_to_update_reliable);
-        let mut data = vec![core::PACKET_OBJECTS_UPDATE];
-        InvList_to_bytes(&mut data, el);
-        server.broadcast(&data);
-
         while (*el).head != std::ptr::null_mut() {
             (*el).remove((*(*el).head).el);
         }
@@ -469,7 +475,7 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
 fn send_location_updates(server: &Server) {
     unsafe {
         if LOCATION_UPDATES.len() > 0 {
-            let mut data = vec![core::PACKET_LOCATION_UPDATES];
+            let mut data = vec![core::PACKET_LOCATION_UPDATE];
             for update in LOCATION_UPDATES.iter() {
                 data.extend_from_slice(&update.to_le_bytes());
             }
@@ -484,7 +490,7 @@ fn send_destroy_updates(server: &Server) {
     unsafe {
         if DESTROY_ITEMS.len() > 0 {
             for (id, location) in DESTROY_ITEMS.iter() {
-                let mut buf = vec![core::PACKET_DESTROY_OBJECT];
+                let mut buf = vec![core::PACKET_OBJECT_DESTROY];
                 buf.extend_from_slice(&id.to_le_bytes());
 
                 let data = location as *const core::ItemLocation;
@@ -499,7 +505,7 @@ fn send_destroy_updates(server: &Server) {
 }
 
 fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
-    let mut buf = vec![core::PACKET_DESTROY_OBJECT];
+    let mut buf = vec![core::PACKET_OBJECT_DESTROY];
     buf.extend_from_slice(&id.to_le_bytes());
 
     let data = &location as *const core::ItemLocation;

@@ -15,7 +15,7 @@ constexpr static const PacketType PACKET_CHUNK_UPDATE = 4;
 
 constexpr static const PacketType PACKET_INVENTORY_UPDATE = 5;
 
-constexpr static const PacketType PACKET_OBJECTS_UPDATE = 6;
+constexpr static const PacketType PACKET_OBJECT_UPDATE = 6;
 
 constexpr static const PacketType PACKET_PLAYER_ACTION_PICKUP = 7;
 
@@ -25,11 +25,11 @@ constexpr static const PacketType PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT = 9;
 
 constexpr static const PacketType PACKET_PLAYER_ACTION_CRAFT = 10;
 
-constexpr static const PacketType PACKET_LOCATION_UPDATES = 11;
+constexpr static const PacketType PACKET_LOCATION_UPDATE = 11;
 
-constexpr static const PacketType PACKET_CREATE_OBJECTS_IN_CHUNK = 12;
+constexpr static const PacketType PACKET_OBJECT_CREATE = 12;
 
-constexpr static const PacketType PACKET_DESTROY_OBJECT = 13;
+constexpr static const PacketType PACKET_OBJECT_DESTROY = 13;
 
 constexpr static const PacketType PACKET_FAILED_CRAFT = 14;
 

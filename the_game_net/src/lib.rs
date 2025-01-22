@@ -104,7 +104,9 @@ pub extern "C" fn network_tick(client: &NetClient) {
                     events::update_inventory(value as *mut u8);
                 },
                 common::PACKET_OBJECTS_UPDATE => unsafe {
-                    events::update_objects(value as *mut u8);
+                    events::update_object(
+                        bincode::deserialize(&value[1..amt]).expect("bad object update"),
+                    );
                 },
                 common::PACKET_PLAYER_ACTION_PICKUP => unsafe {
                     events::item_picked_up(
