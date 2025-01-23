@@ -6,5 +6,6 @@ serv:
 client:
 	cd SDL; cmake -Bbuild
 	cd SDL; cmake --build ./build
-
+tui:
+	@make -C core/alchemist-tui/
 	
