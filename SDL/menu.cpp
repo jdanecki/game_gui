@@ -181,12 +181,10 @@ void Menu::show()
   	    //text_x+=menu_opt_size;
       } 
       if (options >= 10)
-      {
         text_y = mody+(i-menu_pos+options/2) * menu_opt_size;
 
   		write_text(text_x, text_y, entries[i], White, game_size/27, menu_opt_size);
-      }
-    }
+  }
 }
 
 void create_menus()
@@ -392,17 +390,17 @@ int craft(menu_actions a)
 {
     InventoryElement * el=NULL;
     sprintf(status_line, "Starting crafting");
+    // TODO fix that
+    /*
     switch(a) { 
-        // TODO fix that
-        /*case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
+        case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
         case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
         case MENU_CRAFT_KNIFE: el = craft_knife(); break;
 
         case MENU_CRAFT_AXE_BLADE: el = craft_axe_blade(); break;
         case MENU_CRAFT_AXE_HANDLE: el = craft_axe_handle(); break;
-        case MENU_CRAFT_AXE: el = craft_axe(); break;*/
-
-    }
+        case MENU_CRAFT_AXE: el = craft_axe(); break;
+    }*/
     if (el) {
         //set_item_at_ppos(el, &player);
         status_code = 1;
