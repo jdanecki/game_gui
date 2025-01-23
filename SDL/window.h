@@ -1,11 +1,9 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#ifndef STUB_SDL
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-#endif
 
 extern SDL_Renderer *renderer;
 extern SDL_Window *main_window;

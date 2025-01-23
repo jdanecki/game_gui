@@ -1,6 +1,16 @@
+ALCHEMIST=../alchemist/elements.cpp ../alchemist/el_list.cpp ../alchemist/names.cpp ../alchemist/game_time.cpp
+TOOLS=../../server/cpp-src/tools/axe.cpp ../../server/cpp-src/tools/axe_blade.cpp ../../server/cpp-src/tools/axe_handle.cpp \
+	  ../../server/cpp-src/tools/knife.cpp ../../server/cpp-src/tools/knife_blade.cpp ../../server/cpp-src/tools/knife_handle.cpp
+CORE=../world.cpp ../tiles.cpp
+SERVER=../../server/cpp-src/networking.cpp ../../server/cpp-src/elements_server.cpp
+
 all:
-	cd ../alchemist ; g++ -DSTUB_SDL=1 -Wall -g -o ../alchemist-tui/alchemist -I. elements.cpp ../alchemist-tui/main.cpp names.cpp axe.cpp axe_blade.cpp axe_handle.cpp el_list.cpp \
-	test_axe.cpp game_time.cpp ; cd ..
+	g++ -Wall -g -o alchemist \
+	-I../alchemist $(ALCHEMIST) \
+	-I../../server/cpp-src/tools $(TOOLS) \
+	-I../../server/cpp-src $(SERVER) \
+	-I.. $(CORE) \
+	-I. main.cpp test_axe.cpp 
 
 clean:
 	rm alchemist

@@ -20,6 +20,8 @@ void daily_call()
     plants->tick();
 }
 
+void notify_destroy(size_t id, ItemLocation location) { }
+
 void help()
 {
     printf("%sESC/e/?- clear screen/Exit/Help\n", colorWhite);
