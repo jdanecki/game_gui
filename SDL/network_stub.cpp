@@ -1,9 +1,11 @@
 #include "networking.h"
 #include "../core/tiles.h"
+#include "../core/player.h"
 #include <cstring>
 
 const NetClient *init() {
     got_id(0, time(0));
+
     chunk_table table;
     for (int y=0; y < CHUNK_SIZE; y++)
         for (int x=0; x < CHUNK_SIZE; x++)
@@ -18,7 +20,10 @@ void network_tick(const NetClient *client)
 {
 }
 
-void send_packet_move(const NetClient *client, int32_t x, int32_t y) {}
+void send_packet_move(const NetClient *client, int32_t x, int32_t y) 
+{
+    player_server->move(x,y);
+}
 void send_packet_pickup(const NetClient *client, uintptr_t id) {}
 void send_packet_drop(const NetClient *client, uintptr_t id) {}
 void send_packet_item_used_on_object(const NetClient *client, uintptr_t iid, uintptr_t oid) {}

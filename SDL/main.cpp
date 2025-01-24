@@ -84,7 +84,7 @@ void draw()
     int game_size;
     int tile_dungeon_size;
     int width = window_width - PANEL_WINDOW;
-    char text[256];
+    char text[300];
 
     if (width < window_height)
     {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MULTI_USER=OFF
+MULTI_USER=ON
 if [ ! -d build ] 
 then
     mkdir build

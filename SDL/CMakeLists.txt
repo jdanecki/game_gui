@@ -15,7 +15,6 @@ add_subdirectory(../core core)
 
 if(NOT MULTI_USER)
     set(NETWORK_STUB network_stub.cpp)
-    # add_definitions(-DLOCAL_ONLY)
 endif()
 
 add_executable(pime_SDL

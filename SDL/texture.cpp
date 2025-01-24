@@ -16,10 +16,6 @@ SDL_Texture * plant_textures[PLANTS];
 SDL_Texture * grown_plant_textures[PLANTS];
 SDL_Texture * object_textures[TEXTURE_wall_max];
 
-#ifdef LOCAL_ONLY
-SDL_Texture ** all_textures[6] = {0, items_textures, ing_textures, prod_textures, plant_textures, animalr_textures};
-#endif
-
 SDL_Texture* load_texture(const char * texture_name)
 {
     SDL_Texture* texture = NULL;

@@ -41,8 +41,4 @@ extern struct textures Texture;
 
 void load_textures();
 
-#ifdef LOCAL_ONLY
-extern SDL_Texture ** all_textures[6];
-#endif
-
 #endif

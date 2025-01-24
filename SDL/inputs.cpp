@@ -272,45 +272,24 @@ Uint64 handle_keyboard_state(const Uint8 * keys)
     {
         if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S])
         {
-            // TODO clientside movement prediction
-#ifdef LOCAL_ONLY
-            player->move(0, 1);
-            player->direction=direction::down;
-#else
             send_packet_move(client, 0, 1);
-#endif
             last_frame_press=1;
         }
         else if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
         {
-#ifdef LOCAL_ONLY
-            player->direction=direction::up;
-            player->move(client, 0, -1);
-#else
             send_packet_move(client, 0, -1);
-#endif
             last_frame_press=1;
         }
         if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT])
         {
             player->going_right=1;
-#ifdef LOCAL_ONLY
-            player->direction=direction::right;
-            player->move(1, 0);
-#else
             send_packet_move(client, 1, 0);
-#endif
             last_frame_press=1;
         }
         else if (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT])
         {
             player->going_right=0;
-#ifdef LOCAL_ONLY
-            player->direction=direction::left;
-            player->move(-1, 0);
-#else
             send_packet_move(client, -1, 0);
-#endif
             last_frame_press=1;
         }
         if (last_frame_press)
