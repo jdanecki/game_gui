@@ -14,3 +14,6 @@ clean:
 	cd server; cargo clean
 	rm -rf SDL/build
 
+format:
+	find . -name \*.h  -exec clang-format -i {}  \;
+	find . -name \*.cpp  -exec clang-format -i {}  \;

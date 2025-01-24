@@ -1,19 +1,20 @@
 #include "player_actions.h"
 
+#include "../core/player.h"
 #include "../core/world.h"
 #include "networking.h"
-#include "../core/player.h"
 
-extern const NetClient* client;
-extern Player* player;
+extern const NetClient * client;
+extern Player * player;
 extern int active_hotbar;
 
 void put_element()
 {
     InventoryElement * el = player->hotbar[active_hotbar];
-    if (el) {
+    if (el)
+    {
         send_packet_drop(client, el->uid);
-        //player->hotbar[active_hotbar] = NULL;
+        // player->hotbar[active_hotbar] = NULL;
         /*el->set_posittion(player.x, player.y);
         set_item_at_ppos(el, &player);
         player.inventory->remove(el);
@@ -24,19 +25,19 @@ void put_element()
 
 void use_tile(int map_x, int map_y, int x, int y)
 {
-    InventoryElement* object = get_item_at(map_x, map_y, x, y);
+    InventoryElement * object = get_item_at(map_x, map_y, x, y);
     if (!object)
     {
-        if (InventoryElement* item = player->hotbar[active_hotbar])
+        if (InventoryElement * item = player->hotbar[active_hotbar])
         {
             send_packet_item_used_on_tile(client, item->uid, map_x, map_y, x, y);
             printf("plant seed\n");
         }
-        
+
         return;
     }
 
-    if (Product* item = dynamic_cast<Product*>(player->hotbar[active_hotbar]))
+    if (Product * item = dynamic_cast<Product *>(player->hotbar[active_hotbar]))
     {
         printf("used item on object\n");
         send_packet_item_used_on_object(client, item->uid, object->uid);
@@ -56,9 +57,9 @@ void use_tile(int map_x, int map_y, int x, int y)
             }
         }
         sprintf(status_line, "got item: %s (%s)", item->get_form_name(), item->get_name()); //player.inventory->get_count(item));
-        *item_pointer=NULL; 
+        *item_pointer=NULL;
 
-       status_code = 1; 
+       status_code = 1;
     }
 
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
@@ -93,26 +94,26 @@ void use_tile(int map_x, int map_y, int x, int y)
             }
         }
     }*/
-        /*            InventoryElement * el = player.hotbar[active_hotbar];
-            if (el)
+    /*            InventoryElement * el = player.hotbar[active_hotbar];
+        if (el)
+        {
+            if (el->use(player.map_x, player.map_y, player.x, player.y))
+                break;
+            if (plant_with_seed(el, player.map_x, player.map_y, player.x, player.y))
+                break;
+            if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
             {
-                if (el->use(player.map_x, player.map_y, player.x, player.y))
-                    break;
-                if (plant_with_seed(el, player.map_x, player.map_y, player.x, player.y))
-                    break;
-                if ((Element *)el && (Element *)el->get_base() && ((Element *)el)->get_base()->id == ID_WATER)
+                if (Plant ** pp = get_plant_at_ppos(&player))
                 {
-                    if (Plant ** pp = get_plant_at_ppos(&player))
+                    if (Plant * p = *pp)
                     {
-                        if (Plant * p = *pp)
-                        {
-                            p->water += 100;
-                            player.inventory->remove(el);
-                            player.hotbar[active_hotbar]=NULL;
-                            free(el);
-                            break;
-                        }
+                        p->water += 100;
+                        player.inventory->remove(el);
+                        player.hotbar[active_hotbar]=NULL;
+                        free(el);
+                        break;
                     }
                 }
-            }*/
+            }
+        }*/
 }

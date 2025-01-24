@@ -1,11 +1,10 @@
 #ifndef TILES_H
 #define TILES_H
 
-#include "alchemist/elements.h"
 #include "alchemist/el_list.h"
+#include "alchemist/elements.h"
 
-
-enum  game_tiles
+enum game_tiles
 {
     TILE_AIR,
     TILE_STONE,
@@ -21,7 +20,7 @@ enum  game_tiles
     TILE_MAX_NUM
 };
 
-enum  biomes
+enum biomes
 {
     BIOME_DESERT, // yellow
     BIOME_FOREST, // green with trees
@@ -29,28 +28,30 @@ enum  biomes
 };
 #define BIOMES 3
 
-
 #define CHUNK_SIZE 16
 #define WORLD_SIZE 256
-#define WORLD_CENTER WORLD_SIZE/2
+#define WORLD_CENTER WORLD_SIZE / 2
 #define WORLD_SCALE 100.0
 
-struct tile {
+struct tile
+{
     enum game_tiles tile;
 };
-    
+
 typedef struct tile chunk_table[CHUNK_SIZE][CHUNK_SIZE];
 
-class chunk {
+class chunk
+{
     int map_x, map_y;
-    public:
+
+  public:
     enum biomes biome;
     chunk_table table;
     InvList objects;
     InvList beings;
-    void add_object(InventoryElement* object, int x, int y);
-    void remove_object(InventoryElement* object);
-    InventoryElement* find_by_id(size_t id);
+    void add_object(InventoryElement * object, int x, int y);
+    void remove_object(InventoryElement * object);
+    InventoryElement * find_by_id(size_t id);
     chunk(int map_x, int map_y);
     /*InventoryElement * items[CHUNK_SIZE*CHUNK_SIZE];
     Being * beings[CHUNK_SIZE*CHUNK_SIZE];
@@ -58,7 +59,5 @@ class chunk {
     Animal * animals[CHUNK_SIZE*CHUNK_SIZE];
     Object * objects[CHUNK_SIZE*CHUNK_SIZE];*/
 };
-
-
 
 #endif

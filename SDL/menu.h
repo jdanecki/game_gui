@@ -1,8 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "text.h"
 #include "../core/alchemist/elements.h"
+#include "text.h"
 
 enum menu_actions
 {
@@ -31,26 +31,25 @@ enum menu_actions
     MENU_GET_RANDOM_EDIBLE,
     MENU_BUILD_WALL,
     MENU_CATEGORIE,
-//must be the last     
-    MENU_ITEM=0x1000,
+    // must be the last
+    MENU_ITEM = 0x1000,
 };
-
 
 class Menu
 {
-public:	
-    const char *name;
+  public:
+    const char * name;
     int options;
     int menu_pos;
     int added;
     SDL_Texture ** texture;
     const char ** entries;
     enum menu_actions * actions;
-    int *values;
+    int * values;
     Element ** el;
     bool show_texture;
     bool show_texture_literal;
-    Menu(const char *n, int opt);
+    Menu(const char * n, int opt);
     void add(const char * e, enum menu_actions a);
     void add(const char * e, enum menu_actions a, int val);
     void add(const char * e, enum menu_actions a, Element * p_el);
@@ -61,17 +60,16 @@ public:
     void go_up();
 };
 
-extern Menu *menu_main;
-extern Menu *menu_energy;
-extern Menu *menu_help;
-extern Menu *menu_help2;
-extern Menu *menu_crafting;
-extern Menu *current_menu;
+extern Menu * menu_main;
+extern Menu * menu_energy;
+extern Menu * menu_help;
+extern Menu * menu_help2;
+extern Menu * menu_crafting;
+extern Menu * current_menu;
 
 int interact(enum menu_actions a);
 void show_menu();
 void create_menus();
-int  menu_interact(int key);
+int menu_interact(int key);
 
 #endif
-

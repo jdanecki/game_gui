@@ -1,7 +1,7 @@
 #include "texture.h"
-#include "window.h"
 #include "../core/alchemist/elements.h"
 #include "../core/tiles.h"
+#include "window.h"
 #include <SDL2/SDL_blendmode.h>
 
 struct textures Texture;
@@ -16,17 +16,17 @@ SDL_Texture * plant_textures[PLANTS];
 SDL_Texture * grown_plant_textures[PLANTS];
 SDL_Texture * object_textures[TEXTURE_wall_max];
 
-SDL_Texture* load_texture(const char * texture_name)
+SDL_Texture * load_texture(const char * texture_name)
 {
-    SDL_Texture* texture = NULL;
-    SDL_Surface* loadedSurface = IMG_Load(texture_name); 
+    SDL_Texture * texture = NULL;
+    SDL_Surface * loadedSurface = IMG_Load(texture_name);
     if (loadedSurface == NULL)
     {
-        printf("Unable to load texture: %s error: %s\n", texture_name, SDL_GetError()); 
-            exit(0);
+        printf("Unable to load texture: %s error: %s\n", texture_name, SDL_GetError());
+        exit(0);
     }
-    else 
-    {    
+    else
+    {
         texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 
         if (texture == NULL)
@@ -42,24 +42,23 @@ SDL_Texture* load_texture(const char * texture_name)
 
 void add_tile_texture(enum game_tiles id, const char * file)
 {
-    tiles_textures[id]=load_texture(file);
+    tiles_textures[id] = load_texture(file);
 };
 
 void add_items_texture(int id, const char * file)
 {
-    items_textures[id]=load_texture(file);
+    items_textures[id] = load_texture(file);
 };
 
 void add_ing_texture(int id, const char * file)
 {
-    ing_textures[id]=load_texture(file);
+    ing_textures[id] = load_texture(file);
 };
 
 void add_prod_texture(int id, const char * file)
 {
-    prod_textures[id]=load_texture(file);
+    prod_textures[id] = load_texture(file);
 };
-
 
 void load_textures()
 {
@@ -71,15 +70,15 @@ void load_textures()
     add_tile_texture(TILE_AIR, "textures/game_tiles/air.png");
     add_tile_texture(TILE_STONE, "textures/game_tiles/stone.png");
     add_tile_texture(TILE_DIRT, "textures/game_tiles/dirt.png");
-//    add_tile_texture(TILE_TREE, "textures/game_tiles/tree.png");
-    add_tile_texture(TILE_SAND,"textures/game_tiles/sand.png");
-    add_tile_texture(TILE_SANDSTONE,"textures/game_tiles/sandstone.png");
-//    add_tile_texture(TILE_SWEET_TREE, "textures/game_tiles/sweet_tree.png");
-//    add_tile_texture(TILE_SWEET_BUSH,"textures/game_tiles/sweet_bush.png");
-//    add_tile_texture(TILE_SWEET_FLOWER,"textures/game_tiles/sweet_flower.png");
-    add_tile_texture(TILE_GRASS,"textures/game_tiles/grass.png");
-    add_tile_texture(TILE_SWEET_GRASS,"textures/game_tiles/sweet_grass.png");
-    add_tile_texture(TILE_WATER,"textures/game_tiles/water.png");
+    //    add_tile_texture(TILE_TREE, "textures/game_tiles/tree.png");
+    add_tile_texture(TILE_SAND, "textures/game_tiles/sand.png");
+    add_tile_texture(TILE_SANDSTONE, "textures/game_tiles/sandstone.png");
+    //    add_tile_texture(TILE_SWEET_TREE, "textures/game_tiles/sweet_tree.png");
+    //    add_tile_texture(TILE_SWEET_BUSH,"textures/game_tiles/sweet_bush.png");
+    //    add_tile_texture(TILE_SWEET_FLOWER,"textures/game_tiles/sweet_flower.png");
+    add_tile_texture(TILE_GRASS, "textures/game_tiles/grass.png");
+    add_tile_texture(TILE_SWEET_GRASS, "textures/game_tiles/sweet_grass.png");
+    add_tile_texture(TILE_WATER, "textures/game_tiles/water.png");
 
     // SOLID START HERE
     add_items_texture(ID_STONE, "textures/items/solid/stone.png");
@@ -112,10 +111,9 @@ void load_textures()
     add_ing_texture(ING_AXE_HANDLE, "textures/items/ingredients/axe_handle.png");
     add_ing_texture(ING_KNIFE_BLADE, "textures/items/ingredients/knife_blade.png");
     add_ing_texture(ING_KNIFE_HANDLE, "textures/items/ingredients/knife_handle.png");
-    
+
     add_prod_texture(PROD_AXE, "textures/items/products/axe.png");
     add_prod_texture(PROD_KNIFE, "textures/items/products/knife.png");
-
 
     plant_textures[PLANTID_strawberry] = load_texture("textures/plants/strawberry.png");
     plant_textures[PLANTID_pumpkin] = load_texture("textures/plants/pumpkin.png");

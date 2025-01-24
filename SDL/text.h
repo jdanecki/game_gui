@@ -1,10 +1,10 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include <stdio.h>
 #include <SDL2/SDL_ttf.h>
+#include <stdio.h>
 
-extern TTF_Font* font;
+extern TTF_Font * font;
 extern SDL_Color White;
 extern SDL_Color Red;
 extern SDL_Color Gray;

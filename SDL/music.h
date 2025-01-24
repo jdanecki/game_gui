@@ -6,8 +6,8 @@
 
 struct Musics
 {
-    Mix_Chunk* music_one;
-    Mix_Chunk* music_two;
+    Mix_Chunk * music_one;
+    Mix_Chunk * music_two;
 };
 
 int init_music();

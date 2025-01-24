@@ -6,41 +6,58 @@
 class ListElement
 {
     bool enabled;
-public:	
-    InventoryElement * el; 
+
+  public:
+    InventoryElement * el;
     ListElement * next;
 
-	void add(ListElement * entry);
-    void disable() { enabled=false; };
-    void enable() { enabled=true; };
-    bool is_enabled() { return enabled; };
-	virtual void show(bool details=true);
-    virtual bool tick() { return el->tick(); };
-	ListElement(InventoryElement *entry);
-    ListElement(): el(nullptr), next(nullptr) {}
+    void add(ListElement * entry);
+    void disable()
+    {
+        enabled = false;
+    };
+    void enable()
+    {
+        enabled = true;
+    };
+    bool is_enabled()
+    {
+        return enabled;
+    };
+    virtual void show(bool details = true);
+    virtual bool tick()
+    {
+        return el->tick();
+    };
+    ListElement(InventoryElement * entry);
+    ListElement() : el(nullptr), next(nullptr)
+    {
+    }
 };
-    
 
 class InvList
 {
-public:
+  public:
     const char * name;
     int nr_elements;
     ListElement * head;
     ListElement * tail;
 
-	InvList(const char *n);
+    InvList(const char * n);
     InvList();
     ListElement * find(void * what);
-    bool virtual find_check(ListElement *el, void * what) { return el == what; }
-//    bool virtual find_at_check(ListElement *el, void * pos) { return false; }
-	InventoryElement ** find_form(enum Form f, int *count);
-	InventoryElement ** find_id(enum Item_id id, int *count);
-	void show(bool details=true);
-	void add(InventoryElement *el);
-	void add(ListElement *el);
-	void remove(InventoryElement *el);
-	int get_count(InventoryElement *el);
+    bool virtual find_check(ListElement * el, void * what)
+    {
+        return el == what;
+    }
+    //    bool virtual find_at_check(ListElement *el, void * pos) { return false; }
+    InventoryElement ** find_form(enum Form f, int * count);
+    InventoryElement ** find_id(enum Item_id id, int * count);
+    void show(bool details = true);
+    void add(InventoryElement * el);
+    void add(ListElement * el);
+    void remove(InventoryElement * el);
+    int get_count(InventoryElement * el);
     void tick();
     void enable_all();
     int size();
@@ -48,23 +65,27 @@ public:
 
 class Show_el : public ListElement
 {
-public:
+  public:
     char c;
     bool selected;
-    ListElement *l_el;
-    Show_el(char _c, ListElement *_el);
-    void show(bool details=true);
+    ListElement * l_el;
+    Show_el(char _c, ListElement * _el);
+    void show(bool details = true);
 };
 
 class Show_list : public InvList
 {
     char prompt;
-public:
-    Show_list(char p): InvList("select list") { prompt = p;}
+
+  public:
+    Show_list(char p) : InvList("select list")
+    {
+        prompt = p;
+    }
     ListElement * select_el();
     bool multi_select();
     void unselect_all();
-    bool find_check(ListElement *el, void * what);
+    bool find_check(ListElement * el, void * what);
 };
 
 extern const char * colorGray;
@@ -83,6 +104,5 @@ extern const char * clrscr;
 
 int kbhit();
 char wait_key(char prompt);
-
 
 #endif // EL_LIST_H

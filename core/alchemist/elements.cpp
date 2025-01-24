@@ -2,22 +2,15 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "../tiles.h"
 #include "elements.h"
 #include "names.h"
-#include "../tiles.h"
 
-BaseElement *base_elements[BASE_ELEMENTS];
+BaseElement * base_elements[BASE_ELEMENTS];
 
-const char * Form_name[]
-{
-    "nothing",
-    "solid form",
-    "liquid",
-    "gas"
-};
+const char * Form_name[]{"nothing", "solid form", "liquid", "gas"};
 
-const char * Ingredient_name[]=
-{
+const char * Ingredient_name[] = {
     "Axe_blade",
     "Axe_handle",
 
@@ -25,48 +18,33 @@ const char * Ingredient_name[]=
     "Knife_handle",
 };
 
-const char * Product_name[]=
-{
+const char * Product_name[] = {
     "Axe",
     "Knife",
 };
 
-const char * items_name[]=
-{
+const char * items_name[] = {
     "Stone",
     "Log",
     "Sand",
     "Stick",
 };
 
-const char * object_names[]=
-{
-    "wall"
-};
+const char * object_names[] = {"wall"};
 
-const char * food_name[]=
-{
-    "Pumpkin",
-    "Watermelon"
-};
+const char * food_name[] = {"Pumpkin", "Watermelon"};
 
-const char * Plant_phase_name[]=
-{
-    "Seed",
-    "Seedling",
-    "Growing",
-    "Flowers",
-    "Fruits"
-};
+const char * Plant_phase_name[] = {"Seed", "Seedling", "Growing", "Flowers", "Fruits"};
 
 Edible::Edible()
 {
-   caloric=rand() % 1000;
-   irrigation=rand() % 500;
-   poison=0;
-   if (rand() %100 < 10) { // 10%
-       poison = 1 + rand() % 250;
-   }
+    caloric = rand() % 1000;
+    irrigation = rand() % 500;
+    poison = 0;
+    if (rand() % 100 < 10)
+    { // 10%
+        poison = 1 + rand() % 250;
+    }
 }
 
 void Edible::show()
@@ -83,41 +61,40 @@ void Edible::show()
 
 Solid::Solid()
 {
-    stretching=1 + rand() % 10000;
-            //styropian: 1
-            //beton:     5
-            //cyna:     14
-            //drewno:   800
-            //diament: 1800
-            //żelazo:  3800
-            //stal:   10000
+    stretching = 1 + rand() % 10000;
+    // styropian: 1
+    // beton:     5
+    // cyna:     14
+    // drewno:   800
+    // diament: 1800
+    // żelazo:  3800
+    // stal:   10000
 
     squeezing = 1 + rand() % 20000;
-            //styropian:     1
-            //beton:        50
-            //kość:        150
-            //kamień: 100-5000
-            //diament:   17000
+    // styropian:     1
+    // beton:        50
+    // kość:        150
+    // kamień: 100-5000
+    // diament:   17000
 
     fragility = 1000 * stretching / squeezing;
-        // < 100 kruche
-        // > spręzyste
+    // < 100 kruche
+    // > spręzyste
 
     bending = 1 + rand() % 100;
-            //1 łatwo zginalne 
-            //100 trudno
-    solubility=1+rand() % 100;
+    // 1 łatwo zginalne
+    // 100 trudno
+    solubility = 1 + rand() % 100;
 }
 
 void Solid::show()
 {
     printf("      *** Solid ***\n");
     printf("      stretching = %u\n", stretching); // rozciąganie
-    printf("      squeezing = %u\n", squeezing); //ściskanie
-    printf("      bending = %u\n", bending); // zginanie
-    printf("      fragility = %u\n", fragility); //kruchość
-    printf("      solubility = %u\n", solubility); //rozpuszczalność
-
+    printf("      squeezing = %u\n", squeezing);   // ściskanie
+    printf("      bending = %u\n", bending);       // zginanie
+    printf("      fragility = %u\n", fragility);   // kruchość
+    printf("      solubility = %u\n", solubility); // rozpuszczalność
 }
 
 BaseElement::BaseElement(int index)
@@ -129,55 +106,60 @@ BaseElement::BaseElement(int index)
     form = Form_solid;
     solid = new Solid;
     density = 50 + rand() % 2000;
-    if (id >= SOLID_ELEMENTS) { // generate liquid
+    if (id >= SOLID_ELEMENTS)
+    { // generate liquid
         form = Form_liquid;
         density = 500 + rand() % 500;
-    } 
-    if (id >= SOLID_ELEMENTS+LIQUID_ELEMENTS) { // generate gas
+    }
+    if (id >= SOLID_ELEMENTS + LIQUID_ELEMENTS)
+    { // generate gas
         form = Form_gas;
         density = 1;
     }
-    if (id >= SOLID_ELEMENTS+LIQUID_ELEMENTS+GAS_ELEMENTS) // generate food
+    if (id >= SOLID_ELEMENTS + LIQUID_ELEMENTS + GAS_ELEMENTS) // generate food
     {
         form = Form_solid;
         density = 50 + rand() % 1000;
-        solid =new Solid;
-        edible=new Edible;
+        solid = new Solid;
+        edible = new Edible;
     }
     name = create_name(5 - form);
 }
 
 void BaseElement::show(bool details)
 {
-    printf("BaseElement name=%s form=%s id=%d\n", name, Form_name[form],id); 
-    if (!details) return;
-    printf("   density = %u\n", density); //gęstość
+    printf("BaseElement name=%s form=%s id=%d\n", name, Form_name[form], id);
+    if (!details)
+        return;
+    printf("   density = %u\n", density); // gęstość
     printf("   form = %s\n", Form_name[form]);
-    switch(form)
+    switch (form)
     {
         case Form_solid:
             solid->show();
             break;
-        default: break;
+        default:
+            break;
     }
-    if (edible) edible->show();
+    if (edible)
+        edible->show();
 }
 
 int InventoryElement::get_id()
 {
-    return -1; 
+    return -1;
 }
 
 unsigned int InventoryElement::get_packet_size()
 {
-    //if (get_base())
-        return sizeof(size_t) + sizeof(Class_id) + sizeof(ItemLocation);
-    //return sizeof(int)*4;
+    // if (get_base())
+    return sizeof(size_t) + sizeof(Class_id) + sizeof(ItemLocation);
+    // return sizeof(int)*4;
 }
 
-void InventoryElement::to_bytes(unsigned char* buf)
+void InventoryElement::to_bytes(unsigned char * buf)
 {
-//    unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
+    //    unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
     int offset = 0;
     memcpy(&buf[offset], &uid, sizeof(uid));
     offset += sizeof(uid);
@@ -190,9 +172,9 @@ void InventoryElement::to_bytes(unsigned char* buf)
     printf("class %d - uid: %ld - %d %d\n", c_id, uid, location.data.chunk.x, location.data.chunk.y);
 }
 
-Element::Element(BaseElement *b)
+Element::Element(BaseElement * b)
 {
-    c_id=Class_Element;
+    c_id = Class_Element;
     base = b;
     sharpness = rand() % 100;
     smoothness = rand() % 100;
@@ -200,16 +182,16 @@ Element::Element(BaseElement *b)
     width = 1 + rand() % 100;
     height = 1 + rand() % 100;
     volume = length * width * height;
-    mass = b->density * volume/1000;
-    
+    mass = b->density * volume / 1000;
 }
 
 void Element::show(bool details)
 {
     printf("Element -> %d: base=%s form=%s\n", c_id, base->name, get_form_name());
-    if (!details) return;
-    printf("sharpness = %u\n", sharpness); //ostrość
-    printf("smoothness = %u\n", smoothness); //gładkość
+    if (!details)
+        return;
+    printf("sharpness = %u\n", sharpness);   // ostrość
+    printf("smoothness = %u\n", smoothness); // gładkość
     printf("mass = %u: l=%u w=%u h=%u \n", mass, length, width, height);
     base->show(details);
 }
@@ -219,11 +201,11 @@ unsigned int Element::get_packet_size()
     return InventoryElement::get_packet_size() + sizeof(unsigned int) * 7 + sizeof(int);
 }
 
-void Element::to_bytes(unsigned char* buf)
+void Element::to_bytes(unsigned char * buf)
 {
     InventoryElement::to_bytes(buf);
     int offset = InventoryElement::get_packet_size();
-    //printf("packet size %d\n", offset);
+    // printf("packet size %d\n", offset);
 
     memcpy(&buf[offset], &sharpness, sizeof(sharpness));
     offset += sizeof(sharpness);
@@ -247,16 +229,17 @@ void Element::to_bytes(unsigned char* buf)
 
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
 {
-    c_id=Class_Ingredient;
+    c_id = Class_Ingredient;
     el = from;
     name = Ingredient_name[i];
     id = i;
     req_form = f;
 }
-        
+
 bool Ingredient::craft()
 {
-    if (req_form != get_form()) {
+    if (req_form != get_form())
+    {
         printf("form != %d\n", req_form);
         return false;
     }
@@ -270,7 +253,8 @@ bool Ingredient::craft()
 void Ingredient::show(bool details)
 {
     printf("%s ->%d\n", name, c_id);
-    if (!details) return;
+    if (!details)
+        return;
     printf("quality = %d\n", quality);
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
@@ -282,7 +266,7 @@ unsigned int Ingredient::get_packet_size()
     return InventoryElement::get_packet_size() + sizeof(Ingredient_id) + sizeof(int) * 3;
 }
 
-void Ingredient::to_bytes(unsigned char* buf)
+void Ingredient::to_bytes(unsigned char * buf)
 {
     InventoryElement::to_bytes(buf);
     int offset = InventoryElement::get_packet_size();
@@ -297,41 +281,43 @@ void Ingredient::to_bytes(unsigned char* buf)
     memcpy(&buf[offset], &id, sizeof(id));
     offset += sizeof(id);
 }
-        
+
 void Product::init(Product_id i, int c, Form f)
 {
     name = Product_name[i];
     id = i;
-    ing_count=c;
-    req_form=f;
+    ing_count = c;
+    req_form = f;
 }
 
-Product::Product(InventoryElement * el1, InventoryElement *el2, Product_id i, Form f)
+Product::Product(InventoryElement * el1, InventoryElement * el2, Product_id i, Form f)
 {
-    c_id=Class_Product;
-    ings = (InventoryElement**) calloc(2, sizeof(InventoryElement));
-    ings[0]=el1;
-    ings[1]=el2;
+    c_id = Class_Product;
+    ings = (InventoryElement **)calloc(2, sizeof(InventoryElement));
+    ings[0] = el1;
+    ings[1] = el2;
     init(i, 2, f);
 }
 
 Product::Product(InventoryElement ** from, int count, Product_id i, Form f)
 {
-    c_id=Class_Product;
+    c_id = Class_Product;
     ings = from;
     init(i, count, f);
 }
 
 bool Product::craft()
 {
-    for (int i=0; i < ing_count; i++)
+    for (int i = 0; i < ing_count; i++)
     {
-        if (req_form != ings[i]->get_form()) {
-            printf("form != %d for inq[%d]\n", req_form, i);       
+        if (req_form != ings[i]->get_form())
+        {
+            printf("form != %d for inq[%d]\n", req_form, i);
             return false;
         }
     }
-    if (!check_ing()) return false;
+    if (!check_ing())
+        return false;
 
     quality = rand() % 100;
     resilience = rand() % 100;
@@ -342,41 +328,52 @@ bool Product::craft()
 void Product::show(bool details)
 {
     printf("%s -> %d\n", name, c_id);
-    if (!details) return;
+    if (!details)
+        return;
     printf("quality = %d\n", quality);
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
 
-    for (int i=0; i < ing_count; i++)
+    for (int i = 0; i < ing_count; i++)
     {
     }
 }
 
 Form Product::get_form()
 {
-    int solid=0;
-    int liq=0;
-    int gas=0;
+    int solid = 0;
+    int liq = 0;
+    int gas = 0;
 
-    for (int i=0; i < ing_count; i++)
+    for (int i = 0; i < ing_count; i++)
     {
         switch (ings[i]->get_form())
         {
-            case Form_solid: solid++; break;
-            case Form_liquid: liq++; break;
-            case Form_gas: gas++; break;
-            default: return Form_none;
+            case Form_solid:
+                solid++;
+                break;
+            case Form_liquid:
+                liq++;
+                break;
+            case Form_gas:
+                gas++;
+                break;
+            default:
+                return Form_none;
         }
     }
-    if (solid) return Form_solid;
-    if (gas == ing_count) return Form_gas;
-    if (liq) return Form_liquid;
+    if (solid)
+        return Form_solid;
+    if (gas == ing_count)
+        return Form_gas;
+    if (liq)
+        return Form_liquid;
     return Form_none;
 }
 
-const char * Product::get_form_name() 
-{ 
-    return Form_name[get_form()]; 
+const char * Product::get_form_name()
+{
+    return Form_name[get_form()];
 }
 
 unsigned int Product::get_packet_size()
@@ -384,7 +381,7 @@ unsigned int Product::get_packet_size()
     return InventoryElement::get_packet_size() + sizeof(Product_id) + sizeof(int) * 3;
 }
 
-void Product::to_bytes(unsigned char* buf)
+void Product::to_bytes(unsigned char * buf)
 {
     InventoryElement::to_bytes(buf);
     int offset = InventoryElement::get_packet_size();
@@ -402,7 +399,7 @@ void Product::to_bytes(unsigned char* buf)
 
 void init_elements()
 {
-    for (int i=0; i < BASE_ELEMENTS; i++)
+    for (int i = 0; i < BASE_ELEMENTS; i++)
     {
         base_elements[i] = new BaseElement(i);
     }
@@ -410,11 +407,10 @@ void init_elements()
 
 void show_base_elements(bool details)
 {
-    for (int i=0; i < BASE_ELEMENTS; i++)
+    for (int i = 0; i < BASE_ELEMENTS; i++)
     {
         base_elements[i]->show(details);
     }
-
 }
 
 Animal::Animal()
@@ -426,36 +422,48 @@ Animal::Animal()
     name = create_name(rand() % 2 + 2);
 }
 
-
-
 Plant::Plant()
 {
-    c_id=Class_Plant;
-    seedling_time=7 + rand() % 14;
-    growing_time=seedling_time + rand() % 150;
-    flowers_time=growing_time + rand() % 30;
-    max_age=flowers_time + rand() % 100;
-    phase = (Plant_phase) (rand() %  (Plant_fruits+1));
-    grown=false;
-    water=rand() % 100; 
+    c_id = Class_Plant;
+    seedling_time = 7 + rand() % 14;
+    growing_time = seedling_time + rand() % 150;
+    flowers_time = growing_time + rand() % 30;
+    max_age = flowers_time + rand() % 100;
+    phase = (Plant_phase)(rand() % (Plant_fruits + 1));
+    grown = false;
+    water = rand() % 100;
     switch (phase)
     {
-        case Plant_seed: age = 1; planted = false; break;
-        case Plant_seedling: age = seedling_time;  planted = true; break;
-        case Plant_growing: age = growing_time; planted = true; break;
-        case Plant_flowers: age = flowers_time; planted = true; break;
-        case Plant_fruits: age = max_age; grown=true; planted = true; break;
+        case Plant_seed:
+            age = 1;
+            planted = false;
+            break;
+        case Plant_seedling:
+            age = seedling_time;
+            planted = true;
+            break;
+        case Plant_growing:
+            age = growing_time;
+            planted = true;
+            break;
+        case Plant_flowers:
+            age = flowers_time;
+            planted = true;
+            break;
+        case Plant_fruits:
+            age = max_age;
+            grown = true;
+            planted = true;
+            break;
     }
 }
-
-
 
 unsigned int Plant::get_packet_size()
 {
     return InventoryElement::get_packet_size() + sizeof(type) + sizeof(phase) + sizeof(grown);
 }
 
-void Plant::to_bytes(unsigned char* buf)
+void Plant::to_bytes(unsigned char * buf)
 {
     InventoryElement::to_bytes(buf);
     int offset = InventoryElement::get_packet_size();
@@ -466,5 +474,4 @@ void Plant::to_bytes(unsigned char* buf)
     offset += sizeof(phase);
     memcpy(&buf[offset], &grown, sizeof(grown));
     offset += sizeof(grown);
-
 }

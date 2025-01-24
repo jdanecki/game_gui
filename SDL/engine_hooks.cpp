@@ -1,8 +1,8 @@
 #include "text.h"
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
-void print_status(const char* format, ...)
+void print_status(const char * format, ...)
 {
     va_list args;
     va_start(args, format);

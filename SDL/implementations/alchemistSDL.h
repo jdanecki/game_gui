@@ -6,40 +6,39 @@
 
 class Renderable
 {
-    public:
-        virtual SDL_Texture * get_texture() {return NULL; }
+  public:
+    virtual SDL_Texture * get_texture()
+    {
+        return NULL;
+    }
 };
-
 
 class IngredientSDL : public Ingredient, public Renderable
 {
-    public:
-        SDL_Texture * get_texture();
-        IngredientSDL(int id);
+  public:
+    SDL_Texture * get_texture();
+    IngredientSDL(int id);
 };
 
 class ProductSDL : public Product, public Renderable
 {
-    public:
-        SDL_Texture * get_texture();
-        ProductSDL(int id);
-
+  public:
+    SDL_Texture * get_texture();
+    ProductSDL(int id);
 };
 
 class ObjectSDL : public Object, public Renderable
 {
-    public:
-        SDL_Texture * get_texture();
-        ObjectSDL(int id);
-
+  public:
+    SDL_Texture * get_texture();
+    ObjectSDL(int id);
 };
 
 class ElementSDL : public Element, public Renderable
 {
-    public:
-        SDL_Texture * get_texture();
-        ElementSDL(int id);
+  public:
+    SDL_Texture * get_texture();
+    ElementSDL(int id);
 };
 
 #endif
-

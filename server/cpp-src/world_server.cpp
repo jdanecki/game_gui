@@ -1,7 +1,6 @@
 #include "world_server.h"
 #include "elements_server.h"
 
-
 void generator()
 {
     load_chunk(WORLD_CENTER, WORLD_CENTER);
@@ -10,20 +9,20 @@ void generator()
 
 void create_biome_plains(chunk * chunk)
 {
-    for (int y = 0; y < CHUNK_SIZE; y++) 
+    for (int y = 0; y < CHUNK_SIZE; y++)
     {
-        for (int x = 0; x < CHUNK_SIZE; x++) 
+        for (int x = 0; x < CHUNK_SIZE; x++)
         {
             chunk->table[y][x].tile = TILE_GRASS;
         }
-        //printf("\n");
+        // printf("\n");
     }
     if (rand() % 2)
     {
         for (int i = 0; i < 16; i++)
         {
             int b = rand() % BASE_ELEMENTS;
-            Element *o = new Element(base_elements[b]);
+            Element * o = new Element(base_elements[b]);
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
@@ -34,7 +33,7 @@ void create_biome_plains(chunk * chunk)
     {
         for (int i = 0; i < 16; i++)
         {
-            Plant *p = new PlantServer();
+            Plant * p = new PlantServer();
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
@@ -47,12 +46,11 @@ void create_biome_plains(chunk * chunk)
     {
         for (int i = 0; i < 16; i++)
         {
-            Plant *p = new PlantServer();
+            Plant * p = new PlantServer();
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
             p->type = PLANTID_watermelon;
-
 
             chunk->add_object(p, x, y);
         }
@@ -61,7 +59,7 @@ void create_biome_plains(chunk * chunk)
     {
         for (int i = 0; i < 16; i++)
         {
-            Plant *p = new PlantServer();
+            Plant * p = new PlantServer();
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
@@ -70,12 +68,12 @@ void create_biome_plains(chunk * chunk)
             chunk->add_object(p, x, y);
         }
     }
-    if (/*rand() % 2*/1)
+    if (/*rand() % 2*/ 1)
     {
-        
+
         for (int i = 0; i < 2; i++)
         {
-            Animal *a = new AnimalServer();
+            Animal * a = new AnimalServer();
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
@@ -88,24 +86,23 @@ void create_biome_plains(chunk * chunk)
 
 void create_biome_forest(chunk * chunk)
 {
-    for (int y = 0; y < CHUNK_SIZE; y++) 
+    for (int y = 0; y < CHUNK_SIZE; y++)
     {
-        for (int x = 0; x < CHUNK_SIZE; x++) 
+        for (int x = 0; x < CHUNK_SIZE; x++)
         {
             chunk->table[y][x].tile = TILE_GRASS;
         }
-        //printf("\n");
+        // printf("\n");
     }
     for (int i = 0; i < 8; i++)
     {
         int b = rand() % BASE_ELEMENTS;
-        Element *o = new Element(base_elements[b]);
+        Element * o = new Element(base_elements[b]);
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
         chunk->add_object(o, x, y);
     }
-
 
     for (int i = 0; i < 32; i++)
     {
@@ -128,19 +125,19 @@ void create_biome_forest(chunk * chunk)
                     y = rand() % CHUNK_SIZE;
                 }
             }
-        
+
         }*/
-        switch (rand() % 3) {
+        switch (rand() % 3)
+        {
             case 0:
-                tree->type=PLANTID_tree;
+                tree->type = PLANTID_tree;
                 break;
             case 1:
-                tree->type=PLANTID_tree1;
+                tree->type = PLANTID_tree1;
                 break;
             case 2:
-                tree->type=PLANTID_tree2;
+                tree->type = PLANTID_tree2;
                 break;
-        
         }
 
         chunk->add_object(tree, x, y);
@@ -149,31 +146,29 @@ void create_biome_forest(chunk * chunk)
 
 void create_biome_desert(chunk * chunk)
 {
-    for (int y = 0; y < CHUNK_SIZE; y++) 
+    for (int y = 0; y < CHUNK_SIZE; y++)
     {
-        for (int x = 0; x < CHUNK_SIZE; x++) 
+        for (int x = 0; x < CHUNK_SIZE; x++)
         {
             chunk->table[y][x].tile = TILE_SAND;
         }
-        //printf("\n");
+        // printf("\n");
     }
 
     for (int i = 0; i < 4; i++)
     {
         int b = rand() % BASE_ELEMENTS;
-        Element *o = new Element(base_elements[b]);
+        Element * o = new Element(base_elements[b]);
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
         chunk->add_object(o, x, y);
     }
-
-
 }
 
-void generate_chunk(chunk *chunk, int chunk_x, int chunk_y)  
+void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 {
-    enum biomes random_biome = (enum biomes) (rand() % BIOMES);
+    enum biomes random_biome = (enum biomes)(rand() % BIOMES);
     chunk->biome = random_biome;
 
     create_biome_forest(chunk);
@@ -187,12 +182,12 @@ void generate_chunk(chunk *chunk, int chunk_x, int chunk_y)
 
 char load_chunk(int x, int y)
 {
-    if (x >= 0 && x < WORLD_SIZE && y >= 0 && y < WORLD_SIZE) 
+    if (x >= 0 && x < WORLD_SIZE && y >= 0 && y < WORLD_SIZE)
     {
-        if (world_table[y][x] == NULL) 
+        if (world_table[y][x] == NULL)
         {
-            chunk* c = new chunk(x, y);
-//            printf("load %d %d\n", x, y);
+            chunk * c = new chunk(x, y);
+            //            printf("load %d %d\n", x, y);
             generate_chunk(c, x, y);
             world_table[y][x] = c;
         }
@@ -204,30 +199,29 @@ char load_chunk(int x, int y)
 void update()
 {
     // TODO update more chunks
-    ListElement* el = world_table[128][128]->beings.head;
+    ListElement * el = world_table[128][128]->beings.head;
     while (el)
     {
         el->el->tick();
         el = el->next;
     }
-        // TODO kill animals
-        /*            if (!a->alive)
+    // TODO kill animals
+    /*            if (!a->alive)
+        {
+            int x,y;
+            a->get_posittion(&x, &y);
+
+            Element * el;
+            switch (a->type)
             {
-                int x,y;
-                a->get_posittion(&x, &y);
+                case ANIMALID_pig:
+                    el = new Element(base_elements[ID_RAW_HAM]);
+            }
+            el->set_posittion(x, y);
+            set_item_at(el, player.map_x, player.map_y, x, y);
 
-                Element * el;
-                switch (a->type)
-                {
-                    case ANIMALID_pig:
-                        el = new Element(base_elements[ID_RAW_HAM]);
-                }
-                el->set_posittion(x, y);
-                set_item_at(el, player.map_x, player.map_y, x, y);
-
-                free(a);
-                a=NULL;
-                world_table[player.map_y][player.map_x]->animals[i]=NULL;
-            }*/
-
+            free(a);
+            a=NULL;
+            world_table[player.map_y][player.map_x]->animals[i]=NULL;
+        }*/
 }

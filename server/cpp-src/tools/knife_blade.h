@@ -5,7 +5,7 @@
 
 class KnifeBlade : public Ingredient
 {
-    public:
-        KnifeBlade(InventoryElement *from);
+  public:
+    KnifeBlade(InventoryElement * from);
 };
 #endif

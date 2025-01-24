@@ -8,21 +8,21 @@
 #include "../core/alchemist/elements.h"
 #include "../core/tiles.h"
 
-enum object_textures_enum 
+enum object_textures_enum
 {
-        TEXTURE_stone_wall,
-        TEXTURE_log_wall,
-        TEXTURE_log1_wall,
-        TEXTURE_log2_wall,
-        TEXTURE_wall_max
+    TEXTURE_stone_wall,
+    TEXTURE_log_wall,
+    TEXTURE_log1_wall,
+    TEXTURE_log2_wall,
+    TEXTURE_wall_max
 };
 
 struct textures
 {
-        SDL_Texture* playerr;
-        SDL_Texture* playerl;
-        SDL_Texture* run_icon;
-        SDL_Texture* sneak_icon;
+    SDL_Texture * playerr;
+    SDL_Texture * playerl;
+    SDL_Texture * run_icon;
+    SDL_Texture * sneak_icon;
 };
 
 extern SDL_Texture * tiles_textures[TILE_MAX_NUM];

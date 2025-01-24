@@ -14,7 +14,7 @@ class Player
 {
     int id;
 
-public:
+  public:
     int map_y;
     int map_x;
     int y;
@@ -25,17 +25,17 @@ public:
     enum direction direction;
     int thirst;
     int hunger;
-    InvList * inventory; 
+    InvList * inventory;
     InventoryElement * hotbar[10];
     int craftbar[10];
-    void pickup(InventoryElement* item);
-    void drop(InventoryElement* item);
-    InventoryElement* get_item_by_uid(size_t id);
-    int get_id() {return id;}
-	  Player(int id);
-
+    void pickup(InventoryElement * item);
+    void drop(InventoryElement * item);
+    InventoryElement * get_item_by_uid(size_t id);
+    int get_id()
+    {
+        return id;
+    }
+    Player(int id);
 };
-
-
 
 #endif

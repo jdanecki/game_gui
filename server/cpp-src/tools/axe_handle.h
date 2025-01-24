@@ -5,7 +5,7 @@
 
 class AxeHandle : public Ingredient
 {
-    public:
-        AxeHandle(InventoryElement *from);
+  public:
+    AxeHandle(InventoryElement * from);
 };
 #endif

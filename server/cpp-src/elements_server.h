@@ -5,34 +5,32 @@
 
 class ToBytes
 {
-public:
+  public:
 };
 
-void to_bytes_binding(InventoryElement* el, unsigned char* buf);
-unsigned int get_packet_size_binding(InventoryElement* el);
+void to_bytes_binding(InventoryElement * el, unsigned char * buf);
+unsigned int get_packet_size_binding(InventoryElement * el);
 
-
-
-extern "C" {
+extern "C"
+{
     void update_location(size_t id, ItemLocation old_loc, ItemLocation new_loc);
     void notify_destroy(size_t id, ItemLocation location);
 }
 
-void destroy(InventoryElement* el);
+void destroy(InventoryElement * el);
 
 class AnimalServer : public Animal
 {
-public:
+  public:
     void move();
     bool tick() override;
 };
 
 class PlantServer : public Plant
 {
-public:
+  public:
     bool grow() override;
     bool tick() override;
-    
 };
 
 #endif

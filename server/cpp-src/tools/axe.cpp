@@ -1,12 +1,11 @@
 #include "axe.h"
-#include <cstddef>
-#include <cstdio>
 #include "../networking.h"
 #include "../world_server.h"
+#include <cstddef>
+#include <cstdio>
 
-Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_AXE, Form_solid)
+Axe::Axe(InventoryElement * el1, InventoryElement * el2) : Product(el1, el2, PROD_AXE, Form_solid)
 {
-
 }
 
 /*bool Axe::use(int map_x, int map_y, int x, int y)
@@ -46,16 +45,17 @@ Axe::Axe(InventoryElement *el1, InventoryElement *el2): Product(el1, el2, PROD_A
     return false;
 }*/
 
-bool Axe::use(InventoryElement* object)
+bool Axe::use(InventoryElement * object)
 {
-    Plant* p = dynamic_cast<Plant*>(object);
-    
+    Plant * p = dynamic_cast<Plant *>(object);
+
     if (p && (p->type == PLANTID_tree || p->type == PLANTID_tree1 || p->type == PLANTID_tree2))
     {
-        Element* el = nullptr;
-        Element* el_seed = nullptr;
-        
-        switch (p->type) {
+        Element * el = nullptr;
+        Element * el_seed = nullptr;
+
+        switch (p->type)
+        {
             case PLANTID_tree:
             {
                 el = new Element(base_elements[ID_LOG]);
@@ -82,13 +82,12 @@ bool Axe::use(InventoryElement* object)
         objects_to_create.add(el_seed);
 
         destroy(p);
-        p=NULL;
+        p = NULL;
         //                    TODO
-        //world_table[map_y][map_x]->plants[i]=NULL;
+        // world_table[map_y][map_x]->plants[i]=NULL;
         return true;
     }
 
-    
     return true;
 }
 
@@ -97,10 +96,8 @@ bool Axe::check_ing()
     int id1 = ings[0]->get_id();
     int id2 = ings[1]->get_id();
 
-    if (
-            (id1 == ING_AXE_BLADE && id2 == ING_AXE_HANDLE) || 
-            (id1 == ING_AXE_HANDLE && id2 == ING_AXE_BLADE)
-       ) return true;
+    if ((id1 == ING_AXE_BLADE && id2 == ING_AXE_HANDLE) || (id1 == ING_AXE_HANDLE && id2 == ING_AXE_BLADE))
+        return true;
     printf("wrong ingredients\n");
     return false;
 }
