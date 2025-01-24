@@ -24,6 +24,7 @@ class AnimalServer : public Animal
 {
 public:
     void move();
+    bool tick() override;
 };
 
 class PlantServer : public Plant

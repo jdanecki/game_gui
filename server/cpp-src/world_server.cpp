@@ -72,17 +72,17 @@ void create_biome_plains(chunk * chunk)
     }
     if (/*rand() % 2*/1)
     {
-        /*
+        
         for (int i = 0; i < 2; i++)
         {
-            Animal *a = new Animal();
+            Animal *a = new AnimalServer();
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
             a->type = ANIMALID_pig;
 
             chunk->add_object(a, x, y);
-        }*/
+        }
     }
 }
 
@@ -176,12 +176,13 @@ void generate_chunk(chunk *chunk, int chunk_x, int chunk_y)
     enum biomes random_biome = (enum biomes) (rand() % BIOMES);
     chunk->biome = random_biome;
 
-    switch (random_biome)
-    {
-        case BIOME_FOREST: create_biome_forest(chunk); break;
-        case BIOME_DESERT: create_biome_desert(chunk); break;
-        case BIOME_PLAINS: create_biome_plains(chunk); break;
-    }
+    create_biome_forest(chunk);
+    // switch (random_biome)
+    // {
+    //     case BIOME_FOREST: create_biome_forest(chunk); break;
+    //     case BIOME_DESERT: create_biome_desert(chunk); break;
+    //     case BIOME_PLAINS: create_biome_plains(chunk); break;
+    // }
 }
 
 char load_chunk(int x, int y)

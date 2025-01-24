@@ -6,7 +6,6 @@
 #include "tools/knife_blade.h"
 #include "tools/knife_handle.h"
 #include "tools/knife.h"
-#include "player_server.h"
 #include <cstdio>
 #include "networking.h"
 #include "world_server.h"

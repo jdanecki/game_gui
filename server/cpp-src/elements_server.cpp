@@ -55,10 +55,17 @@ void AnimalServer::move()
     if (_x < 0) _x=0;
 
     //set_posittion(_x, _y);
-    location.data.chunk.x = 7;
-    location.data.chunk.y = 0;
+    location.data.chunk.x = _x;
+    location.data.chunk.y = _y;
 
     objects_to_update.add(this);
+}
+
+bool AnimalServer::tick()
+{
+    Animal::tick();
+    move();
+    return true;
 }
 
 bool PlantServer::grow()

@@ -89,7 +89,6 @@ class BaseElement
         BaseElement(int index); 
         void show(bool details=true);
 };        
-class Player;
 
 enum ItemLocationType 
 {
@@ -131,7 +130,7 @@ class InventoryElement
         virtual Form get_form() {return Form_none; }
         virtual const char * get_name() {return NULL; }
         virtual const char * get_form_name() { return NULL; }
-        virtual int get_id() {return -1; }
+        virtual int get_id();
         virtual Edible * get_edible() { return NULL; }
         virtual BaseElement * get_base() { return NULL; }
         virtual bool craft() { 
@@ -199,7 +198,7 @@ class Element : public InventoryElement
             return known ? base->name : "unknown"; 
         }
         const char * get_form_name() { return Form_name[base->form]; }
-        int get_id() {return base->id; }
+        int get_id() override {return base->id; }
         unsigned int get_packet_size() override;
         void to_bytes(unsigned char* buf) override;
 };
