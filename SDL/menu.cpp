@@ -183,6 +183,7 @@ void Menu::show()
       if (options >= 10)
         text_y = mody+(i-menu_pos+options/2) * menu_opt_size;
 
+      if (entries[i])
   		write_text(text_x, text_y, entries[i], White, game_size/27, menu_opt_size);
   }
 }
@@ -259,14 +260,16 @@ Menu * create_inv_category_menu(enum Form f)
     extern SDL_Texture* items_textures[BASE_ELEMENTS];
     int count=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
-    	if (base_elements[i]->form == f)
+    	if (base_elements[i]->form == f && player->inventory->find_id((enum Item_id)i, NULL))
     	    count++;
+    if (count == 0)
+      return NULL;
     if (menu_inventory_categories2) {delete menu_inventory_categories2->texture; delete menu_inventory_categories2;}
         menu_inventory_categories2 = new Menu("Inventory", count);
     int menu_index=0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
     {
-      	if (base_elements[i]->form == f)
+      	if (base_elements[i]->form == f && player->inventory->find_id((enum Item_id)i, NULL))
       	{
       	    menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], menu_index, i);
       	    menu_index++;
