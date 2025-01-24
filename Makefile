@@ -4,8 +4,13 @@ serv:
 	cd server; 	cargo build
 
 client:
-	cd SDL; cmake -Bbuild
-	cd SDL; cmake --build ./build
+	cd SDL; ./configure
+	@make -C SDL/build
+
 tui:
 	@make -C core/alchemist-tui/
 	
+clean:
+	cd server; cargo clean
+	rm -rf SDL/build
+
