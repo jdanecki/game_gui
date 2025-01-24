@@ -11,7 +11,7 @@ extern "C" {
     pub fn item_dropped(iid: usize, pid: usize);
     pub fn item_used_on_object(item_id: usize, object_id: usize, player_id: usize);
     pub fn update_item_location(updates_number: i32, data: *mut u8);
-    pub fn create_object_in_chunk(x: i32, y: i32, data: types::ObjectData);
+    pub fn create_object_in_chunk(data: types::ObjectData);
     pub fn destroy_object(id: usize, data: *mut u8);
     pub fn failed_craft();
 }

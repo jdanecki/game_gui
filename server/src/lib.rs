@@ -276,7 +276,7 @@ fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords
 
         let mut le = chunk.objects.head;
         while le != std::ptr::null_mut() {
-            let mut data = vec![core::PACKET_OBJECT_CREATE, coords.0, coords.1];
+            let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
             let obj_data = &bincode::serialize(&obj).unwrap()[..];
             println!("data {:?}", obj_data);

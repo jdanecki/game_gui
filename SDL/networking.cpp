@@ -398,8 +398,10 @@ void update_item_location(int32_t updates_number, uint8_t *data)
 }
 
 //void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
-void create_object_in_chunk(int32_t x, int32_t y, ObjectData data)
+void create_object_in_chunk(ObjectData data)
 {
+    int x = 128;
+    int y = 128;
     if (world_table[y][x])
     {
         int offset = 0;

@@ -178,7 +178,7 @@ extern void item_used_on_object(uintptr_t item_id, uintptr_t object_id, uintptr_
 
 extern void update_item_location(int32_t updates_number, uint8_t *data);
 
-extern void create_object_in_chunk(int32_t x, int32_t y, ObjectData data);
+extern void create_object_in_chunk(ObjectData data);
 
 extern void destroy_object(uintptr_t id, uint8_t *data);
 

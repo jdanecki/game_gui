@@ -132,13 +132,13 @@ pub extern "C" fn network_tick(client: &NetClient) {
                 },
                 common::PACKET_CREATE_OBJECTS_IN_CHUNK => unsafe {
                     // TODO more
-                    println!("value {:?}", &value[3..amt]);
+                    println!("value {:?}", &value[1..amt]);
                     events::create_object_in_chunk(
-                        i32::from(value[1]),
-                        i32::from(value[2]),
+                        //i32::from(value[1]),
+                        //i32::from(value[2]),
                         //(amt - 3) as u32,
                         //&mut value[7] as *mut u8,
-                        bincode::deserialize(&value[3..amt])
+                        bincode::deserialize(&value[1..amt])
                             .expect("Failed to create item from data"),
                     );
                 },
