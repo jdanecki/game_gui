@@ -422,6 +422,14 @@ class Being : public InventoryElement
     {
         return grow();
     }
+    Form get_form()
+    {
+        return Form_solid;
+    }
+    const char * get_form_name()
+    {
+        return Form_name[Form_solid];
+    }
 };
 
 enum animal_types

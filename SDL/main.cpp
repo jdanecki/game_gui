@@ -229,7 +229,8 @@ void draw()
 
         SDL_RenderDrawRect(renderer, &rect);
     }
-
+// FIXME when more chunks enabled
+#if 0
     unsigned int * pixels;
     int pitch, x, y;
 
@@ -271,7 +272,7 @@ void draw()
             if (py >= 0 && py < WORLD_SIZE && px >= 0 && px < WORLD_SIZE)
                 pixels[py * WORLD_SIZE + px] = 0xffffffff;
         }
-
+#endif
     switch (world_table[player->map_y][player->map_x]->biome)
     {
         case BIOME_DESERT:

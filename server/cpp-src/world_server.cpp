@@ -183,6 +183,12 @@ void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 
 char load_chunk(int x, int y)
 {
+    // FIXME when more chunks enabled
+    if (x != 128)
+        return 0;
+    if (y != 128)
+        return 0;
+
     if (x >= 0 && x < WORLD_SIZE && y >= 0 && y < WORLD_SIZE)
     {
         if (world_table[y][x] == NULL)

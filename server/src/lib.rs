@@ -441,7 +441,7 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
             let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
             let obj_data = &bincode::serialize(&obj).unwrap()[..];
-            println!("data {:?}", obj_data);
+//            println!("data {:?}", obj_data);
             data.extend_from_slice(obj_data);
 
             le = (*le).next;
@@ -458,7 +458,7 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
             let mut data = vec![core::PACKET_OBJECT_UPDATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
             let obj_data = &bincode::serialize(&obj).unwrap()[..];
-            println!("data {:?}", obj_data);
+//            println!("data {:?}", obj_data);
             data.extend_from_slice(obj_data);
 
             le = (*le).next;
@@ -479,7 +479,7 @@ fn send_location_updates(server: &Server) {
             for update in LOCATION_UPDATES.iter() {
                 data.extend_from_slice(&update.to_le_bytes());
             }
-            println!("{:?}", data);
+//            println!("{:?}", data);
             server.broadcast(&data);
             LOCATION_UPDATES.clear();
         }

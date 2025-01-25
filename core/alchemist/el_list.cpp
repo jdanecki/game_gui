@@ -165,6 +165,10 @@ void InvList::add(InventoryElement * el)
 
 void InvList::add(ListElement * entry)
 {
+    if (!entry)
+    {
+        printf("adding NULL pointer\n");
+    }
     if (nr_elements)
     {
         tail->add(entry);
@@ -187,14 +191,25 @@ void InvList::remove(InventoryElement * el)
     if (head->el == el)
     {
         tmp = head->next;
-        if (tail->el == el)
-            tail = NULL;
+        if (!tail)
+        {
+            printf("!!! tail is null %s\n", el->get_name());
+            exit(0);
+        }
+        if (tail->el == el) // only 1 element on the list
+        {
+            //   printf("--- %s (%d) ---\n", name, nr_elements);
+            //  printf("removing last element %s ", el->get_name());
+            if (head == tail)
+                tail = NULL;
+        }
         free(head);
         nr_elements--;
+        // printf("    removing first element %s\n", el->get_name());
         head = tmp;
         return;
     }
-    while (cur)
+    while (cur) // more then 1 element on the list
     {
         if (!cur->next)
             break;
@@ -208,6 +223,8 @@ void InvList::remove(InventoryElement * el)
             }
             free(tmp);
             nr_elements--;
+            //  printf("--- %s (%d) ---\n", name, nr_elements);
+            //  printf("removing element %s\n", el->get_name());
             return;
         }
         cur = cur->next;
