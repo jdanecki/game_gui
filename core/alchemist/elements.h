@@ -78,14 +78,11 @@ class BaseElement
 {
   public:
     const char * name;
-    ;
 
     int id; // texture id
     unsigned int density;
     Edible * edible;
     Form form;
-    ;
-
     Solid * solid;
 
     BaseElement(int index);

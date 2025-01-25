@@ -180,9 +180,8 @@ void draw()
     InventoryElement * item = get_item_at_ppos(player);
     if (item)
     {
-        // TODO
-        // sprintf(text, "Item: %s (%s)", item->get_form_name(), item->get_name());
-        // write_text(tx, ty+75, text, White,15,30);
+        sprintf(text, "Item: %s (%s)", item->get_form_name(), item->get_name());
+        write_text(tx, ty + 75, text, White, 15, 30);
     }
 
     for (int i = 0; i < 10; i++)
@@ -253,6 +252,9 @@ void draw()
                         break;
                     case BIOME_PLAINS:
                         pixels[y * WORLD_SIZE + x] = 0xff22ff22;
+                        break;
+                    default:
+                        pixels[y * WORLD_SIZE + x] = 0xffffffff;
                 }
             }
             else
@@ -280,6 +282,9 @@ void draw()
             break;
         case BIOME_PLAINS:
             sprintf(text, "biome: plains");
+            break;
+        default:
+            sprintf(text, "biome: unknown");
             break;
     }
 

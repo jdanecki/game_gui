@@ -168,9 +168,10 @@ void create_biome_desert(chunk * chunk)
 
 void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 {
-    enum biomes random_biome = (enum biomes)(rand() % BIOMES);
-    chunk->biome = random_biome;
+    //   enum biomes random_biome = (enum biomes)(rand() % BIOMES);
+    chunk->biome = BIOME_FOREST;
 
+    printf("generate_chunk[%d][%d]: %d\n", chunk_y, chunk_x, chunk->biome);
     create_biome_forest(chunk);
     // switch (random_biome)
     // {
@@ -187,7 +188,7 @@ char load_chunk(int x, int y)
         if (world_table[y][x] == NULL)
         {
             chunk * c = new chunk(x, y);
-            //            printf("load %d %d\n", x, y);
+            printf("load_chunk: %d %d\n", x, y);
             generate_chunk(c, x, y);
             world_table[y][x] = c;
         }
