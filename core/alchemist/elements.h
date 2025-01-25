@@ -309,7 +309,11 @@ class Ingredient : public InventoryElement
     }
     const char * get_form_name()
     {
-        return Form_name[el->get_form()];
+        // FIXME don't check el once it's fixed in server
+        if (el)
+            return Form_name[el->get_form()];
+        else
+            return "unknown";
     }
     int get_id()
     {

@@ -258,7 +258,9 @@ void Ingredient::show(bool details)
     printf("quality = %d\n", quality);
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
-    el->show(details);
+    // FIXME el should be defined
+    if (el)
+        el->show(details);
 }
 
 unsigned int Ingredient::get_packet_size()
@@ -334,8 +336,17 @@ void Product::show(bool details)
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
 
+    if (!ings)
+    { // FIXME ings should be defined
+        return;
+    }
     for (int i = 0; i < ing_count; i++)
     {
+        // FIXME ings[i] should be defined
+        if (!ings[i])
+            return;
+
+        ings[i]->show();
     }
 }
 
@@ -345,8 +356,15 @@ Form Product::get_form()
     int liq = 0;
     int gas = 0;
 
+    if (!ings)
+    { // FIXME ings should be defined
+        return Form_none;
+    }
     for (int i = 0; i < ing_count; i++)
     {
+        // FIXME ings[i] should be defined
+        if (!ings[i])
+            return Form_none;
         switch (ings[i]->get_form())
         {
             case Form_solid:

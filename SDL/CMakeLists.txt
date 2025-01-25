@@ -19,7 +19,7 @@ endif()
 
 add_executable(pime_SDL
 	window.cpp music.cpp text.cpp  
-	texture.cpp main.cpp menu.cpp
+	texture.cpp main.cpp render.cpp menu.cpp
     engine_hooks.cpp networking.cpp
     inputs.cpp player_actions.cpp
     

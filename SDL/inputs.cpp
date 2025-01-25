@@ -208,9 +208,14 @@ void key_pressed(int key)
             /*	InventoryElement ** item_pointer = get_item_at_ppos(&player);
              if (item_pointer)
                  (*item_pointer)->show();*/
+            break;
         }
-        break;
-
+        case SDLK_F1:
+        {
+            InventoryElement * item = get_item_at_ppos(player);
+            item->show();
+            break;
+        }
         case SDLK_RETURN:
         case SDLK_e:
             use_tile(player->map_x, player->map_y, player->x, player->y);

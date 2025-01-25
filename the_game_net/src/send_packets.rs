@@ -62,6 +62,6 @@ pub extern "C" fn send_packet_craft(
             println!("extended");
         }
     }
-    println!("{:?}", buf);
+  //  println!("{:?}", buf);
     client.send(&buf);
 }
