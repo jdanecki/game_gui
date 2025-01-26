@@ -116,9 +116,6 @@ class ItemLocation
 class chunk;
 class InventoryElement
 {
-    int padding1; //FIXME
-    int padding2; //FIXME
-    int padding3; //FIXME
     // int x, y, z;
   protected:
     const char * name;
@@ -297,7 +294,7 @@ extern const char * food_name[];
 
 class Ingredient : public InventoryElement
 {
-    int *padding1; //FIXME
+    int * padding; // FIXME
 
   public:
     int quality;    //[0..100] slaby..najlepszy
@@ -305,8 +302,7 @@ class Ingredient : public InventoryElement
     int usage;      // [0..100] łatwy..trudny
 
     Ingredient_id id;
-    InventoryElement * el; //available only in server , move to IngredientServer class
-
+    InventoryElement * el; // available only in server , move to IngredientServer class
 
     int get_id()
     {
@@ -314,9 +310,9 @@ class Ingredient : public InventoryElement
     }
     bool craft();
     Edible * get_edible()
-    {//FIXME
+    { // FIXME
         return nullptr;
-        //return el->get_edible();
+        // return el->get_edible();
     }
     Ingredient(InventoryElement * from, Ingredient_id i, Form f);
     void show(bool details = true);
@@ -326,7 +322,7 @@ class Ingredient : public InventoryElement
 
 class Product : public InventoryElement
 {
-    int *padding1; //FIXME
+    int * padding; // FIXME
     void init(Product_id i, int c, Form f);
 
   public:
@@ -336,7 +332,7 @@ class Product : public InventoryElement
 
     Product_id id;
 
-    //available only in server , move to IngredientServer class
+    // available only in server , move to IngredientServer class
     int ing_count;
     InventoryElement ** ings;
     // above only in server
@@ -377,8 +373,8 @@ enum plant_types
 
 class Being : public InventoryElement
 {
-    int *padding1; //FIXME
-  public:    
+    int * padding; // FIXME
+  public:
     unsigned int age;
     unsigned int max_age;
     bool alive;
@@ -410,7 +406,7 @@ class Being : public InventoryElement
     bool tick()
     {
         return grow();
-    }  
+    }
 };
 
 enum animal_types

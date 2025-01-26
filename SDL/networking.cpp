@@ -5,13 +5,13 @@
 #include "../core/world.h"
 #include "implementations/BeingSDL.h"
 #include "implementations/alchemistSDL.h"
+#include "text.h"
 #include <cstring>
 #include <stdio.h>
 
 #define PLAYER_NUM 16
 extern Player * players[PLAYER_NUM];
 extern Player * player;
-extern void print_status(const char * format, ...);
 
 InventoryElement * find_by_uid(size_t uid)
 {
@@ -268,6 +268,7 @@ extern "C"
                     p->grown = data.plant.data.grown;
                     break;
             }
+            // printf("%s updated\n", el->get_name());
         }
         else
         {
@@ -391,7 +392,7 @@ extern "C"
     }
 
     // void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
-    void create_object_in_chunk(ObjectData data)
+    void create_object(ObjectData data)
     {
         int x = 128;
         int y = 128;
@@ -409,7 +410,8 @@ extern "C"
                 int item_y = el->location.data.chunk.y;
                 // el->get_posittion(&item_x,&item_y);
                 world_table[y][x]->add_object(el, item_x, item_y);
-                offset += el->get_packet_size();
+                print_status("%s created", el->get_name());
+                // offset += el->get_packet_size();
             }
             //}
         }

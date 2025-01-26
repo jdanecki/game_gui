@@ -21,7 +21,6 @@ extern int auto_explore;
 
 int last_frame_press = 0;
 Uint64 last_time = 0;
-extern void print_status(const char * format, ...);
 
 // TODO cleanup this
 void update_window_size()

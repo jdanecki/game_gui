@@ -4,13 +4,13 @@
 #include "../core/tiles.h"
 #include "../core/world.h"
 #include "music.h"
+#include "networking.h"
 #include "text.h"
 #include "texture.h"
 #include "window.h"
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
-#include "networking.h"
 
 extern class Player * player;
 extern int active_hotbar;
@@ -414,13 +414,14 @@ int craft(menu_actions a)
 {
     InventoryElement * el = NULL;
 
-    switch(a) {
-//FIXME
-/*
-        case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
-        case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
-        case MENU_CRAFT_KNIFE: el = craft_knife(); break;
-*/
+    switch (a)
+    {
+            // FIXME
+            /*
+                    case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
+                    case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
+                    case MENU_CRAFT_KNIFE: el = craft_knife(); break;
+            */
         case MENU_CRAFT_AXE_BLADE:
             send_packet_craft(client, ING_AXE_BLADE, 1, &player->hotbar[active_hotbar]->uid);
             goto sent;
@@ -437,9 +438,9 @@ int craft(menu_actions a)
     status_code = 0;
     return 0;
 
- sent:
+sent:
     sprintf(status_line, "Starting crafting");
-    status_code=1;
+    status_code = 1;
     return 1;
 }
 

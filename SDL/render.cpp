@@ -96,7 +96,7 @@ void draw_maps()
             chunk * chunk = world_table[y][x];
             if (chunk)
             {
-                //FIXME
+                // FIXME
                 /*
                  * switch (chunk->biome)
                 {

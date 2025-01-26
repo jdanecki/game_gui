@@ -9,7 +9,7 @@ pkg_check_modules(SDL2_MIXER SDL2_mixer)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-add_definitions(-DFUNNY_STUFF_FOR_SDL)
+# add_definitions(-DFUNNY_STUFF_FOR_SDL)
 
 add_subdirectory(../core core)
 
@@ -18,9 +18,9 @@ if(NOT MULTI_USER)
 endif()
 
 add_executable(pime_SDL
-	window.cpp music.cpp text.cpp  
-	texture.cpp main.cpp render.cpp menu.cpp
-    engine_hooks.cpp networking.cpp
+    window.cpp music.cpp text.cpp
+    texture.cpp main.cpp render.cpp menu.cpp
+    networking.cpp
     inputs.cpp player_actions.cpp
     
     implementations/alchemistSDL.cpp

@@ -103,7 +103,7 @@ pub extern "C" fn network_tick(client: &NetClient) {
                 common::PACKET_INVENTORY_UPDATE => unsafe {
                     events::update_inventory(value as *mut u8);
                 },
-                common::PACKET_OBJECTS_UPDATE => unsafe {
+                common::PACKET_OBJECT_UPDATE => unsafe {
                     events::update_object(
                         bincode::deserialize(&value[1..amt]).expect("bad object update"),
                     );
@@ -130,10 +130,10 @@ pub extern "C" fn network_tick(client: &NetClient) {
                 common::PACKET_LOCATION_UPDATES => unsafe {
                     events::update_item_location(((amt - 1) / 56) as i32, &mut value[1] as *mut u8)
                 },
-                common::PACKET_CREATE_OBJECTS_IN_CHUNK => unsafe {
+                common::PACKET_OBJECT_CREATE => unsafe {
                     // TODO more
                     //println!("value {:?}", &value[1..amt]);
-                    events::create_object_in_chunk(
+                    events::create_object(
                         //i32::from(value[1]),
                         //i32::from(value[2]),
                         //(amt - 3) as u32,

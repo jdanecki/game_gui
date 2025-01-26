@@ -116,6 +116,8 @@ int init_SDL()
 
 int setup()
 {
+    setbuf(stdout, nullptr); // fix for qtcreator console
+
     if (init_SDL() != 0)
         return 1;
 
@@ -149,7 +151,7 @@ void loop()
     // int dst_map_x=player.map_x;
     // int dst_map_y=player.map_y;
 
-    sprintf(status_line, "Welcome in game!");
+    print_status("Welcome in game!");
 
     for (;;)
     {

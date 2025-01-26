@@ -257,7 +257,7 @@ void Ingredient::show(bool details)
         return;
     printf("quality = %d\n", quality);
     printf("resilience = %d\n", resilience);
-    printf("usage = %d\n", usage);    
+    printf("usage = %d\n", usage);
 }
 
 unsigned int Ingredient::get_packet_size()
