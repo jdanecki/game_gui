@@ -78,23 +78,6 @@ void draw_texts()
         ty += 25;
     }
 
-    switch (world_table[player->map_y][player->map_x]->biome)
-    {
-        case BIOME_DESERT:
-            sprintf(text, "biome: desert");
-            break;
-        case BIOME_FOREST:
-            sprintf(text, "biome: forest");
-            break;
-        case BIOME_PLAINS:
-            sprintf(text, "biome: plains");
-            break;
-        default:
-            sprintf(text, "biome: unknown");
-            break;
-    }
-    write_text(tx, window_height - 80, text, White, 15, 30);
-
     sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed");
     write_text(5, window_height - 32, text, White, 15, 30);
 }
@@ -113,7 +96,9 @@ void draw_maps()
             chunk * chunk = world_table[y][x];
             if (chunk)
             {
-                switch (chunk->biome)
+                //FIXME
+                /*
+                 * switch (chunk->biome)
                 {
                     case BIOME_DESERT:
                         pixels[y * WORLD_SIZE + x] = 0xffffff00;
@@ -126,7 +111,7 @@ void draw_maps()
                         break;
                     default:
                         pixels[y * WORLD_SIZE + x] = 0xffffffff;
-                }
+                }*/
             }
             else
                 pixels[y * WORLD_SIZE + x] = 0xff202020;

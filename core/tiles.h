@@ -44,8 +44,7 @@ class chunk
 {
     int map_x, map_y;
 
-  public:
-    enum biomes biome;
+  public:    
     chunk_table table;
     InvList objects;
     InvList beings;

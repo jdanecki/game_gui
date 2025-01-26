@@ -10,9 +10,11 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include "networking.h"
 
 extern class Player * player;
 extern int active_hotbar;
+extern const NetClient * client;
 
 Menu * menu_music;
 Menu * menu_main;
@@ -411,27 +413,33 @@ player.hotbar[active_hotbar]=menu_inventory->el[i];*/
 int craft(menu_actions a)
 {
     InventoryElement * el = NULL;
-    sprintf(status_line, "Starting crafting");
-    // TODO fix that
-    /*
+
     switch(a) {
+//FIXME
+/*
         case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
         case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
         case MENU_CRAFT_KNIFE: el = craft_knife(); break;
+*/
+        case MENU_CRAFT_AXE_BLADE:
+            send_packet_craft(client, ING_AXE_BLADE, 1, &player->hotbar[active_hotbar]->uid);
+            goto sent;
 
-        case MENU_CRAFT_AXE_BLADE: el = craft_axe_blade(); break;
-        case MENU_CRAFT_AXE_HANDLE: el = craft_axe_handle(); break;
-        case MENU_CRAFT_AXE: el = craft_axe(); break;
-    }*/
-    if (el)
-    {
-        // set_item_at_ppos(el, &player);
-        status_code = 1;
+        case MENU_CRAFT_AXE_HANDLE:
+            send_packet_craft(client, ING_AXE_HANDLE, 1, &player->hotbar[active_hotbar]->uid);
+            goto sent;
+
+        case MENU_CRAFT_AXE:
+            size_t ingredients[2] = {player->hotbar[active_hotbar]->uid, player->hotbar[active_hotbar + 1]->uid};
+            send_packet_craft(client, ING_NUM + PROD_AXE, 2, ingredients);
+            goto sent;
     }
-    else
-        status_code = 0;
-    current_menu = NULL;
+    status_code = 0;
+    return 0;
 
+ sent:
+    sprintf(status_line, "Starting crafting");
+    status_code=1;
     return 1;
 }
 

@@ -116,7 +116,13 @@ class ItemLocation
 class chunk;
 class InventoryElement
 {
+    int padding1; //FIXME
+    int padding2; //FIXME
+    int padding3; //FIXME
     // int x, y, z;
+  protected:
+    const char * name;
+
   public:
     ItemLocation location;
     size_t uid;
@@ -128,6 +134,7 @@ class InventoryElement
         req_form = Form_none;
         known = true;
         uid = (size_t)this;
+        name = nullptr;
     }
     virtual bool use(int map_x, int map_y, int x, int y)
     {
@@ -146,15 +153,15 @@ class InventoryElement
     }
     virtual Form get_form()
     {
-        return Form_none;
+        return req_form;
     }
     virtual const char * get_name()
     {
-        return NULL;
+        return name;
     }
     virtual const char * get_form_name()
     {
-        return NULL;
+        return Form_name[req_form];
     }
     virtual int get_id();
     virtual Edible * get_edible()
@@ -232,6 +239,7 @@ class Element : public InventoryElement
     unsigned int width;
     unsigned int height;
     unsigned int volume; // lenght*width*height
+
     virtual BaseElement * get_base()
     {
         return base;
@@ -289,7 +297,7 @@ extern const char * food_name[];
 
 class Ingredient : public InventoryElement
 {
-    const char * name;
+    int *padding1; //FIXME
 
   public:
     int quality;    //[0..100] slaby..najlepszy
@@ -297,32 +305,18 @@ class Ingredient : public InventoryElement
     int usage;      // [0..100] łatwy..trudny
 
     Ingredient_id id;
-    InventoryElement * el;
+    InventoryElement * el; //available only in server , move to IngredientServer class
 
-    Form get_form()
-    {
-        return el->get_form();
-    }
-    const char * get_name()
-    {
-        return name;
-    }
-    const char * get_form_name()
-    {
-        // FIXME don't check el once it's fixed in server
-        if (el)
-            return Form_name[el->get_form()];
-        else
-            return "unknown";
-    }
+
     int get_id()
     {
         return id;
     }
     bool craft();
     Edible * get_edible()
-    {
-        return el->get_edible();
+    {//FIXME
+        return nullptr;
+        //return el->get_edible();
     }
     Ingredient(InventoryElement * from, Ingredient_id i, Form f);
     void show(bool details = true);
@@ -332,7 +326,7 @@ class Ingredient : public InventoryElement
 
 class Product : public InventoryElement
 {
-    const char * name;
+    int *padding1; //FIXME
     void init(Product_id i, int c, Form f);
 
   public:
@@ -342,20 +336,15 @@ class Product : public InventoryElement
 
     Product_id id;
 
+    //available only in server , move to IngredientServer class
     int ing_count;
     InventoryElement ** ings;
+    // above only in server
 
-    Form get_form();
-    const char * get_name()
-    {
-        return name;
-    }
     int get_id()
     {
         return id;
     }
-    const char * get_form_name();
-
     Product(InventoryElement * el1, InventoryElement * el2, Product_id i, Form f);
     Product(InventoryElement ** from, int count, Product_id i, Form f);
 
@@ -388,8 +377,8 @@ enum plant_types
 
 class Being : public InventoryElement
 {
-  public:
-    const char * name;
+    int *padding1; //FIXME
+  public:    
     unsigned int age;
     unsigned int max_age;
     bool alive;
@@ -414,10 +403,6 @@ class Being : public InventoryElement
     {
         return alive;
     }
-    const char * get_name()
-    {
-        return name;
-    }
     void show(bool details = true)
     {
         printf("Being %s age=%d/%d alive=%d\n", name, age, max_age, alive);
@@ -425,15 +410,7 @@ class Being : public InventoryElement
     bool tick()
     {
         return grow();
-    }
-    Form get_form()
-    {
-        return Form_solid;
-    }
-    const char * get_form_name()
-    {
-        return Form_name[Form_solid];
-    }
+    }  
 };
 
 enum animal_types
