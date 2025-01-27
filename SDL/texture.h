@@ -35,6 +35,7 @@ extern SDL_Texture * animalr_textures[ANIMALS];
 extern SDL_Texture * plant_textures[PLANTS];
 extern SDL_Texture * grown_plant_textures[PLANTS];
 extern SDL_Texture * object_textures[TEXTURE_wall_max];
+extern SDL_Texture * npc_textures[2];
 extern SDL_Texture * up_mask;
 extern SDL_Texture * down_mask;
 extern struct textures Texture;

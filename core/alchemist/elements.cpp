@@ -380,6 +380,15 @@ Animal::Animal()
     name = create_name(rand() % 2 + 2);
 }
 
+Npc::Npc()
+{
+    c_id = Class_Animal;
+    alive = true;
+    max_age = 1 + rand() % 18000; // 50 years
+    age = rand() % max_age;
+    name = create_name(rand() % 3 + 3);
+}
+
 Plant::Plant()
 {
     c_id = Class_Plant;

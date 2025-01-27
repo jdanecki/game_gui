@@ -171,20 +171,7 @@ void key_pressed(int key)
         case SDLK_q:
             put_element();
             break;
-        case SDLK_u:                                                                          // product, ing_num, id
-            send_packet_craft(client, ING_AXE_BLADE, 1, &player->hotbar[active_hotbar]->uid); /*player->hotbar[active_hotbar] = NULL;*/
-            break;
-        case SDLK_j:
-            send_packet_craft(client, ING_AXE_HANDLE, 1, &player->hotbar[active_hotbar]->uid); /*player->hotbar[active_hotbar] = NULL;*/
-            break;
-        case SDLK_k:
-        {
-            size_t ingredients[2] = {player->hotbar[active_hotbar]->uid, player->hotbar[active_hotbar + 1]->uid};
-            send_packet_craft(client, ING_NUM + PROD_AXE, 2, ingredients);
-            // player->hotbar[active_hotbar] = NULL;
-            // player->hotbar[active_hotbar+1] = NULL;
-            break;
-        }
+
         case SDLK_BACKQUOTE:
             active_hotbar--;
             if (active_hotbar == -1)
@@ -196,17 +183,17 @@ void key_pressed(int key)
                 active_hotbar = 0;
             break;
 
-            // case SDLK_MINUS: player.craftbar[active_hotbar]=0;  break;
-            // case SDLK_EQUALS: player.craftbar[active_hotbar]=1;  break;
+        case SDLK_MINUS:
+            player->craftbar[active_hotbar]=0;
+            break;
+        case SDLK_EQUALS:
+            if(player->hotbar[active_hotbar])
+                player->craftbar[active_hotbar]=1;
+            break;
 
         case SDLK_F5:
-            auto_explore ^= 1;
-            break;
-        case SDLK_F4:
         {
-            /*	InventoryElement ** item_pointer = get_item_at_ppos(&player);
-             if (item_pointer)
-                 (*item_pointer)->show();*/
+            auto_explore ^= 1;
             break;
         }
         case SDLK_F1:

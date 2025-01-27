@@ -149,7 +149,7 @@ InventoryElement * el_from_data(ObjectData data)
     }
     return el;
 }
-
+//FIXME - remove/add only one element
 void update_hotbar()
 {
     for (int i = 0; i < 10; i++)
@@ -361,7 +361,7 @@ extern "C"
                     players[old_location.data.player.id]->drop(el);
                     if (old_location.data.player.id == player->get_id())
                     {
-                        update_hotbar();
+                        update_hotbar();  //FIXME - remove only one element  from hotbar
                     }
                 }
             }
@@ -380,8 +380,9 @@ extern "C"
                 }
                 case LOCATION_PLAYER_INV:
                 {
-                    printf("added %ld to player %d\n", id, new_location.data.player.id);
+                    print_status("added %s to inventory", el->get_name());
                     players[new_location.data.player.id]->pickup(el);
+                    //FIXME - don't add automatically to hotbar
                     if (new_location.data.player.id == player->get_id())
                     {
                         update_hotbar();
@@ -436,7 +437,7 @@ extern "C"
                 players[loc->data.player.id]->drop(el);
                 if (loc->data.player.id == player->get_id())
                 {
-                    update_hotbar();
+                    update_hotbar();  //FIXME - remove only one element
                 }
                 break;
         }

@@ -4,11 +4,14 @@
 int active_hotbar = 0;
 int width;
 int tx;
+int game_size;
+int tile_dungeon_size;
+
 char text[300];
 
 void draw_hotbar()
 {
-    int ty = window_height - 52;
+    int ty = window_height - 80;
 
     for (int i = 0; i < 10; i++)
     {
@@ -76,10 +79,7 @@ void draw_texts()
         sprintf(text, "Item: %s (%s)", item->get_form_name(), item->get_name());
         write_text(tx, ty, text, White, 15, 30);
         ty += 25;
-    }
-
-    sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed");
-    write_text(5, window_height - 32, text, White, 15, 30);
+    }    
 }
 
 void draw_maps()
@@ -146,11 +146,8 @@ void draw_maps()
     SDL_RenderCopy(renderer, map, NULL, &window_rec);
 }
 
-void draw()
+bool draw_terrain()
 {
-    int game_size;
-    int tile_dungeon_size;
-
     width = window_width - PANEL_WINDOW;
     tx = width + 10;
 
@@ -165,7 +162,7 @@ void draw()
         tile_dungeon_size = window_height / (CHUNK_SIZE);
     }
 
-    // render terrain
+           // render terrain
     if (world_table[128][128])
     {
         for (int y = 0; y < CHUNK_SIZE; y++)
@@ -182,7 +179,10 @@ void draw()
     }
     else
     {
-        printf("chunk not loaded\n");
+        print_status("chunk not loaded");
+        status_code = 0;
+
+        return false;
     }
     chunk * c = world_table[128][128];
     if (c)
@@ -208,7 +208,11 @@ void draw()
             el = el->next;
         }
     }
+    return true;
+}
 
+void draw_players()
+{
     // render players
     for (int i = 0; i < PLAYER_NUM; i++)
     {
@@ -233,12 +237,38 @@ void draw()
         SDL_Rect sneaking_icon_rect = {(int)(game_size - (icon_size * 1.1)), 0, icon_size, icon_size};
         SDL_RenderCopy(renderer, Texture.sneak_icon, NULL, &sneaking_icon_rect);
     }
+}
 
-    draw_texts();
-    draw_hotbar();
+void draw_npc()
+{
+    SDL_Rect img_rect = {5 * tile_dungeon_size, 5 * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+    static int tick = 0;
+    static int dir=1;
+    int side;
+    tick++;
+    if (! (tick % 50))
+    {
+        dir*=-1;
+    }
 
-    // FIXME when more chunks enabled
-    // draw_maps();
+    side = dir > 0 ? 0 : 1;
+    SDL_RenderCopy(renderer, npc_textures[side], NULL, &img_rect);
+}
+
+void draw()
+{
+    if (draw_terrain())
+    {
+        draw_players();
+        draw_npc();
+        draw_texts();
+        draw_hotbar();
+
+        // FIXME when more chunks enabled
+        // draw_maps();
+    }
+    sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed");
+    write_text(5, window_height - 32, text, White, 15, 30);
 
     if (current_menu)
         current_menu->show();

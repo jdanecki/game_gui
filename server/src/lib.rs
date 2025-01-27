@@ -279,7 +279,7 @@ fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords
             let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
             let obj_data = &bincode::serialize(&obj).unwrap()[..];
-            println!("data {:?}", obj_data);
+//          println!("data {:?}", obj_data);
             data.extend_from_slice(obj_data);
 
             le = (*le).next;

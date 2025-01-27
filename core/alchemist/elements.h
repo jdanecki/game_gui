@@ -45,6 +45,7 @@ enum Class_id
     Class_Product,
     Class_Plant,
     Class_Animal,
+    Class_Npc,
 };
 
 enum Item_id
@@ -379,6 +380,7 @@ class Being : public InventoryElement
     unsigned int max_age;
     bool alive;
     enum being_types type;
+
     virtual bool grow()
     {
         if (!alive)
@@ -428,6 +430,16 @@ class Animal : public Being
     bool tick()
     {
         return grow();
+    }
+};
+
+class Npc : public Being
+{
+  public:
+    Npc();
+    void show(bool details = true)
+    {
+        printf("Npc %s age=%d/%d alive=%d\n", name, age, max_age, alive);
     }
 };
 

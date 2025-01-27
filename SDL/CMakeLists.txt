@@ -21,7 +21,7 @@ add_executable(pime_SDL
     window.cpp music.cpp text.cpp
     texture.cpp main.cpp render.cpp menu.cpp
     networking.cpp
-    inputs.cpp player_actions.cpp
+    inputs.cpp player_actions.cpp npc.cpp
     
     implementations/alchemistSDL.cpp
     implementations/BeingSDL.cpp
