@@ -330,92 +330,89 @@ extern "C"
         printf("item used LOL\n");
     }
 
-    void update_item_location(int32_t updates_number, uint8_t * data)
+    void update_item_location(LocationUpdateData data)
     {
-        int offset = 0;
-        for (int i = 0; i < updates_number; i++)
-        {
-            printf("LOL\n");
-            size_t id = *((size_t *)&data[offset]);
-            offset += sizeof(size_t);
-            ItemLocation old_location = *((ItemLocation *)&data[offset]);
-            offset += sizeof(ItemLocation);
-            ItemLocation new_location = *((ItemLocation *)&data[offset]);
-            offset += sizeof(ItemLocation);
+        size_t id = data.id;
+        ItemLocationLol & old_loc = data.old;
+        ItemLocationLol & new_loc = data.new_;
 
-            InventoryElement * el;
-            switch (old_location.type)
+        InventoryElement * el;
+        switch (old_loc.tag)
+        {
+            case ItemLocationLol::Tag::Chunk:
             {
-                case LOCATION_CHUNK:
+                printf("removed %ld from chunk %d %d\n", id, old_loc.chunk.map_x, old_loc.chunk.map_y);
+                el = world_table[old_loc.chunk.map_y][old_loc.chunk.map_x]->find_by_id(id);
+                world_table[old_loc.chunk.map_y][old_loc.chunk.map_x]->remove_object(el);
+                break;
+            }
+            case ItemLocationLol::Tag::Player:
+            {
+                printf("removed %ld from player %ld\n", id, old_loc.player.id);
+                el = players[old_loc.player.id]->get_item_by_uid(id);
+                players[old_loc.player.id]->drop(el);
+                if (old_loc.player.id == player->get_id())
                 {
-                    printf("removed %ld from chunk %d %d\n", id, old_location.data.chunk.map_x, old_location.data.chunk.map_y);
-                    el = world_table[old_location.data.chunk.map_y][old_location.data.chunk.map_x]->find_by_id(id);
-                    world_table[old_location.data.chunk.map_y][old_location.data.chunk.map_x]->remove_object(el);
-                    break;
-                }
-                case LOCATION_PLAYER_INV:
-                {
-                    printf("removed %ld from player %d\n", id, old_location.data.player.id);
-                    el = players[old_location.data.player.id]->get_item_by_uid(id);
-                    players[old_location.data.player.id]->drop(el);
-                    if (old_location.data.player.id == player->get_id())
-                    {
-                        update_hotbar();
-                    }
+                    update_hotbar();
                 }
             }
-            if (!el)
+        }
+        if (!el)
+        {
+            printf("not found item to remove %d %d\n", old_loc.chunk.map_x, old_loc.chunk.map_y);
+            return;
+        }
+        switch (new_loc.tag)
+        {
+            case ItemLocationLol::Tag::Chunk:
             {
-                printf("not found item to remove %d %d\n", old_location.data.chunk.map_x, old_location.data.chunk.map_y);
-                return;
+                printf("added %ld to chunk %d %d\n", id, new_loc.chunk.map_x, new_loc.chunk.map_y);
+                world_table[new_loc.chunk.map_y][new_loc.chunk.map_x]->add_object(el, new_loc.chunk.x, new_loc.chunk.y);
+                break;
             }
-            switch (new_location.type)
+            case ItemLocationLol::Tag::Player:
             {
-                case LOCATION_CHUNK:
+                printf("added %ld to player %ld\n", id, new_loc.player.id);
+                players[new_loc.player.id]->pickup(el);
+                if (new_loc.player.id == player->get_id())
                 {
-                    printf("added %ld to chunk %d %d\n", id, new_location.data.chunk.map_x, new_location.data.chunk.map_y);
-                    world_table[new_location.data.chunk.map_y][new_location.data.chunk.map_x]->add_object(el, new_location.data.chunk.x, new_location.data.chunk.y);
-                    break;
-                }
-                case LOCATION_PLAYER_INV:
-                {
-                    printf("added %ld to player %d\n", id, new_location.data.player.id);
-                    players[new_location.data.player.id]->pickup(el);
-                    if (new_location.data.player.id == player->get_id())
-                    {
-                        update_hotbar();
-                    }
+                    update_hotbar();
                 }
             }
         }
     }
 
     // void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
-    void create_object_in_chunk(ObjectData data)
+    void create_object(ObjectData data)
     {
-        int x = 128;
-        int y = 128;
+        int x = 128; // data.inv_element.data.location.chunk.x;
+        int y = 128; // data.inv_element.data.location.chunk.y;
         if (world_table[y][x])
         {
-            int offset = 0;
-            // for (int i = 0; i < num; i++)
-            //{
-            //   if (offset + 30 > num)
-            //     break;
-            InventoryElement * el = el_from_data(data);
-            if (el)
+            int x = 128;
+            int y = 128;
+            if (world_table[y][x])
             {
-                int item_x = el->location.data.chunk.x;
-                int item_y = el->location.data.chunk.y;
-                // el->get_posittion(&item_x,&item_y);
-                world_table[y][x]->add_object(el, item_x, item_y);
-                offset += el->get_packet_size();
+                int offset = 0;
+                // for (int i = 0; i < num; i++)
+                //{
+                //   if (offset + 30 > num)
+                //     break;
+                InventoryElement * el = el_from_data(data);
+                if (el)
+                {
+                    int item_x = el->location.data.chunk.x;
+                    int item_y = el->location.data.chunk.y;
+                    // el->get_posittion(&item_x,&item_y);
+                    world_table[y][x]->add_object(el, item_x, item_y);
+                    offset += el->get_packet_size();
+                }
+                //}
             }
-            //}
-        }
-        else
-        {
-            printf("inexisting chunk\n");
+            else
+            {
+                printf("inexisting chunk\n");
+            }
         }
     }
 

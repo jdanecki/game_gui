@@ -13,8 +13,6 @@ constexpr static const PacketType PACKET_PLAYER_MOVE = 3;
 
 constexpr static const PacketType PACKET_CHUNK_UPDATE = 4;
 
-constexpr static const PacketType PACKET_INVENTORY_UPDATE = 5;
-
 constexpr static const PacketType PACKET_OBJECT_UPDATE = 6;
 
 constexpr static const PacketType PACKET_PLAYER_ACTION_PICKUP = 7;

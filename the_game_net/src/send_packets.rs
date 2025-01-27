@@ -1,29 +1,29 @@
-use crate::common;
+use crate::core;
 use crate::NetClient;
 
 #[no_mangle]
 pub extern "C" fn send_packet_move(client: &NetClient, x: i32, y: i32) {
-    let buf = [common::PACKET_PLAYER_MOVE, x as u8, y as u8];
+    let buf = [core::PACKET_PLAYER_MOVE, x as u8, y as u8];
     client.send(&buf);
 }
 
 #[no_mangle]
 pub extern "C" fn send_packet_pickup(client: &NetClient, id: usize) {
-    let mut buf = vec![common::PACKET_PLAYER_ACTION_PICKUP];
+    let mut buf = vec![core::PACKET_PLAYER_ACTION_PICKUP];
     buf.extend_from_slice(&id.to_le_bytes());
     client.send(&buf);
 }
 
 #[no_mangle]
 pub extern "C" fn send_packet_drop(client: &NetClient, id: usize) {
-    let mut buf = vec![common::PACKET_PLAYER_ACTION_DROP];
+    let mut buf = vec![core::PACKET_PLAYER_ACTION_DROP];
     buf.extend_from_slice(&id.to_le_bytes());
     client.send(&buf);
 }
 
 #[no_mangle]
 pub extern "C" fn send_packet_item_used_on_object(client: &NetClient, iid: usize, oid: usize) {
-    let mut buf = vec![common::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT];
+    let mut buf = vec![core::PACKET_PLAYER_ACTION_USE_ITEM_ON_OBJECT];
     buf.extend_from_slice(&iid.to_le_bytes());
     buf.extend_from_slice(&oid.to_le_bytes());
     client.send(&buf);
@@ -38,7 +38,7 @@ pub extern "C" fn send_packet_item_used_on_tile(
     x: i32,
     y: i32,
 ) {
-    let mut buf = vec![common::PACKET_PLAYER_ACTION_USE_ITEM_ON_TILE];
+    let mut buf = vec![core::PACKET_PLAYER_ACTION_USE_ITEM_ON_TILE];
     buf.extend_from_slice(&iid.to_le_bytes());
     buf.extend_from_slice(&map_x.to_le_bytes());
     buf.extend_from_slice(&map_y.to_le_bytes());
@@ -54,7 +54,7 @@ pub extern "C" fn send_packet_craft(
     ingredients_num: usize,
     iid: *const usize,
 ) {
-    let mut buf = vec![common::PACKET_PLAYER_ACTION_CRAFT];
+    let mut buf = vec![core::PACKET_PLAYER_ACTION_CRAFT];
     buf.extend_from_slice(&prod_id.to_le_bytes());
     for i in 0..ingredients_num {
         unsafe {

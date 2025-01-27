@@ -6,6 +6,5 @@ AlignAfterOpenBracket: DontAlign
 PointerAlignment: Middle
 IndentCaseLabels: true
 AllowShortFunctionsOnASingleLine: None
-BreakAdjacentStringLiterals: false
 BreakStringLiterals: false
 

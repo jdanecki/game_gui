@@ -7,27 +7,6 @@ mod convert_types;
 mod core;
 mod types;
 
-#[allow(dead_code)]
-pub struct LocationUpdate {
-    id: usize,
-    old: core::ItemLocation,
-    new: core::ItemLocation,
-}
-
-impl LocationUpdate {
-    fn to_le_bytes(&self) -> Vec<u8> {
-        let data = self as *const LocationUpdate;
-        let data = data as *const u8;
-
-        let mut buf = vec![];
-        unsafe {
-            let slice = std::slice::from_raw_parts(data, size_of::<LocationUpdate>());
-            buf.extend_from_slice(slice);
-        }
-        return buf;
-    }
-}
-
 #[no_mangle]
 extern "C" fn update_location(
     id: usize,
@@ -35,10 +14,34 @@ extern "C" fn update_location(
     location: core::ItemLocation,
 ) {
     unsafe {
-        LOCATION_UPDATES.push(LocationUpdate {
+        LOCATION_UPDATES.push(types::LocationUpdateData {
             id: id,
-            old: old_location,
-            new: location,
+            old: if old_location.type_ == core::ItemLocationType_LOCATION_CHUNK {
+                types::ItemLocationLol::Chunk {
+                    map_x: old_location.data.chunk.map_x,
+                    map_y: old_location.data.chunk.map_y,
+                    x: old_location.data.chunk.x,
+                    y: old_location.data.chunk.y,
+                }
+            } else {
+                types::ItemLocationLol::Player {
+                    id: old_location.data.player.id as usize,
+                }
+            },
+            new: if location.type_ == core::ItemLocationType_LOCATION_CHUNK {
+                types::ItemLocationLol::Chunk {
+                    map_x: location.data.chunk.map_x,
+                    map_y: location.data.chunk.map_y,
+                    x: location.data.chunk.x,
+                    y: location.data.chunk.y,
+                }
+            } else {
+                types::ItemLocationLol::Player {
+                    id: location.data.player.id as usize,
+                }
+            },
+            //old: *((&old_location) as *const core::ItemLocation as *const types::ItemLocationLol),
+            //new: *((&location) as *const core::ItemLocation as *const types::ItemLocationLol),
         });
         println!(
             "update location, {} chunk {} {}",
@@ -55,7 +58,7 @@ extern "C" fn notify_destroy(id: usize, location: core::ItemLocation) {
 }
 
 pub static mut SEED: i64 = 0;
-pub static mut LOCATION_UPDATES: Vec<LocationUpdate> = vec![];
+pub static mut LOCATION_UPDATES: Vec<types::LocationUpdateData> = vec![];
 
 pub static mut DESTROY_ITEMS: Vec<(usize, core::ItemLocation)> = vec![];
 
@@ -232,7 +235,7 @@ fn update_player_inventory(
     peer: &SocketAddr,
     players: &mut Vec<core::PlayerServer>,
 ) {
-    let id = server.clients.get(peer).unwrap();
+    /*let id = server.clients.get(peer).unwrap();
 
     let mut data = vec![core::PACKET_INVENTORY_UPDATE as u8];
     unsafe {
@@ -240,7 +243,7 @@ fn update_player_inventory(
         InvList_to_bytes(&mut data, inv);
     }
 
-    server.socket.send_to(&data, peer).unwrap();
+    server.socket.send_to(&data, peer).unwrap();*/
 }
 
 fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
@@ -353,9 +356,11 @@ fn handle_packet(
             unsafe {
                 let item = player._base.get_item_by_uid(id);
                 if item != std::ptr::null_mut() {
+                    let loc = (*item).location;
                     (*core::world_table[player._base.map_y as usize][player._base.map_x as usize])
                         .add_object(item, player._base.x, player._base.y);
-                    (*player._base.inventory).remove(item);
+                    player._base.drop(item);
+                    core::update_location((*item).uid, loc, (*item).location);
                     //let mut buf = vec![core::PACKET_PLAYER_ACTION_DROP];
                     //buf.extend_from_slice(&id.to_le_bytes());
                     //buf.extend_from_slice(&player_id.to_le_bytes());
@@ -475,12 +480,13 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
 fn send_location_updates(server: &Server) {
     unsafe {
         if LOCATION_UPDATES.len() > 0 {
-            let mut data = vec![core::PACKET_LOCATION_UPDATE];
             for update in LOCATION_UPDATES.iter() {
-                data.extend_from_slice(&update.to_le_bytes());
+                let mut data = vec![core::PACKET_LOCATION_UPDATE];
+                println!("{:?}", update);
+                data.extend_from_slice(&bincode::serialize(update).unwrap()[..]);
+                println!("{:?}", data);
+                server.broadcast(&data);
             }
-            println!("{:?}", data);
-            server.broadcast(&data);
             LOCATION_UPDATES.clear();
         }
     }
@@ -495,7 +501,7 @@ fn send_destroy_updates(server: &Server) {
 
                 let data = location as *const core::ItemLocation;
                 let data = data as *const u8;
-                let slice = std::slice::from_raw_parts(data, size_of::<LocationUpdate>());
+                let slice = std::slice::from_raw_parts(data, size_of::<core::ItemLocation>());
                 buf.extend_from_slice(slice);
                 server.broadcast(&buf);
             }
@@ -511,7 +517,7 @@ fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
     let data = &location as *const core::ItemLocation;
     let data = data as *const u8;
     unsafe {
-        let slice = std::slice::from_raw_parts(data, size_of::<LocationUpdate>());
+        let slice = std::slice::from_raw_parts(data, size_of::<core::ItemLocation>());
         buf.extend_from_slice(slice);
     }
     server.broadcast(&buf);

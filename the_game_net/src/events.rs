@@ -5,13 +5,9 @@ extern "C" {
     pub fn update_player(id: usize, map_x: i32, map_y: i32, x: i32, y: i32);
     pub fn update_chunk(x: i32, y: i32, data: &core::chunk_table);
     pub fn got_id(id: usize, seed: i64);
-    pub fn update_inventory(data: *mut u8);
     pub fn update_object(data: types::ObjectData);
-    pub fn item_picked_up(iid: usize, pid: usize);
-    pub fn item_dropped(iid: usize, pid: usize);
-    pub fn item_used_on_object(item_id: usize, object_id: usize, player_id: usize);
-    pub fn update_item_location(updates_number: i32, data: *mut u8);
-    pub fn create_object_in_chunk(data: types::ObjectData);
+    pub fn update_item_location(data: types::LocationUpdateData);
+    pub fn create_object(data: types::ObjectData);
     pub fn destroy_object(id: usize, data: *mut u8);
     pub fn failed_craft();
 }
