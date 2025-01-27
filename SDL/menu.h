@@ -31,6 +31,10 @@ enum menu_actions
     MENU_GET_RANDOM_EDIBLE,
     MENU_BUILD_WALL,
     MENU_CATEGORIE,
+
+    MENU_NPC,
+    MENU_NPC_SAY,
+
     // must be the last
     MENU_ITEM = 0x1000,
 };
@@ -55,6 +59,7 @@ class Menu
     void add(const char * e, enum menu_actions a, Element * p_el);
     void add(const char * e, enum menu_actions a, SDL_Texture * _texture, int index, int item_id);
     int get_val(int v);
+    int get_val();
     void show();
     void go_down();
     void go_up();
@@ -66,6 +71,8 @@ extern Menu * menu_help;
 extern Menu * menu_help2;
 extern Menu * menu_crafting;
 extern Menu * current_menu;
+extern Menu * menu_npc;
+extern Menu * menu_dialog;
 
 int interact(enum menu_actions a);
 void show_menu();

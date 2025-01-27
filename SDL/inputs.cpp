@@ -21,7 +21,6 @@ extern int auto_explore;
 
 int last_frame_press = 0;
 Uint64 last_time = 0;
-extern void print_status(const char * format, ...);
 
 // TODO cleanup this
 void update_window_size()
@@ -55,7 +54,7 @@ void key_pressed(int key)
     switch (key)
     {
         case SDLK_v:
-            sprintf(status_line, "");
+            sprintf(status_line, " ");
             status_code = 1;
             break;
         case SDLK_t:
@@ -172,20 +171,7 @@ void key_pressed(int key)
         case SDLK_q:
             put_element();
             break;
-        case SDLK_u:
-            send_packet_craft(client, 0, 1, &player->hotbar[active_hotbar]->uid); /*player->hotbar[active_hotbar] = NULL;*/
-            break;
-        case SDLK_j:
-            send_packet_craft(client, 1, 1, &player->hotbar[active_hotbar]->uid); /*player->hotbar[active_hotbar] = NULL;*/
-            break;
-        case SDLK_k:
-        {
-            size_t ingredients[2] = {player->hotbar[active_hotbar]->uid, player->hotbar[active_hotbar + 1]->uid};
-            send_packet_craft(client, 4, 2, ingredients);
-            // player->hotbar[active_hotbar] = NULL;
-            // player->hotbar[active_hotbar+1] = NULL;
-            break;
-        }
+
         case SDLK_BACKQUOTE:
             active_hotbar--;
             if (active_hotbar == -1)
@@ -197,20 +183,25 @@ void key_pressed(int key)
                 active_hotbar = 0;
             break;
 
-            // case SDLK_MINUS: player.craftbar[active_hotbar]=0;  break;
-            // case SDLK_EQUALS: player.craftbar[active_hotbar]=1;  break;
+        case SDLK_MINUS:
+            player->craftbar[active_hotbar]=0;
+            break;
+        case SDLK_EQUALS:
+            if(player->hotbar[active_hotbar])
+                player->craftbar[active_hotbar]=1;
+            break;
 
         case SDLK_F5:
+        {
             auto_explore ^= 1;
             break;
-        case SDLK_F4:
-        {
-            /*	InventoryElement ** item_pointer = get_item_at_ppos(&player);
-             if (item_pointer)
-                 (*item_pointer)->show();*/
         }
-        break;
-
+        case SDLK_F1:
+        {
+            InventoryElement * item = get_item_at_ppos(player);
+            item->show();
+            break;
+        }
         case SDLK_RETURN:
         case SDLK_e:
             use_tile(player->map_x, player->map_y, player->x, player->y);

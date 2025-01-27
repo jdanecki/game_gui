@@ -67,10 +67,11 @@ bool craft(int product_id, int ingredients_num, const size_t * ingredients_ids, 
     }
     if (crafted)
     {
-#ifndef FUNNY_STUFF_FOR_SDL
+        // FIXME remove this flag
+        // #ifndef FUNNY_STUFF_FOR_SDL
         world_table[player->map_y][player->map_x]->add_object(crafted, player->x, player->y);
         objects_to_create.add(crafted);
-#endif
+        // #endif
         printf("crafted\n");
         return true;
     }
@@ -140,85 +141,7 @@ InventoryElement * craft_axe(InventoryElement * el1, InventoryElement * el2)
 // InventoryElement * craft_knife_blade(InventoryElement* el);
 // InventoryElement * craft_knife_handle(InventoryElement* el);
 // InventoryElement * craft_knife(InventoryElement* el1, InventoryElement* el2);
-
-/*InventoryElement * craft_axe_blade(Player* player)
-{
-    InventoryElement * el = player->hotbar[active_hotbar];
-    if (el) {
-        // print_status("crafting: axe blade from %s", el->get_name());
-
-        AxeBlade * axe_blade=new AxeBlade(el);
-        if (axe_blade->craft()) {
-            axe_blade->show();
-            axe_blade->set_posittion(player->x, player->y);
-            player->inventory->remove(el);
-
-            player->hotbar[active_hotbar]=NULL;
-            return axe_blade;
-        } else delete axe_blade;
-    }
-    return NULL;
-}
-
-InventoryElement * craft_axe_handle(Player* player)
-{
-    InventoryElement * el = player->hotbar[active_hotbar];
-    if (el) {
-        // print_status("crafting: axe handle from %s", el->get_name());
-
-        AxeHandle * axe_handle=new AxeHandle(el);
-        if (axe_handle->craft())
-        {
-            axe_handle->show();
-            axe_handle->set_posittion(player->x, player->y);
-            player->inventory->remove(el);
-
-            player->hotbar[active_hotbar]=NULL;
-            return axe_handle;
-        } else delete axe_handle;
-    }
-    return NULL;
-}
-
-InventoryElement * craft_axe(Player* player)
-{
-    InventoryElement *el1=NULL, *el2=NULL;
-    for (int i =0; i< 10; i++)
-    {
-        if (player->craftbar[i])
-        {
-            player->craftbar[i]=0;
-            if (!el1) {
-                el1 = player->hotbar[i];
-            } else {
-                el2 = player->hotbar[i];
-                player->hotbar[i]=NULL;
-                break;
-            }
-            player->hotbar[i]=NULL;
-        }
-    }
-    if (el1 && el2)
-    {
-        // print_status("crafting: axe from %s and %s", el1->get_name(), el2->get_name());
-
-        Axe * axe=new Axe(el1, el2);
-        if (axe->craft())
-        {
-            axe->show();
-            axe->set_posittion(player->x, player->y);
-            player->inventory->remove(el1);
-            player->inventory->remove(el2);
-            return axe;
-        } else delete axe;
-    }
-    return NULL;
-}
-
-
-
-
-
+/*
 InventoryElement * craft_knife_blade(Player* player)
 {
     InventoryElement * el = player->hotbar[active_hotbar];

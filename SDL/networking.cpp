@@ -5,13 +5,13 @@
 #include "../core/world.h"
 #include "implementations/BeingSDL.h"
 #include "implementations/alchemistSDL.h"
+#include "text.h"
 #include <cstring>
 #include <stdio.h>
 
 #define PLAYER_NUM 16
 extern Player * players[PLAYER_NUM];
 extern Player * player;
-extern void print_status(const char * format, ...);
 
 InventoryElement * find_by_uid(size_t uid)
 {
@@ -27,6 +27,7 @@ InventoryElement * find_by_uid(size_t uid)
 
 void update_hotbar()
 {
+//FIXME - remove/add only one element
     for (int i = 0; i < 10; i++)
         player->hotbar[i] = nullptr;
     ListElement * le = player->inventory->head;
@@ -294,6 +295,7 @@ extern "C"
                     p->grown = data.plant.data.grown;
                     break;
             }
+            // printf("%s updated\n", el->get_name());
         }
         else
         {
@@ -331,7 +333,7 @@ extern "C"
                 players[new_loc.player.id]->pickup(el);
                 if (new_loc.player.id == player->get_id())
                 {
-                    update_hotbar();
+                    update_hotbar();  //FIXME - remove only one element
                 }
             }
         }

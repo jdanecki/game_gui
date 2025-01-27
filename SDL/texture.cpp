@@ -15,6 +15,7 @@ SDL_Texture * animalr_textures[ANIMALS];
 SDL_Texture * plant_textures[PLANTS];
 SDL_Texture * grown_plant_textures[PLANTS];
 SDL_Texture * object_textures[TEXTURE_wall_max];
+SDL_Texture * npc_textures[2];
 
 SDL_Texture * load_texture(const char * texture_name)
 {
@@ -43,22 +44,22 @@ SDL_Texture * load_texture(const char * texture_name)
 void add_tile_texture(enum game_tiles id, const char * file)
 {
     tiles_textures[id] = load_texture(file);
-};
+}
 
 void add_items_texture(int id, const char * file)
 {
     items_textures[id] = load_texture(file);
-};
+}
 
 void add_ing_texture(int id, const char * file)
 {
     ing_textures[id] = load_texture(file);
-};
+}
 
 void add_prod_texture(int id, const char * file)
 {
     prod_textures[id] = load_texture(file);
-};
+}
 
 void load_textures()
 {
@@ -66,6 +67,9 @@ void load_textures()
     Texture.playerl = load_texture("textures/player/playerl.png");
     Texture.run_icon = load_texture("textures/gui/run_icon.png");
     Texture.sneak_icon = load_texture("textures/gui/sneak_icon.png");
+
+    npc_textures[0] = load_texture("textures/npc/npcl.png");
+    npc_textures[1] = load_texture("textures/npc/npcr.png");
 
     add_tile_texture(TILE_AIR, "textures/game_tiles/air.png");
     add_tile_texture(TILE_STONE, "textures/game_tiles/stone.png");

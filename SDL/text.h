@@ -16,4 +16,6 @@ int load_font();
 
 extern char status_line[256];
 extern int status_code;
+extern void print_status(const char * format, ...);
+
 #endif

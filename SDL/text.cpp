@@ -64,3 +64,11 @@ void write_text(int x, int y, const char * text, SDL_Color color, int scale_x, i
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(text_sdl);
 }
+
+void print_status(const char * format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vsprintf(status_line, format, args);
+    va_end(args);
+};

@@ -54,6 +54,7 @@ bool Axe::use(InventoryElement * object)
         Element * el = nullptr;
         Element * el_seed = nullptr;
 
+        // FIXME change this to object->use
         switch (p->type)
         {
             case PLANTID_tree:

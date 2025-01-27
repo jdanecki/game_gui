@@ -4,15 +4,18 @@
 #include "../core/tiles.h"
 #include "../core/world.h"
 #include "music.h"
+#include "networking.h"
 #include "text.h"
 #include "texture.h"
 #include "window.h"
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include "npc.h"
 
 extern class Player * player;
 extern int active_hotbar;
+extern const NetClient * client;
 
 Menu * menu_music;
 Menu * menu_main;
@@ -24,6 +27,8 @@ Menu * menu_inventory_categories2;
 Menu * menu_crafting;
 Menu * menu_dev;
 Menu * menu_build;
+Menu * menu_npc;
+Menu * menu_dialog;
 
 void load(char with_player);
 void save(char with_player);
@@ -34,12 +39,12 @@ Menu::Menu(const char * n, int opt)
     options = opt;
     menu_pos = 0;
     added = 0;
-    entries = (const char **)calloc(opt, sizeof(char *));
-    actions = (menu_actions *)calloc(opt, sizeof(enum menu_actions));
-    values = (int *)calloc(opt, sizeof(int));
-    texture = (SDL_Texture **)calloc(opt, sizeof(SDL_Texture *));
-    el = (Element **)calloc(opt, sizeof(Element *));
-    show_texture = false;
+    entries = (const char **)calloc(options, sizeof(char *));
+    actions = (menu_actions *)calloc(options, sizeof(enum menu_actions));
+    values = (int *)calloc(options, sizeof(int));
+    texture = (SDL_Texture **)calloc(options, sizeof(SDL_Texture *));
+    el = (Element **)calloc(options, sizeof(Element *));
+    show_texture = false;    
 }
 
 void Menu::add(const char * e, enum menu_actions a)
@@ -78,6 +83,11 @@ int Menu::get_val(int v)
             return values[i];
     }
     return 0;
+}
+
+int Menu::get_val()
+{
+    return values[menu_pos];
 }
 
 void Menu::show()
@@ -197,50 +207,54 @@ void create_menus()
     menu_main->add("Change music volume", MENU_MUSIC);
     menu_main->add("Cancel", MENU_CANCEL);
 
-    menu_help = new Menu("Help 1", 21);
+    menu_help = new Menu("Help 1", 12);
     menu_help->add("; - show item info", MENU_CANCEL);
     menu_help->add("f11 - resize", MENU_CANCEL);
     menu_help->add("1-9,0 - hotbar", MENU_CANCEL);
-    menu_help->add("q - drop item", MENU_CANCEL);
+  //  menu_help->add("q - drop item", MENU_CANCEL);
     menu_help->add("` - previous item", MENU_CANCEL);
     menu_help->add("tab - next item", MENU_CANCEL);
-    menu_help->add("minus - deselect hotbar", MENU_CANCEL);
+ //   menu_help->add("minus - deselect hotbar", MENU_CANCEL);
     menu_help->add("esc - main menu", MENU_CANCEL);
-    menu_help->add("l - devmenu", MENU_CANCEL);
+ //   menu_help->add("l - devmenu", MENU_CANCEL);
     menu_help->add("c - crafting", MENU_CANCEL);
     menu_help->add("i - inventory", MENU_CANCEL);
-    menu_help->add("v - clear statusline", MENU_CANCEL);
-    menu_help->add("g - terrain break", MENU_CANCEL);
-    menu_help->add("r - remove from hotbar", MENU_CANCEL);
-    menu_help->add("= - select hotbar", MENU_CANCEL);
-    menu_help->add("F5 - autoexplore", MENU_CANCEL);
-    menu_help->add("F4 - item info at player", MENU_CANCEL);
+  //  menu_help->add("v - clear statusline", MENU_CANCEL);
+ //   menu_help->add("g - terrain break", MENU_CANCEL);
+  //  menu_help->add("r - remove from hotbar", MENU_CANCEL);
+  //  menu_help->add("= - select hotbar", MENU_CANCEL);
+  //  menu_help->add("F5 - autoexplore", MENU_CANCEL);
+  //  menu_help->add("F4 - item info at player", MENU_CANCEL);
     menu_help->add("e / enter - use", MENU_CANCEL);
     menu_help->add("shift/control - sneak/run", MENU_CANCEL);
     menu_help->add("wasd+arrows - move", MENU_CANCEL);
-    menu_help->add("Cancel", MENU_CANCEL);
+    menu_help->add("n - NPC", MENU_CANCEL);
 
-    menu_music = new Menu("Music 3", 3);
+    menu_music = new Menu("Music", 3);
     menu_music->add("+5 Volume", MENU_LOUDER);
     menu_music->add("-5 Volume", MENU_QUIETER);
     menu_music->add("Cancel", MENU_CANCEL);
 
-    menu_inventory_categories = new Menu("Inventory", 3);
+    menu_inventory_categories = new Menu("Inventory categories", 4);
     menu_inventory_categories->add("Solid form", MENU_INV_SOLID, Form_solid);
     menu_inventory_categories->add("Liquid form", MENU_INV_LIGQUID, Form_liquid);
     menu_inventory_categories->add("Gas form", MENU_INV_GAS, Form_gas);
+    menu_inventory_categories->add("Cancel", MENU_CANCEL);
 
-    menu_crafting = new Menu("Crafting", 7);
+    menu_crafting = new Menu("Crafting", 4);
     menu_crafting->add("Axe blade (1 ing.)", MENU_CRAFT_AXE_BLADE);
     menu_crafting->add("Axe handle (1 ing.)", MENU_CRAFT_AXE_HANDLE);
     menu_crafting->add("Axe (2 ing.)", MENU_CRAFT_AXE);
-
+    menu_crafting->add("Cancel", MENU_CANCEL);
+//FIXME
+/*
     menu_crafting->add("Knife blade (1 ing.)", MENU_CRAFT_KNIFE_BLADE);
     menu_crafting->add("Knife handle (1 ing.)", MENU_CRAFT_KNIFE_HANDLE);
     menu_crafting->add("Knife (2 ing.)", MENU_CRAFT_KNIFE);
+*/
 
-    menu_crafting->add("Cancel", MENU_CANCEL);
-
+//FIXME
+    /*
     menu_build = new Menu("build", 1);
     menu_build->add("Wall (1 ing.)", MENU_BUILD_WALL);
 
@@ -250,7 +264,12 @@ void create_menus()
     menu_dev->add("random element", MENU_GET_RANDOM_ELEMENT);
     menu_dev->add("random edible", MENU_GET_RANDOM_EDIBLE);
     menu_dev->add("food/water +100", MENU_REGAIN);
+*/
+    menu_npc = new Menu("NPC", 2);
+    menu_npc->add("Talk to NPC", MENU_NPC);
+    menu_npc->add("Cancel", MENU_CANCEL);
 }
+
 Menu * create_inv_category_menu(enum Form f)
 {
     extern SDL_Texture * items_textures[BASE_ELEMENTS];
@@ -262,10 +281,13 @@ Menu * create_inv_category_menu(enum Form f)
         return NULL;
     if (menu_inventory_categories2)
     {
-        delete menu_inventory_categories2->texture;
+        free(menu_inventory_categories2->texture);
         delete menu_inventory_categories2;
     }
-    menu_inventory_categories2 = new Menu("Inventory", count);
+    char *menu_name=new char[50];
+    sprintf(menu_name, "Inventory: %s", Form_name[f]);
+
+    menu_inventory_categories2 = new Menu(menu_name, count);
     int menu_index = 0;
     for (int i = 0; i < BASE_ELEMENTS; i++)
     {
@@ -277,6 +299,7 @@ Menu * create_inv_category_menu(enum Form f)
     }
     return menu_inventory_categories2;
 }
+//FIXME
 Menu * create_inv_menu(Item_id id)
 {
     printf("szukam %d\n", id);
@@ -288,6 +311,7 @@ Menu * create_inv_menu(Item_id id)
 
         if (menu_inventory)
             delete menu_inventory;
+
         menu_inventory = new Menu("Inventory", c);
         Element ** el = (Element **)i_el;
         for (int i = 0; i < c; i++)
@@ -319,15 +343,6 @@ int menu_interact(int key)
 {
     switch (key)
     {
-        case SDLK_b:
-        {
-            if (!current_menu)
-                current_menu = menu_build;
-            else if (current_menu == menu_build)
-                current_menu = NULL;
-
-            return 1;
-        }
         case SDLK_ESCAPE:
         {
             if (current_menu)
@@ -336,12 +351,13 @@ int menu_interact(int key)
                 current_menu = menu_main;
             return 1;
         }
-        case SDLK_l:
+        case SDLK_b:
         {
-            if (current_menu)
+            if (!current_menu)
+                current_menu = menu_build;
+            else if (current_menu == menu_build)
                 current_menu = NULL;
-            else
-                current_menu = menu_dev;
+
             return 1;
         }
         case SDLK_c:
@@ -352,6 +368,19 @@ int menu_interact(int key)
                 current_menu = NULL;
             return 1;
         }
+        case SDLK_RETURN:
+        case SDLK_e:
+        {
+            if (current_menu)
+            {
+                if (interact(current_menu->actions[current_menu->menu_pos]))
+                {
+                    current_menu = NULL;
+                    return 1;
+                }
+            }
+            break;
+        }
         case SDLK_i:
         {
             player->inventory->show();
@@ -359,6 +388,23 @@ int menu_interact(int key)
                 current_menu = menu_inventory_categories;
             else if (current_menu == menu_inventory_categories)
                 current_menu = NULL;
+            return 1;
+        }
+        case SDLK_l:
+        {
+            if (current_menu)
+                current_menu = NULL;
+            else
+                current_menu = menu_dev;
+            return 1;
+        }
+        case SDLK_n:
+        {
+            if (!current_menu)
+                current_menu = menu_npc;
+            else if (current_menu == menu_npc)
+                current_menu = NULL;
+
             return 1;
         }
 
@@ -377,61 +423,87 @@ int menu_interact(int key)
             break;
         }
 
-        case SDLK_RETURN:
-        case SDLK_e:
-        {
-            if (current_menu)
-            {
-                if (interact(current_menu->actions[current_menu->menu_pos]))
-                {
-                    current_menu = NULL;
-                    return 1;
-                }
-            }
-            break;
-        }
+
     }
     return current_menu ? 1 : 0;
 }
 
 int handle_item(int i)
 {
+
     if (active_hotbar >= 0)
     {
         Element * el = menu_inventory->el[i];
-        /*for (int h=0; h< 10; h++)
-{
-    if (player.hotbar[h] == el) return 0;
-};
-player.hotbar[active_hotbar]=menu_inventory->el[i];*/
+
+         for (int h=0; h< 10; h++)
+        {
+             if (player->hotbar[h] == el) return 0;
+        };
+        player->hotbar[active_hotbar]=menu_inventory->el[i];
     }
     return 1;
 }
 
+bool craft2elements(Product_id what)
+{
+    InventoryElement *el1=nullptr, *el2=nullptr;
+    int i1, i2;
+    for (int i =0; i< 10; i++)
+    {
+        if (player->craftbar[i])
+        {
+            if (!el1) {
+                el1 = player->hotbar[i];
+                i1=i;
+            } else {
+                el2 = player->hotbar[i];
+                i2=i;
+                break;
+            }
+        }
+    }
+    if (el1 && el2)
+    {
+        size_t ingredients[2] = {el1->uid, el2->uid};
+        send_packet_craft(client, ING_NUM + what, 2, ingredients);
+        player->craftbar[i1]=0;
+        player->craftbar[i2]=0;
+        return true;
+    }
+    return false;
+}
+
+
 int craft(menu_actions a)
 {
     InventoryElement * el = NULL;
-    sprintf(status_line, "Starting crafting");
-    // TODO fix that
-    /*
-    switch(a) {
-        case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
-        case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
-        case MENU_CRAFT_KNIFE: el = craft_knife(); break;
 
-        case MENU_CRAFT_AXE_BLADE: el = craft_axe_blade(); break;
-        case MENU_CRAFT_AXE_HANDLE: el = craft_axe_handle(); break;
-        case MENU_CRAFT_AXE: el = craft_axe(); break;
-    }*/
-    if (el)
+    switch (a)
     {
-        // set_item_at_ppos(el, &player);
-        status_code = 1;
-    }
-    else
-        status_code = 0;
-    current_menu = NULL;
+            // FIXME
+            /*
+                    case MENU_CRAFT_KNIFE_BLADE: el = craft_knife_blade(); break;
+                    case MENU_CRAFT_KNIFE_HANDLE: el = craft_knife_handle(); break;
+                    case MENU_CRAFT_KNIFE: el = craft_knife(); break;
+            */
+        case MENU_CRAFT_AXE_BLADE:
+            send_packet_craft(client, ING_AXE_BLADE, 1, &player->hotbar[active_hotbar]->uid);
+            goto sent;
 
+        case MENU_CRAFT_AXE_HANDLE:
+            send_packet_craft(client, ING_AXE_HANDLE, 1, &player->hotbar[active_hotbar]->uid);
+            goto sent;
+
+        case MENU_CRAFT_AXE:
+            if (craft2elements(PROD_AXE))
+                goto sent;
+    }
+    status_code = 0;
+    return 0;
+
+sent:
+    sprintf(status_line, "Starting crafting");
+    status_code = 1;
     return 1;
 }
 
@@ -441,11 +513,13 @@ int interact(enum menu_actions a)
         return handle_item(a & ~MENU_ITEM);
     switch (a)
     {
-        case MENU_CATEGORIE:
+      //FIXME - doesn't work for beings
+       case MENU_CATEGORIE:
         {
-            current_menu = create_inv_menu((Item_id)(menu_inventory_categories2->values[menu_inventory_categories2->menu_pos]));
+            current_menu = create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
             return 0;
         }
+
         case MENU_BUILD_WALL:
         {
             sprintf(status_line, "Starting building");
@@ -569,6 +643,13 @@ int interact(enum menu_actions a)
         case MENU_CRAFT_KNIFE_BLADE:
         case MENU_CRAFT_KNIFE_HANDLE:
             return craft(a);
+
+        case MENU_NPC:
+            return npc();
+            break;
+        case MENU_NPC_SAY:
+            npc_say((Npc_say) menu_dialog->get_val());
+            return 0;
     }
     return 1;
 }

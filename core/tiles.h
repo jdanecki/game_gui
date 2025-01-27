@@ -45,7 +45,6 @@ class chunk
     int map_x, map_y;
 
   public:
-    enum biomes biome;
     chunk_table table;
     InvList objects;
     InvList beings;
@@ -53,11 +52,6 @@ class chunk
     void remove_object(InventoryElement * object);
     InventoryElement * find_by_id(size_t id);
     chunk(int map_x, int map_y);
-    /*InventoryElement * items[CHUNK_SIZE*CHUNK_SIZE];
-    Being * beings[CHUNK_SIZE*CHUNK_SIZE];
-    Plant * plants[CHUNK_SIZE*CHUNK_SIZE];
-    Animal * animals[CHUNK_SIZE*CHUNK_SIZE];
-    Object * objects[CHUNK_SIZE*CHUNK_SIZE];*/
 };
 
 #endif
