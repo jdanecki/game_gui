@@ -19,10 +19,6 @@ extern "C" fn update_location(
             old: convert_types::convert_item_location(&old_location),
             new: convert_types::convert_item_location(&location),
         });
-        println!(
-            "update location, {} chunk {} {}",
-            location.type_, location.data.chunk.map_x, location.data.chunk.map_y
-        );
     }
 }
 
@@ -458,9 +454,7 @@ fn send_location_updates(server: &Server) {
         if LOCATION_UPDATES.len() > 0 {
             for update in LOCATION_UPDATES.iter() {
                 let mut data = vec![core::PACKET_LOCATION_UPDATE];
-                println!("{:?}", update);
                 data.extend_from_slice(&bincode::serialize(update).unwrap()[..]);
-                println!("{:?}", data);
                 server.broadcast(&data);
             }
             LOCATION_UPDATES.clear();
@@ -472,14 +466,7 @@ fn send_destroy_updates(server: &Server) {
     unsafe {
         if DESTROY_ITEMS.len() > 0 {
             for (id, location) in DESTROY_ITEMS.iter() {
-                let mut buf = vec![core::PACKET_OBJECT_DESTROY];
-                buf.extend_from_slice(&id.to_le_bytes());
-
-                let data = location as *const core::ItemLocation;
-                let data = data as *const u8;
-                let slice = std::slice::from_raw_parts(data, size_of::<core::ItemLocation>());
-                buf.extend_from_slice(slice);
-                server.broadcast(&buf);
+                destroy_object(server, *id, *location);
             }
             DESTROY_ITEMS.clear();
         }
@@ -489,7 +476,6 @@ fn send_destroy_updates(server: &Server) {
 fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
     let mut buf = vec![core::PACKET_OBJECT_DESTROY];
     buf.extend_from_slice(&id.to_le_bytes());
-
     buf.extend_from_slice(
         &bincode::serialize(&convert_types::convert_item_location(&location)).unwrap()[..],
     );

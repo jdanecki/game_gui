@@ -103,6 +103,20 @@ void create_biome_forest(chunk * chunk)
 
         chunk->add_object(o, x, y);
     }
+    if (/*rand() % 2*/ 1)
+    {
+
+        for (int i = 0; i < 2; i++)
+        {
+            Animal * a = new AnimalServer();
+            int x = rand() % CHUNK_SIZE;
+            int y = rand() % CHUNK_SIZE;
+
+            a->type = ANIMALID_pig;
+
+            chunk->add_object(a, x, y);
+        }
+    }
 
     for (int i = 0; i < 32; i++)
     {
