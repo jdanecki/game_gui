@@ -8,6 +8,6 @@ extern "C" {
     pub fn update_object(data: types::ObjectData);
     pub fn update_item_location(data: types::LocationUpdateData);
     pub fn create_object(data: types::ObjectData);
-    pub fn destroy_object(id: usize, data: *mut u8);
+    pub fn destroy_object(id: usize, location: types::ItemLocationLol);
     pub fn failed_craft();
 }

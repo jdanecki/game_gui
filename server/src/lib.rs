@@ -15,33 +15,9 @@ extern "C" fn update_location(
 ) {
     unsafe {
         LOCATION_UPDATES.push(types::LocationUpdateData {
-            id: id,
-            old: if old_location.type_ == core::ItemLocationType_LOCATION_CHUNK {
-                types::ItemLocationLol::Chunk {
-                    map_x: old_location.data.chunk.map_x,
-                    map_y: old_location.data.chunk.map_y,
-                    x: old_location.data.chunk.x,
-                    y: old_location.data.chunk.y,
-                }
-            } else {
-                types::ItemLocationLol::Player {
-                    id: old_location.data.player.id as usize,
-                }
-            },
-            new: if location.type_ == core::ItemLocationType_LOCATION_CHUNK {
-                types::ItemLocationLol::Chunk {
-                    map_x: location.data.chunk.map_x,
-                    map_y: location.data.chunk.map_y,
-                    x: location.data.chunk.x,
-                    y: location.data.chunk.y,
-                }
-            } else {
-                types::ItemLocationLol::Player {
-                    id: location.data.player.id as usize,
-                }
-            },
-            //old: *((&old_location) as *const core::ItemLocation as *const types::ItemLocationLol),
-            //new: *((&location) as *const core::ItemLocation as *const types::ItemLocationLol),
+            id,
+            old: convert_types::convert_item_location(&old_location),
+            new: convert_types::convert_item_location(&location),
         });
         println!(
             "update location, {} chunk {} {}",
@@ -514,11 +490,8 @@ fn destroy_object(server: &Server, id: usize, location: core::ItemLocation) {
     let mut buf = vec![core::PACKET_OBJECT_DESTROY];
     buf.extend_from_slice(&id.to_le_bytes());
 
-    let data = &location as *const core::ItemLocation;
-    let data = data as *const u8;
-    unsafe {
-        let slice = std::slice::from_raw_parts(data, size_of::<core::ItemLocation>());
-        buf.extend_from_slice(slice);
-    }
+    buf.extend_from_slice(
+        &bincode::serialize(&convert_types::convert_item_location(&location)).unwrap()[..],
+    );
     server.broadcast(&buf);
 }

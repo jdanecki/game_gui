@@ -25,6 +25,49 @@ InventoryElement * find_by_uid(size_t uid)
     return nullptr;
 }
 
+void update_hotbar()
+{
+    for (int i = 0; i < 10; i++)
+        player->hotbar[i] = nullptr;
+    ListElement * le = player->inventory->head;
+    int i = 0;
+    while (le)
+    {
+        if (i >= 10)
+            break;
+        if (le->el)
+            player->hotbar[i] = le->el;
+        le = le->next;
+        i++;
+    }
+}
+
+InventoryElement* remove_from_location(ItemLocationLol location, size_t id)
+{
+    InventoryElement* el;
+    switch (location.tag)
+    {
+        case ItemLocationLol::Tag::Chunk:
+        {
+            printf("removed %ld from chunk %d %d\n", id, location.chunk.map_x, location.chunk.map_y);
+            el = world_table[location.chunk.map_y][location.chunk.map_x]->find_by_id(id);
+            world_table[location.chunk.map_y][location.chunk.map_x]->remove_object(el);
+            break;
+        }
+        case ItemLocationLol::Tag::Player:
+        {
+            printf("removed %ld from player %ld\n", id, location.player.id);
+            el = players[location.player.id]->get_item_by_uid(id);
+            players[location.player.id]->drop(el);
+            if (location.player.id == player->get_id())
+            {
+                update_hotbar();
+            }
+        }
+    }   
+    return el;
+}
+
 // InventoryElement* el_from_data(unsigned char* data)
 // {
 //     int offset = 0;
@@ -150,23 +193,6 @@ InventoryElement * el_from_data(ObjectData data)
     return el;
 }
 
-void update_hotbar()
-{
-    for (int i = 0; i < 10; i++)
-        player->hotbar[i] = nullptr;
-    ListElement * le = player->inventory->head;
-    int i = 0;
-    while (le)
-    {
-        if (i >= 10)
-            break;
-        if (le->el)
-            player->hotbar[i] = le->el;
-        le = le->next;
-        i++;
-    }
-}
-
 extern "C"
 {
 
@@ -278,85 +304,14 @@ extern "C"
         }
     }
 
-    void item_picked_up(uintptr_t iid, uintptr_t pid)
-    {
-        /*if (pid >= 0 && pid < PLAYER_NUM && players[pid])
-        {
-            InventoryElement* item = find_by_uid(iid);
-            item->parent_chunk->remove_object(item);
-            if (item)
-            {
-                players[pid]->pickup(item);
-                if (players[pid] == player)
-                {
-                    for (int i = 0; i<10; i++) {
-                        if (!player->hotbar[i])
-                        {
-                            player->hotbar[i]=item;
-                            break;
-                        }
-                    }
-                }
-                printf("player %ld picked up %ld\n", pid, iid);
-                player->inventory->show();
-            }
-            else
-                printf("picked inexisting item\n");
-        }
-        else
-            printf("inexisting player\n");*/
-    }
-
-    void item_dropped(uintptr_t iid, uintptr_t pid)
-    {
-        /*if (pid < 0 || pid >= PLAYER_NUM || !players[pid])
-        {
-            printf("inexisting player drop");
-            return;
-        }
-        InventoryElement* el = players[pid]->get_item_by_uid(iid);
-        if (!el)
-        {
-            printf("inexisting item drop");
-            return;
-        }
-        Player* p = players[pid];
-        world_table[p->map_y][p->map_x]->add_object(el, p->x, p->y);
-        p->inventory->remove(el);*/
-    }
-
-    void item_used_on_object(uintptr_t iid, uintptr_t oid, uintptr_t pid)
-    {
-        printf("item used LOL\n");
-    }
-
     void update_item_location(LocationUpdateData data)
     {
         size_t id = data.id;
         ItemLocationLol & old_loc = data.old;
         ItemLocationLol & new_loc = data.new_;
 
-        InventoryElement * el;
-        switch (old_loc.tag)
-        {
-            case ItemLocationLol::Tag::Chunk:
-            {
-                printf("removed %ld from chunk %d %d\n", id, old_loc.chunk.map_x, old_loc.chunk.map_y);
-                el = world_table[old_loc.chunk.map_y][old_loc.chunk.map_x]->find_by_id(id);
-                world_table[old_loc.chunk.map_y][old_loc.chunk.map_x]->remove_object(el);
-                break;
-            }
-            case ItemLocationLol::Tag::Player:
-            {
-                printf("removed %ld from player %ld\n", id, old_loc.player.id);
-                el = players[old_loc.player.id]->get_item_by_uid(id);
-                players[old_loc.player.id]->drop(el);
-                if (old_loc.player.id == player->get_id())
-                {
-                    update_hotbar();
-                }
-            }
-        }
+        InventoryElement * el = remove_from_location(old_loc, id);
+
         if (!el)
         {
             printf("not found item to remove %d %d\n", old_loc.chunk.map_x, old_loc.chunk.map_y);
@@ -382,7 +337,6 @@ extern "C"
         }
     }
 
-    // void create_objects_in_chunk(int32_t x, int32_t y, uint32_t num, uint8_t *data)
     void create_object(ObjectData data)
     {
         int x = 128; // data.inv_element.data.location.chunk.x;
@@ -416,26 +370,9 @@ extern "C"
         }
     }
 
-    void destroy_object(uintptr_t id, uint8_t * data)
+    void destroy_object(uintptr_t id, ItemLocationLol location)
     {
-        ItemLocation * loc = (ItemLocation *)data;
-        InventoryElement * el = nullptr;
-        switch (loc->type)
-        {
-            case LOCATION_CHUNK:
-                el = world_table[loc->data.chunk.map_y][loc->data.chunk.map_x]->find_by_id(id);
-                world_table[loc->data.chunk.map_y][loc->data.chunk.map_x]->remove_object(el);
-                break;
-            case LOCATION_PLAYER_INV:
-                el = players[loc->data.player.id]->get_item_by_uid(id);
-                players[loc->data.player.id]->drop(el);
-                if (loc->data.player.id == player->get_id())
-                {
-                    update_hotbar();
-                }
-                break;
-        }
-
+        InventoryElement * el = remove_from_location(location, id);
         if (el)
         {
             printf("delete %ld\n", id);

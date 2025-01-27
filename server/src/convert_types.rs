@@ -88,3 +88,20 @@ fn convert_inv_el(el: &core::InventoryElement) -> InventoryElementData {
         }
     }
 }
+
+pub fn convert_item_location(location: &core::ItemLocation) -> ItemLocationLol {
+    unsafe {
+        if location.type_ == core::ItemLocationType_LOCATION_CHUNK {
+            ItemLocationLol::Chunk {
+                map_x: location.data.chunk.map_x,
+                map_y: location.data.chunk.map_y,
+                x: location.data.chunk.x,
+                y: location.data.chunk.y,
+            }
+        } else {
+            ItemLocationLol::Player {
+                id: location.data.player.id as usize,
+            }
+        }
+    }
+}

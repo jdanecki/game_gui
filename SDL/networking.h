@@ -146,7 +146,7 @@ extern void update_item_location(LocationUpdateData data);
 
 extern void create_object(ObjectData data);
 
-extern void destroy_object(uintptr_t id, uint8_t *data);
+extern void destroy_object(uintptr_t id, ItemLocationLol location);
 
 extern void failed_craft();
 

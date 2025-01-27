@@ -119,7 +119,7 @@ pub extern "C" fn network_tick(client: &NetClient) {
                 core::PACKET_OBJECT_DESTROY => unsafe {
                     events::destroy_object(
                         usize::from_le_bytes(value[1..9].try_into().unwrap()),
-                        &mut value[9] as *mut u8,
+                        bincode::deserialize(&value[9..]).expect("bad item location for destroy"),
                     );
                 },
                 core::PACKET_FAILED_CRAFT => unsafe {
