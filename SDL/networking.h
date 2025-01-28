@@ -3,7 +3,6 @@
 class UdpSocket
 {
 };
-#include "../core/packet_types.h"
 #include "../core/world.h"
 #include <cstdarg>
 #include <cstdint>
@@ -26,6 +25,8 @@ struct ItemLocationLol
 
     struct Chunk_Body
     {
+        int32_t map_x;
+        int32_t map_y;
         int32_t x;
         int32_t y;
     };
@@ -143,6 +144,13 @@ struct ObjectData
     };
 };
 
+struct LocationUpdateData
+{
+    uintptr_t id;
+    ItemLocationLol old;
+    ItemLocationLol new_;
+};
+
 extern "C"
 {
 
@@ -156,21 +164,13 @@ extern "C"
 
     extern void got_id(uintptr_t id, int64_t seed);
 
-    extern void update_inventory(uint8_t * data);
-
     extern void update_object(ObjectData data);
 
-    extern void item_picked_up(uintptr_t iid, uintptr_t pid);
+    extern void update_item_location(LocationUpdateData data);
 
-    extern void item_dropped(uintptr_t iid, uintptr_t pid);
+    extern void create_object(ObjectData data);
 
-    extern void item_used_on_object(uintptr_t item_id, uintptr_t object_id, uintptr_t player_id);
-
-    extern void update_item_location(int32_t updates_number, uint8_t * data);
-
-    extern void create_object_in_chunk(ObjectData data);
-
-    extern void destroy_object(uintptr_t id, uint8_t * data);
+    extern void destroy_object(uintptr_t id, ItemLocationLol location);
 
     extern void failed_craft();
 

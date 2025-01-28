@@ -56,7 +56,7 @@ bool PlayerServer::plant_with_seed(InventoryElement * el, int map_x, int map_y, 
         int id = el->get_id();
         if (id == ID_ACORN || id == ID_ACORN1 || id == ID_ACORN2)
         {
-            Plant * p = new Plant();
+            Plant * p = new PlantServer();
             switch (id)
             {
                 case ID_ACORN:

@@ -2,10 +2,25 @@ use crate::core;
 use serde::{Deserialize, Serialize};
 
 #[repr(C)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 pub enum ItemLocationLol {
-    Chunk { x: i32, y: i32 },
-    Player { id: usize },
+    Chunk {
+        map_x: i32,
+        map_y: i32,
+        x: i32,
+        y: i32,
+    },
+    Player {
+        id: usize,
+    },
+}
+
+#[repr(C)]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LocationUpdateData {
+    pub id: usize,
+    pub old: ItemLocationLol,
+    pub new: ItemLocationLol,
 }
 
 #[repr(C)]

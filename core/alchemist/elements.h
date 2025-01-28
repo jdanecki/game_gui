@@ -421,6 +421,7 @@ enum animal_types
 
 class Animal : public Being
 {
+    int padding; // FIXME
   public:
     enum animal_types type;
     Animal();

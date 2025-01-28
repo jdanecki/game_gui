@@ -21,9 +21,15 @@ void destroy(InventoryElement * el);
 
 class AnimalServer : public Animal
 {
+    int delay_for_move;
+
   public:
     void move();
     bool tick() override;
+    AnimalServer()
+    {
+        delay_for_move = 10;
+    }
 };
 
 class PlantServer : public Plant

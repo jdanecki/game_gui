@@ -69,13 +69,39 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
 
 fn convert_inv_el(el: &core::InventoryElement) -> InventoryElementData {
     unsafe {
+        let location = if el.location.type_ == core::ItemLocationType_LOCATION_CHUNK {
+            ItemLocationLol::Chunk {
+                map_x: el.location.data.chunk.map_x,
+                map_y: el.location.data.chunk.map_y,
+                x: el.location.data.chunk.x,
+                y: el.location.data.chunk.y,
+            }
+        } else {
+            ItemLocationLol::Player {
+                id: el.location.data.player.id as usize,
+            }
+        };
         InventoryElementData {
             uid: el.uid,
             el_type: el.c_id,
-            location: ItemLocationLol::Chunk {
-                x: el.location.data.chunk.x,
-                y: el.location.data.chunk.y,
-            },
+            location,
+        }
+    }
+}
+
+pub fn convert_item_location(location: &core::ItemLocation) -> ItemLocationLol {
+    unsafe {
+        if location.type_ == core::ItemLocationType_LOCATION_CHUNK {
+            ItemLocationLol::Chunk {
+                map_x: location.data.chunk.map_x,
+                map_y: location.data.chunk.map_y,
+                x: location.data.chunk.x,
+                y: location.data.chunk.y,
+            }
+        } else {
+            ItemLocationLol::Player {
+                id: location.data.player.id as usize,
+            }
         }
     }
 }

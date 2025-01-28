@@ -24,11 +24,14 @@ void destroy(InventoryElement * el)
 
 void AnimalServer::move()
 {
-    // TODO: send info about movement for animations
+    delay_for_move--;
+    if (delay_for_move)
+        return;
+    delay_for_move = 10;
+
+    ItemLocation l = location;
     int _x = location.data.chunk.x;
     int _y = location.data.chunk.y;
-
-    // get_posittion(&_x, &_y);
 
     switch (rand() % 4)
     {
@@ -59,11 +62,10 @@ void AnimalServer::move()
     if (_x < 0)
         _x = 0;
 
-    // set_posittion(_x, _y);
     location.data.chunk.x = _x;
     location.data.chunk.y = _y;
 
-    objects_to_update.add(this);
+    update_location(uid, l, location);
 }
 
 bool AnimalServer::tick()
