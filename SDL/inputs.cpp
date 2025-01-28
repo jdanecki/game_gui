@@ -184,11 +184,11 @@ void key_pressed(int key)
             break;
 
         case SDLK_MINUS:
-            player->craftbar[active_hotbar]=0;
+            player->craftbar[active_hotbar] = 0;
             break;
         case SDLK_EQUALS:
-            if(player->hotbar[active_hotbar])
-                player->craftbar[active_hotbar]=1;
+            if (player->hotbar[active_hotbar])
+                player->craftbar[active_hotbar] = 1;
             break;
 
         case SDLK_F5:

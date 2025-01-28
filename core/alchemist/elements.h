@@ -396,6 +396,7 @@ class Being : public InventoryElement
         max_age = 1 + rand() % 36000; // 100 years
         age = rand() % max_age;
         name = create_name(5);
+        req_form = Form_solid;
     }
     bool is_alive()
     {

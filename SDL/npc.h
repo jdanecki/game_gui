@@ -7,6 +7,8 @@ enum Npc_say
 {
     Say_hello,
     Say_how_do_you_do,
+    Ask_do_you_know,
+
 };
 
 extern void npc_say(enum Npc_say s);

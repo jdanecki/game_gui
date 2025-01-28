@@ -79,7 +79,7 @@ void draw_texts()
         sprintf(text, "Item: %s (%s)", item->get_form_name(), item->get_name());
         write_text(tx, ty, text, White, 15, 30);
         ty += 25;
-    }    
+    }
 }
 
 void draw_maps()
@@ -162,7 +162,7 @@ bool draw_terrain()
         tile_dungeon_size = window_height / (CHUNK_SIZE);
     }
 
-           // render terrain
+    // render terrain
     if (world_table[128][128])
     {
         for (int y = 0; y < CHUNK_SIZE; y++)
@@ -243,12 +243,12 @@ void draw_npc()
 {
     SDL_Rect img_rect = {5 * tile_dungeon_size, 5 * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
     static int tick = 0;
-    static int dir=1;
+    static int dir = 1;
     int side;
     tick++;
-    if (! (tick % 50))
+    if (!(tick % 50))
     {
-        dir*=-1;
+        dir *= -1;
     }
 
     side = dir > 0 ? 0 : 1;
