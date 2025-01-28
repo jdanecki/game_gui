@@ -1,0 +1,10 @@
+BasedOnStyle: llvm
+BreakBeforeBraces: Allman
+IndentWidth: 4
+ColumnLimit: 200
+AlignAfterOpenBracket: DontAlign
+PointerAlignment: Middle
+IndentCaseLabels: true
+AllowShortFunctionsOnASingleLine: None
+BreakStringLiterals: false
+

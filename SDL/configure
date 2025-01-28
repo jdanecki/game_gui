@@ -1,0 +1,10 @@
+#!/bin/bash
+
+MULTI_USER=ON
+if [ ! -d build ] 
+then
+    mkdir build
+fi
+cd build
+cmake -DMULTI_USER=${MULTI_USER} ..
+
