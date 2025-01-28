@@ -27,7 +27,7 @@ InventoryElement * find_by_uid(size_t uid)
 
 void update_hotbar()
 {
-//FIXME - remove/add only one element
+    // FIXME - remove/add only one element
     for (int i = 0; i < 10; i++)
         player->hotbar[i] = nullptr;
     ListElement * le = player->inventory->head;
@@ -43,21 +43,21 @@ void update_hotbar()
     }
 }
 
-InventoryElement* remove_from_location(ItemLocationLol location, size_t id)
+InventoryElement * remove_from_location(ItemLocationLol location, size_t id)
 {
-    InventoryElement* el;
+    InventoryElement * el;
     switch (location.tag)
     {
         case ItemLocationLol::Tag::Chunk:
         {
-            //printf("removed %ld from chunk %d %d\n", id, location.chunk.map_x, location.chunk.map_y);
+            // printf("removed %ld from chunk %d %d\n", id, location.chunk.map_x, location.chunk.map_y);
             el = world_table[location.chunk.map_y][location.chunk.map_x]->find_by_id(id);
             world_table[location.chunk.map_y][location.chunk.map_x]->remove_object(el);
             break;
         }
         case ItemLocationLol::Tag::Player:
         {
-            //printf("removed %ld from player %ld\n", id, location.player.id);
+            // printf("removed %ld from player %ld\n", id, location.player.id);
             el = players[location.player.id]->get_item_by_uid(id);
             players[location.player.id]->drop(el);
             if (location.player.id == player->get_id())
@@ -65,7 +65,7 @@ InventoryElement* remove_from_location(ItemLocationLol location, size_t id)
                 update_hotbar();
             }
         }
-    }   
+    }
     return el;
 }
 
@@ -323,17 +323,17 @@ extern "C"
         {
             case ItemLocationLol::Tag::Chunk:
             {
-                //printf("added %ld to chunk %d %d\n", id, new_loc.chunk.map_x, new_loc.chunk.map_y);
+                // printf("added %ld to chunk %d %d\n", id, new_loc.chunk.map_x, new_loc.chunk.map_y);
                 world_table[new_loc.chunk.map_y][new_loc.chunk.map_x]->add_object(el, new_loc.chunk.x, new_loc.chunk.y);
                 break;
             }
             case ItemLocationLol::Tag::Player:
             {
-                //printf("added %ld to player %ld\n", id, new_loc.player.id);
+                // printf("added %ld to player %ld\n", id, new_loc.player.id);
                 players[new_loc.player.id]->pickup(el);
                 if (new_loc.player.id == player->get_id())
                 {
-                    update_hotbar();  //FIXME - remove only one element
+                    update_hotbar(); // FIXME - remove only one element
                 }
             }
         }
