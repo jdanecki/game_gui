@@ -120,41 +120,7 @@ void create_biome_forest(chunk * chunk)
 
     for (int i = 0; i < 32; i++)
     {
-        Plant * tree = new PlantServer();
-
-        int x = rand() % CHUNK_SIZE;
-        int y = rand() % CHUNK_SIZE;
-
-        /*for (int i = 0; i < 256; i++) {
-            if (chunk->plants[i])
-            {
-                int ox=0;
-                int oy=0;
-
-                chunk->plants[i]->get_posittion(&ox, &oy);
-
-                if (ox == x && oy == y)
-                {
-                    x = rand() % CHUNK_SIZE;
-                    y = rand() % CHUNK_SIZE;
-                }
-            }
-
-        }*/
-        switch (rand() % 3)
-        {
-            case 0:
-                tree->type = PLANTID_tree;
-                break;
-            case 1:
-                tree->type = PLANTID_tree1;
-                break;
-            case 2:
-                tree->type = PLANTID_tree2;
-                break;
-        }
-
-        chunk->add_object(tree, x, y);
+        chunk->add_object(new PlantServer());
     }
 }
 

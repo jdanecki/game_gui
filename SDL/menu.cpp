@@ -39,39 +39,41 @@ Menu::Menu(const char * n, int opt)
     options = opt;
     menu_pos = 0;
     added = 0;
-    entries = (const char **)calloc(options, sizeof(char *));
-    actions = (menu_actions *)calloc(options, sizeof(enum menu_actions));
-    values = (int *)calloc(options, sizeof(int));
-    texture = (SDL_Texture **)calloc(options, sizeof(SDL_Texture *));
-    el = (Element **)calloc(options, sizeof(Element *));
+    entries = new Menu_entry *[options];
     show_texture = false;
 }
 
+Menu::~Menu()
+{
+    delete[] entries;
+}
 void Menu::add(const char * e, enum menu_actions a)
 {
-    entries[added] = e;
-    actions[added] = a;
+    entries[added] = new Menu_entry(e, a, 0, nullptr, nullptr);
     added++;
 }
 
 void Menu::add(const char * e, enum menu_actions a, int val)
 {
-    values[added] = val;
-    add(e, a);
+    entries[added] = new Menu_entry(e, a, val, nullptr, nullptr);
+    added++;
 }
 
-void Menu::add(const char * e, enum menu_actions a, SDL_Texture * _texture, int index, int item_id)
+void Menu::add(const char * e, enum menu_actions a, SDL_Texture * t, int index, int item_id)
 {
-    values[index] = item_id;
-    texture[index] = _texture;
-    add(e, a);
+    // FIXME why is index here?
+    entries[index] = new Menu_entry(e, a, item_id, nullptr, t);
+    added++;
 }
-
-void Menu::add(const char * e, enum menu_actions a, Element * p_el)
+void Menu::add(const char * e, enum menu_actions a, int val, InventoryElement * p_el)
 {
-    int i = a & ~MENU_ITEM;
-    el[i] = p_el;
-    add(e, a);
+    entries[added] = new Menu_entry(e, a, val, p_el, nullptr);
+    added++;
+}
+void Menu::add(const char * e, enum menu_actions a, InventoryElement * p_el)
+{
+    entries[added] = new Menu_entry(e, a, 0, p_el, nullptr);
+    added++;
     show_texture = false;
 }
 
@@ -79,15 +81,20 @@ int Menu::get_val(int v)
 {
     for (int i = 0; i < added; i++)
     {
-        if (actions[i] == v)
-            return values[i];
+        if (entries[i]->action == v)
+            return entries[i]->value;
     }
     return 0;
 }
 
 int Menu::get_val()
 {
-    return values[menu_pos];
+    return entries[menu_pos]->value;
+}
+
+InventoryElement * Menu::get_el()
+{
+    return entries[menu_pos]->el;
 }
 
 void Menu::show()
@@ -176,9 +183,9 @@ void Menu::show()
             rect.w = menu_opt_size;
             rect.h = menu_opt_size;
         }
-        if (texture[i])
+        if (entries[i]->texture)
         {
-            SDL_RenderCopy(renderer, texture[i], NULL, &rect);
+            SDL_RenderCopy(renderer, entries[i]->texture, NULL, &rect);
             text_x += menu_opt_size;
         }
         if (show_texture)
@@ -192,8 +199,33 @@ void Menu::show()
             text_y = mody + (i - menu_pos + options / 2) * menu_opt_size;
 
         if (entries[i])
-            write_text(text_x, text_y, entries[i], White, game_size / 27, menu_opt_size);
+            write_text(text_x, text_y, entries[i]->entry, White, game_size / 27, menu_opt_size);
     }
+}
+
+Menu_entry::Menu_entry(const char * e, enum menu_actions a, int v, InventoryElement * _el, SDL_Texture * t)
+{
+    texture = t;
+    action = a;
+    value = v;
+    el = _el;
+    if (el)
+    {
+        entry = new char[64];
+        sprintf(entry, "%s %s", e, el->get_name());
+        dynamic_entry = true;
+    }
+    else
+    {
+        entry = (char *)e;
+        dynamic_entry = false;
+    }
+}
+
+Menu_entry::~Menu_entry()
+{
+    if (dynamic_entry)
+        delete entry;
 }
 
 void create_menus()
@@ -272,35 +304,31 @@ void create_menus()
 
 Menu * create_inv_category_menu(enum Form f)
 {
-    extern SDL_Texture * items_textures[BASE_ELEMENTS];
     int count = 0;
-    for (int i = 0; i < BASE_ELEMENTS; i++)
-        if (base_elements[i]->form == f && player->inventory->find_id((enum Item_id)i, NULL))
-            count++;
-    if (count == 0)
-        return NULL;
+    InventoryElement ** elements_with_form = player->inventory->find_form(f, &count);
+    if (!count)
+        return nullptr;
+
     if (menu_inventory_categories2)
     {
-        free(menu_inventory_categories2->texture);
         delete menu_inventory_categories2;
     }
     char * menu_name = new char[50];
     sprintf(menu_name, "Inventory: %s", Form_name[f]);
 
     menu_inventory_categories2 = new Menu(menu_name, count);
-    int menu_index = 0;
-    for (int i = 0; i < BASE_ELEMENTS; i++)
+    // int menu_index = 0;
+    for (int i = 0; i < count; i++)
     {
-        if (base_elements[i]->form == f && player->inventory->find_id((enum Item_id)i, NULL))
-        {
-            menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], menu_index, i);
-            menu_index++;
-        }
+        // FIXME add texture
+        // menu_inventory_categories2->add(base_elements[i]->name, MENU_CATEGORIE, items_textures[i], menu_index, i);
+        menu_inventory_categories2->add("*", MENU_CATEGORIE, elements_with_form[i]);
+        //        menu_index++;
     }
     return menu_inventory_categories2;
 }
 // FIXME
-Menu * create_inv_menu(Item_id id)
+void create_inv_menu(Item_id id)
 {
     printf("szukam %d\n", id);
     int c = 0;
@@ -312,17 +340,18 @@ Menu * create_inv_menu(Item_id id)
         if (menu_inventory)
             delete menu_inventory;
 
-        menu_inventory = new Menu("Inventory", c);
+        menu_inventory = new Menu("Which element?", c);
         Element ** el = (Element **)i_el;
         for (int i = 0; i < c; i++)
         {
             printf("%s\n", el[i]->get_name());
-            menu_inventory->add(el[i]->get_name(), (menu_actions)(MENU_ITEM + i), el[i]);
+            menu_inventory->add("->", (menu_actions)(MENU_ITEM + i), el[i]);
         }
         free(el);
-        return menu_inventory;
+        current_menu = menu_inventory;
+        return;
     }
-    return NULL;
+    current_menu = nullptr;
 }
 
 void Menu::go_down()
@@ -373,7 +402,7 @@ int menu_interact(int key)
         {
             if (current_menu)
             {
-                if (interact(current_menu->actions[current_menu->menu_pos]))
+                if (current_menu->interact())
                 {
                     current_menu = NULL;
                     return 1;
@@ -426,19 +455,18 @@ int menu_interact(int key)
     return current_menu ? 1 : 0;
 }
 
-int handle_item(int i)
+int Menu::handle_item(int i)
 {
-
     if (active_hotbar >= 0)
     {
-        Element * el = menu_inventory->el[i];
+        InventoryElement * el = entries[i]->el;
 
         for (int h = 0; h < 10; h++)
         {
             if (player->hotbar[h] == el)
                 return 0;
         };
-        player->hotbar[active_hotbar] = menu_inventory->el[i];
+        player->hotbar[active_hotbar] = el;
     }
     return 1;
 }
@@ -508,16 +536,18 @@ sent:
     return 1;
 }
 
-int interact(enum menu_actions a)
+int Menu::interact()
 {
+    menu_actions a = entries[menu_pos]->action;
+
     if (a & MENU_ITEM)
-        return handle_item(a & ~MENU_ITEM);
+        return menu_inventory->handle_item(a & ~MENU_ITEM);
     switch (a)
     {
             // FIXME - doesn't work for beings
         case MENU_CATEGORIE:
-        {
-            current_menu = create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
+        { // FIXME don't use elements'id but c_id and type
+            create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
             return 0;
         }
 
@@ -623,7 +653,7 @@ int interact(enum menu_actions a)
         case MENU_INV_SOLID:
         case MENU_INV_LIGQUID:
         case MENU_INV_GAS:
-            current_menu = create_inv_category_menu((Form)menu_inventory_categories->get_val(a));
+            current_menu = create_inv_category_menu((Form)menu_inventory_categories->get_val());
             return 0;
 
         case MENU_LOUDER:

@@ -1,0 +1,5 @@
+* improve rust compilation 
+    - don't build game_net for debug and release, only one target
+* refactor world generator
+* add npc conversation
+

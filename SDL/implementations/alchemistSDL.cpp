@@ -32,17 +32,26 @@ SDL_Texture * ElementSDL::get_texture()
     return items_textures[get_base()->id];
 }
 
+#ifdef CORE_FOR_CLIENT
+IngredientSDL::IngredientSDL(int id) : Ingredient((Ingredient_id)id)
+{
+}
+ProductSDL::ProductSDL(int id) : Product((Product_id)id)
+{
+}
+
+#else
 IngredientSDL::IngredientSDL(int id) : Ingredient(nullptr, (Ingredient_id)id, Form_none)
 {
 }
+ProductSDL::ProductSDL(int id) : Product(nullptr, nullptr, (Product_id)id, Form_none)
+{
+}
+#endif
 
 SDL_Texture * IngredientSDL::get_texture()
 {
     return ing_textures[id];
-}
-
-ProductSDL::ProductSDL(int id) : Product(nullptr, nullptr, (Product_id)id, Form_none)
-{
 }
 
 SDL_Texture * ProductSDL::get_texture()

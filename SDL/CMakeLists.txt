@@ -9,7 +9,7 @@ pkg_check_modules(SDL2_MIXER SDL2_mixer)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-# add_definitions(-DFUNNY_STUFF_FOR_SDL)
+add_definitions(-DCORE_FOR_CLIENT)
 
 add_subdirectory(../core core)
 

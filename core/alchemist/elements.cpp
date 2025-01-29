@@ -23,18 +23,9 @@ const char * Product_name[] = {
     "Knife",
 };
 
-const char * items_name[] = {
-    "Stone",
-    "Log",
-    "Sand",
-    "Stick",
-};
-
 const char * object_names[] = {"wall"};
-
-const char * food_name[] = {"Pumpkin", "Watermelon"};
-
 const char * Plant_phase_name[] = {"Seed", "Seedling", "Growing", "Flowers", "Fruits"};
+const char * Class_names[] = {"unknown", "Element", "Ingredient", "Product", "Plant", "Animal", "Npc"};
 
 Edible::Edible()
 {
@@ -227,6 +218,14 @@ void Element::to_bytes(unsigned char * buf)
     printf("element %d\n", base->id);
 }
 
+#ifdef CORE_FOR_CLIENT
+Ingredient::Ingredient(Ingredient_id i)
+{
+    c_id = Class_Ingredient;
+    name = Ingredient_name[i];
+    id = i;
+}
+#else
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
 {
     c_id = Class_Ingredient;
@@ -235,7 +234,6 @@ Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
     id = i;
     req_form = f;
 }
-
 bool Ingredient::craft()
 {
     if (req_form != get_form())
@@ -249,6 +247,7 @@ bool Ingredient::craft()
     usage = rand() % 100;
     return true;
 }
+#endif
 
 void Ingredient::show(bool details)
 {
@@ -258,6 +257,7 @@ void Ingredient::show(bool details)
     printf("quality = %d\n", quality);
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
+    printf("form = %s", Form_name[req_form]);
 }
 
 unsigned int Ingredient::get_packet_size()
@@ -281,6 +281,14 @@ void Ingredient::to_bytes(unsigned char * buf)
     offset += sizeof(id);
 }
 
+#ifdef CORE_FOR_CLIENT
+Product::Product(Product_id i)
+{
+    id = i;
+    c_id = Class_Product;
+    name = Product_name[i];
+}
+#else
 void Product::init(Product_id i, int c, Form f)
 {
     name = Product_name[i];
@@ -305,7 +313,7 @@ Product::Product(InventoryElement ** from, int count, Product_id i, Form f)
     init(i, count, f);
 }
 
-bool Product::craft()
+bool Product::craft() // executed only on server
 {
     for (int i = 0; i < ing_count; i++)
     {
@@ -323,6 +331,7 @@ bool Product::craft()
     usage = rand() % 100;
     return true;
 }
+#endif
 
 void Product::show(bool details)
 {
@@ -332,27 +341,6 @@ void Product::show(bool details)
     printf("quality = %d\n", quality);
     printf("resilience = %d\n", resilience);
     printf("usage = %d\n", usage);
-}
-
-unsigned int Product::get_packet_size()
-{
-    return InventoryElement::get_packet_size() + sizeof(Product_id) + sizeof(int) * 3;
-}
-
-void Product::to_bytes(unsigned char * buf)
-{
-    InventoryElement::to_bytes(buf);
-    int offset = InventoryElement::get_packet_size();
-
-    memcpy(&buf[offset], &quality, sizeof(quality));
-    offset += sizeof(quality);
-    memcpy(&buf[offset], &resilience, sizeof(resilience));
-    offset += sizeof(resilience);
-    memcpy(&buf[offset], &usage, sizeof(usage));
-    offset += sizeof(usage);
-
-    memcpy(&buf[offset], &id, sizeof(id));
-    offset += sizeof(id);
 }
 
 void init_elements()
@@ -382,7 +370,7 @@ Animal::Animal()
 
 Npc::Npc()
 {
-    c_id = Class_Animal;
+    c_id = Class_Npc;
     alive = true;
     max_age = 1 + rand() % 18000; // 50 years
     age = rand() % max_age;

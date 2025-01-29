@@ -162,7 +162,8 @@ fn add_player(
     }
     println!("{:?} , players {:?}", peer, players);
     update_chunk_for_player(server, &mut peer, (128, 128));
-    update_player_inventory(server, &mut peer, players);
+    //FIXME
+//    update_player_inventory(server, &mut peer, players);
 }
 
 fn update_players(server: &Server, players: &mut Vec<core::PlayerServer>) {
@@ -201,13 +202,14 @@ fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
         }
     }
 }
-
+//FIXME
+/*
 fn update_player_inventory(
     server: &Server,
     peer: &SocketAddr,
     players: &mut Vec<core::PlayerServer>,
 ) {
-    /*let id = server.clients.get(peer).unwrap();
+    let id = server.clients.get(peer).unwrap();
 
     let mut data = vec![core::PACKET_INVENTORY_UPDATE as u8];
     unsafe {
@@ -215,8 +217,9 @@ fn update_player_inventory(
         InvList_to_bytes(&mut data, inv);
     }
 
-    server.socket.send_to(&data, peer).unwrap();*/
-}
+    server.socket.send_to(&data, peer).unwrap();
+    
+}*/
 
 fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
     let mut data = vec![
