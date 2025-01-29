@@ -19,6 +19,9 @@ extern "C"
 
 void destroy(InventoryElement * el);
 
+const int max_delay_move = 10;
+const int max_delay_grow = 600;
+
 class AnimalServer : public Animal
 {
     int delay_for_move;
@@ -28,15 +31,18 @@ class AnimalServer : public Animal
     bool tick() override;
     AnimalServer()
     {
-        delay_for_move = 10;
+        delay_for_move = max_delay_move; // 600 * 100ms -> 1min
     }
 };
 
 class PlantServer : public Plant
 {
+    int delay_for_grow;
+
   public:
     bool grow() override;
-    bool tick() override;
+    // bool tick() override;
+    PlantServer();
 };
 
 #endif

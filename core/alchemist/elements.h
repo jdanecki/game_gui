@@ -48,6 +48,8 @@ enum Class_id
     Class_Npc,
 };
 
+extern const char * Class_names[];
+
 enum Item_id
 {
     // SOLID START HERE
@@ -126,6 +128,7 @@ class InventoryElement
     size_t uid;
     Class_id c_id;
     Form req_form;
+
     bool known;
     InventoryElement()
     {
@@ -157,6 +160,10 @@ class InventoryElement
     {
         return name;
     }
+    const char * get_class_name()
+    {
+        return Class_names[c_id];
+    }
     virtual const char * get_form_name()
     {
         return Form_name[req_form];
@@ -170,11 +177,14 @@ class InventoryElement
     {
         return NULL;
     }
+#ifndef CORE_FOR_CLIENT
+
     virtual bool craft()
     {
         printf("missing craft function\n");
         return false;
     }
+#endif
     int get_x()
     {
         return location.data.chunk.x;
@@ -189,6 +199,13 @@ class InventoryElement
     }
     virtual unsigned int get_packet_size();
     virtual void to_bytes(unsigned char * buf);
+
+    virtual char * get_description()
+    {
+        char * buf = new char[128];
+        sprintf(buf, "%s: %s (%s)", get_class_name(), get_form_name(), get_name());
+        return buf;
+    }
 };
 
 enum object_types
@@ -291,7 +308,7 @@ enum Product_id
 extern const char * Ingredient_name[];
 extern const char * Product_name[];
 extern const char * items_name[];
-extern const char * food_name[];
+// extern const char * food_name[];
 
 class Ingredient : public InventoryElement
 {
@@ -303,56 +320,73 @@ class Ingredient : public InventoryElement
     int usage;      // [0..100] łatwy..trudny
 
     Ingredient_id id;
-    InventoryElement * el; // available only in server , move to IngredientServer class
 
     int get_id()
     {
         return id;
     }
+#ifdef CORE_FOR_CLIENT
+    Ingredient(Ingredient_id i);
+#else
+    InventoryElement * el; // available only in server , move to IngredientServer class
     bool craft();
+#endif
     Edible * get_edible()
     { // FIXME
         return nullptr;
         // return el->get_edible();
     }
     Ingredient(InventoryElement * from, Ingredient_id i, Form f);
+
     void show(bool details = true);
     unsigned int get_packet_size() override;
     void to_bytes(unsigned char * buf) override;
+    char * get_description()
+    {
+        char * buf = new char[128];
+        sprintf(buf, "%s: (%s)", get_class_name(), get_name());
+        return buf;
+    }
 };
 
 class Product : public InventoryElement
 {
     int * padding; // FIXME
+#ifndef CORE_FOR_CLIENT
     void init(Product_id i, int c, Form f);
-
+#endif
   public:
     int quality;    //[0..100] slaby..najlepszy
     int resilience; // [0..100] wytrzymały..słaby
     int usage;      // [0..100] łatwy..trudny
 
     Product_id id;
-
-    // available only in server , move to IngredientServer class
-    int ing_count;
-    InventoryElement ** ings;
-    // above only in server
-
     int get_id()
     {
         return id;
     }
+#ifdef CORE_FOR_CLIENT
+    Product(Product_id i);
+#else
+    int ing_count;
+    InventoryElement ** ings;
+    bool craft();
+
     Product(InventoryElement * el1, InventoryElement * el2, Product_id i, Form f);
     Product(InventoryElement ** from, int count, Product_id i, Form f);
-
-    bool craft();
+#endif
     virtual bool check_ing()
     {
         return false;
     }
     void show(bool details = true);
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
+
+    char * get_description()
+    {
+        char * buf = new char[128];
+        sprintf(buf, "%s: (%s)", get_class_name(), get_name());
+        return buf;
+    }
 };
 
 enum being_types
@@ -429,10 +463,10 @@ class Animal : public Being
     {
         printf("Animal %s age=%d/%d alive=%d\n", name, age, max_age, alive);
     }
-    bool tick()
-    {
-        return grow();
-    }
+    /* bool tick()
+     {
+         return grow();
+     }*/
 };
 
 class Npc : public Being
@@ -458,6 +492,8 @@ extern const char * Plant_phase_name[];
 
 class Plant : public Being
 {
+    int padding; // FIXME
+
   protected:
     unsigned int seedling_time;
     unsigned int growing_time;

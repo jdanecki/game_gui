@@ -17,6 +17,13 @@ void chunk::add_object(InventoryElement * object, int x, int y)
     object->location = location;
 }
 
+void chunk::add_object(InventoryElement * object)
+{
+    int x = rand() % CHUNK_SIZE;
+    int y = rand() % CHUNK_SIZE;
+    add_object(object, x, y);
+}
+
 void chunk::remove_object(InventoryElement * object)
 {
     objects.remove(object);

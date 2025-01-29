@@ -61,23 +61,16 @@ void draw_texts()
 {
     int ty = 10;
 
-    sprintf(text, "Hunger: %d", player->hunger);
-    write_text(tx, ty, text, player->hunger < 100 ? Red : White, 15, 30);
-    ty += 25;
-
-    sprintf(text, "Irrigation: %d", player->thirst);
-    write_text(tx, ty, text, player->thirst < 100 ? Red : White, 15, 30);
-    ty += 25;
-
-    sprintf(text, "Player@(%d, %d)", (player->x + player->map_x * CHUNK_SIZE) - (WORLD_SIZE * CHUNK_SIZE / 2), (player->y + player->map_y * CHUNK_SIZE) - (WORLD_SIZE * CHUNK_SIZE / 2));
-    write_text(tx, ty, text, White, 15, 30);
+    sprintf(text, "Hunger=%d Irrigation=%d", player->hunger, player->thirst);
+    write_text(tx, ty, text, (player->hunger < 100 || player->thirst < 100) ? Red : White, 15, 30);
     ty += 25;
 
     InventoryElement * item = get_item_at_ppos(player);
     if (item)
     {
-        sprintf(text, "Item: %s (%s)", item->get_form_name(), item->get_name());
-        write_text(tx, ty, text, White, 15, 30);
+        char * t = item->get_description();
+        write_text(tx, ty, t, White, 15, 30);
+        delete t;
         ty += 25;
     }
 }
@@ -198,7 +191,8 @@ bool draw_terrain()
                 int y = o->location.data.chunk.y;
                 // o->get_posittion(&x, &y);
                 SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-                SDL_RenderCopy(renderer, r->get_texture(), NULL, &img_rect);
+                SDL_Texture * foo = r->get_texture();
+                SDL_RenderCopy(renderer, foo, NULL, &img_rect);
             }
             else
             {

@@ -27,7 +27,7 @@ void AnimalServer::move()
     delay_for_move--;
     if (delay_for_move)
         return;
-    delay_for_move = 10;
+    delay_for_move = max_delay_move;
 
     ItemLocation l = location;
     int _x = location.data.chunk.x;
@@ -70,13 +70,23 @@ void AnimalServer::move()
 
 bool AnimalServer::tick()
 {
-    Animal::tick();
     move();
-    return true;
+    return Being::tick();
+}
+
+PlantServer::PlantServer()
+{
+    type = (enum plant_types)(rand() % PLANTS);
+    delay_for_grow = max_delay_grow;
 }
 
 bool PlantServer::grow()
 {
+    delay_for_grow--;
+    if (delay_for_grow)
+        return false;
+    delay_for_grow = max_delay_grow;
+
     if (grown)
         return false;
     if (!water)
@@ -123,10 +133,10 @@ bool PlantServer::grow()
     }
     return !grown;
 }
-
+/*
 bool PlantServer::tick()
 {
     grow();
     Plant::tick();
     return true;
-}
+}*/
