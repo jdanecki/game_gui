@@ -191,8 +191,7 @@ bool draw_terrain()
                 int y = o->location.data.chunk.y;
                 // o->get_posittion(&x, &y);
                 SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-                SDL_Texture * foo = r->get_texture();
-                SDL_RenderCopy(renderer, foo, NULL, &img_rect);
+                SDL_RenderCopy(renderer, r->get_texture(), NULL, &img_rect);
             }
             else
             {

@@ -307,7 +307,7 @@ Menu * create_inv_category_menu(enum Form f)
     int count = 0;
     InventoryElement ** elements_with_form = player->inventory->find_form(f, &count);
     if (!count)
-        nullptr;
+        return nullptr;
 
     if (menu_inventory_categories2)
     {
