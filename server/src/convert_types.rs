@@ -10,13 +10,13 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: ElementData {
                     base: convert_inv_el(el),
                     id: unsafe { (*element.base).id },
-                    sharpness: element.sharpness,
-                    smoothness: element.smoothness,
-                    mass: element.mass,
-                    length: element.length,
-                    width: element.width,
-                    height: element.height,
-                    volume: element.volume,
+                    sharpness: (*element.sharpness).value,
+                    smoothness: (*element.smoothness).value,
+                    mass: (*element.mass).value,
+                    length: (*element.length).value,
+                    width: (*element.width).value,
+                    height: (*element.height).value,
+                    volume: (*element.volume).value,
                 },
             }
         }
@@ -27,9 +27,9 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: IngredientData {
                     base: convert_inv_el(el),
                     id: ingredient.id,
-                    quality: ingredient.quality,
-                    resilience: ingredient.resilience,
-                    usage: ingredient.usage,
+                    quality: (*ingredient.quality).value,
+                    resilience: (*ingredient.resilience).value,
+                    usage: (*ingredient.usage).value,
                 },
             }
         }
@@ -40,9 +40,9 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: ProductData {
                     base: convert_inv_el(el),
                     id: product.id,
-                    quality: product.quality,
-                    resilience: product.resilience,
-                    usage: product.usage,
+                    quality: (*product.quality).value,
+                    resilience: (*product.resilience).value,
+                    usage: (*product.usage).value,
                 },
             }
         }

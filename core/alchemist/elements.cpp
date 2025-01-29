@@ -29,30 +29,33 @@ const char * Class_names[] = {"unknown", "Element", "Ingredient", "Product", "Pl
 
 Edible::Edible()
 {
-    caloric = rand() % 1000;
-    irrigation = rand() % 500;
-    poison = 0;
+    caloric = new Property("caloric", rand() % 1000);;
+    irrigation = new Property("irrigation", rand() % 500);
+    poison = new Property("poison", 0);
     if (rand() % 100 < 10)
     { // 10%
-        poison = 1 + rand() % 250;
+        poison->value = 1 + rand() % 250;
     }
+}
+
+Edible::~Edible()
+{
+    delete irrigation;
+    delete poison;
+    delete caloric;
 }
 
 void Edible::show()
 {
     printf("      *** Edible ***\n");
-    printf("      caloric = %u\n", caloric);
-    printf("      irrigation = %u\n", irrigation);
-    if (poison)
-    {
-        printf("           *** Poison ***\n");
-        printf("           poison = %u\n", poison);
-    }
+    caloric->show();
+    irrigation->show();
+    poison->show();
 }
 
 Solid::Solid()
 {
-    stretching = 1 + rand() % 10000;
+    stretching = new Property("stretching", 1 + rand() % 10000);
     // styropian: 1
     // beton:     5
     // cyna:     14
@@ -61,31 +64,41 @@ Solid::Solid()
     // żelazo:  3800
     // stal:   10000
 
-    squeezing = 1 + rand() % 20000;
+    squeezing = new Property("squezzing", 1 + rand() % 20000);
     // styropian:     1
     // beton:        50
     // kość:        150
     // kamień: 100-5000
     // diament:   17000
 
-    fragility = 1000 * stretching / squeezing;
+    fragility = new Property("fragility", 1000 * stretching->value / squeezing->value);
     // < 100 kruche
     // > spręzyste
 
-    bending = 1 + rand() % 100;
+    bending = new Property("bending", 1 + rand() % 100);
     // 1 łatwo zginalne
     // 100 trudno
-    solubility = 1 + rand() % 100;
+    solubility = new Property("solubility", 1 + rand() % 100);
+}
+
+Solid::~Solid()
+{
+    delete stretching;
+    delete squeezing;
+    delete bending;
+    delete fragility;
+    delete solubility;
 }
 
 void Solid::show()
 {
     printf("      *** Solid ***\n");
-    printf("      stretching = %u\n", stretching); // rozciąganie
-    printf("      squeezing = %u\n", squeezing);   // ściskanie
-    printf("      bending = %u\n", bending);       // zginanie
-    printf("      fragility = %u\n", fragility);   // kruchość
-    printf("      solubility = %u\n", solubility); // rozpuszczalność
+
+    stretching->show(); // rozciąganie
+    squeezing->show();   // ściskanie
+  bending->show();       // zginanie
+   fragility->show();   // kruchość
+    solubility->show(); // rozpuszczalność
 }
 
 BaseElement::BaseElement(int index)
@@ -96,21 +109,21 @@ BaseElement::BaseElement(int index)
 
     form = Form_solid;
     solid = new Solid;
-    density = 50 + rand() % 2000;
+    density = new Property("density", 50 + rand() % 2000);
     if (id >= SOLID_ELEMENTS)
     { // generate liquid
         form = Form_liquid;
-        density = 500 + rand() % 500;
+        density->value = 500 + rand() % 500;
     }
     if (id >= SOLID_ELEMENTS + LIQUID_ELEMENTS)
     { // generate gas
         form = Form_gas;
-        density = 1;
+        density->value = 1;
     }
     if (id >= SOLID_ELEMENTS + LIQUID_ELEMENTS + GAS_ELEMENTS) // generate food
     {
         form = Form_solid;
-        density = 50 + rand() % 1000;
+        density->value = 50 + rand() % 1000;
         solid = new Solid;
         edible = new Edible;
     }
@@ -122,7 +135,7 @@ void BaseElement::show(bool details)
     printf("BaseElement name=%s form=%s id=%d\n", name, Form_name[form], id);
     if (!details)
         return;
-    printf("   density = %u\n", density); // gęstość
+    density->show(); // gęstość
     printf("   form = %s\n", Form_name[form]);
     switch (form)
     {
@@ -167,13 +180,13 @@ Element::Element(BaseElement * b)
 {
     c_id = Class_Element;
     base = b;
-    sharpness = rand() % 100;
-    smoothness = rand() % 100;
-    length = 1 + rand() % 100;
-    width = 1 + rand() % 100;
-    height = 1 + rand() % 100;
-    volume = length * width * height;
-    mass = b->density * volume / 1000;
+    sharpness = new Property("shaepeness", rand() % 100);
+    smoothness = new Property("smoothness",  rand() % 100);
+    length = new Property("length", 1 + rand() % 100);
+    width = new Property("width", 1 + rand() % 100);
+    height = new Property("height", 1 + rand() % 100);
+    volume = new Property("volume", length->value * width->value * height->value);
+    mass = new Property("mass", b->density->value * volume->value / 1000);
 }
 
 void Element::show(bool details)
@@ -181,9 +194,14 @@ void Element::show(bool details)
     printf("Element -> %d: base=%s form=%s\n", c_id, base->name, get_form_name());
     if (!details)
         return;
-    printf("sharpness = %u\n", sharpness);   // ostrość
-    printf("smoothness = %u\n", smoothness); // gładkość
-    printf("mass = %u: l=%u w=%u h=%u \n", mass, length, width, height);
+    sharpness->show();   // ostrość
+    smoothness->show(); // gładkość
+    length->show();
+    width->show();
+    height->show();
+    volume->show();
+    mass->show();
+
     base->show(details);
 }
 
@@ -198,19 +216,19 @@ void Element::to_bytes(unsigned char * buf)
     int offset = InventoryElement::get_packet_size();
     // printf("packet size %d\n", offset);
 
-    memcpy(&buf[offset], &sharpness, sizeof(sharpness));
+    memcpy(&buf[offset], &sharpness, sizeof(sharpness->value));
     offset += sizeof(sharpness);
-    memcpy(&buf[offset], &smoothness, sizeof(smoothness));
+    memcpy(&buf[offset], &smoothness, sizeof(smoothness->value));
     offset += sizeof(smoothness);
-    memcpy(&buf[offset], &mass, sizeof(mass));
+    memcpy(&buf[offset], &mass, sizeof(mass->value));
     offset += sizeof(mass);
-    memcpy(&buf[offset], &length, sizeof(length));
+    memcpy(&buf[offset], &length, sizeof(length->value));
     offset += sizeof(length);
-    memcpy(&buf[offset], &width, sizeof(width));
+    memcpy(&buf[offset], &width, sizeof(width->value));
     offset += sizeof(width);
-    memcpy(&buf[offset], &height, sizeof(height));
+    memcpy(&buf[offset], &height, sizeof(height->value));
     offset += sizeof(height);
-    memcpy(&buf[offset], &volume, sizeof(volume));
+    memcpy(&buf[offset], &volume, sizeof(volume->value));
     offset += sizeof(volume);
 
     memcpy(&buf[offset], &base->id, sizeof(base->id));
@@ -224,6 +242,10 @@ Ingredient::Ingredient(Ingredient_id i)
     c_id = Class_Ingredient;
     name = Ingredient_name[i];
     id = i;
+    //FIXME get values from server
+    quality=new Property("quality", rand() %100);
+    resilience=new Property("resilience", rand() %100);
+    usage=new Property("usage", rand() %100);
 }
 #else
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
@@ -233,6 +255,9 @@ Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
     name = Ingredient_name[i];
     id = i;
     req_form = f;
+    quality = nullptr;
+    resilience=nullptr;
+    usage=nullptr;
 }
 bool Ingredient::craft()
 {
@@ -242,9 +267,9 @@ bool Ingredient::craft()
         return false;
     }
 
-    quality = rand() % 100;
-    resilience = rand() % 100;
-    usage = rand() % 100;
+    quality=new Property("quality", rand() %100);
+    resilience=new Property("resilience", rand() %100);
+    usage=new Property("usage", rand() %100);
     return true;
 }
 #endif
@@ -254,9 +279,9 @@ void Ingredient::show(bool details)
     printf("%s ->%d\n", name, c_id);
     if (!details)
         return;
-    printf("quality = %d\n", quality);
-    printf("resilience = %d\n", resilience);
-    printf("usage = %d\n", usage);
+    quality->show();
+    resilience->show();
+    usage->show();
     printf("form = %s", Form_name[req_form]);
 }
 
@@ -270,11 +295,11 @@ void Ingredient::to_bytes(unsigned char * buf)
     InventoryElement::to_bytes(buf);
     int offset = InventoryElement::get_packet_size();
 
-    memcpy(&buf[offset], &quality, sizeof(quality));
+    memcpy(&buf[offset], &quality, sizeof(quality->value));
     offset += sizeof(quality);
-    memcpy(&buf[offset], &resilience, sizeof(resilience));
+    memcpy(&buf[offset], &resilience, sizeof(resilience->value));
     offset += sizeof(resilience);
-    memcpy(&buf[offset], &usage, sizeof(usage));
+    memcpy(&buf[offset], &usage, sizeof(usage->value));
     offset += sizeof(usage);
 
     memcpy(&buf[offset], &id, sizeof(id));
@@ -287,6 +312,10 @@ Product::Product(Product_id i)
     id = i;
     c_id = Class_Product;
     name = Product_name[i];
+    //FIXME get values from server
+    quality=new Property("quality", rand() %100);
+    resilience=new Property("resilience", rand() %100);
+    usage=new Property("usage", rand() %100);
 }
 #else
 void Product::init(Product_id i, int c, Form f)
@@ -326,9 +355,9 @@ bool Product::craft() // executed only on server
     if (!check_ing())
         return false;
 
-    quality = rand() % 100;
-    resilience = rand() % 100;
-    usage = rand() % 100;
+    quality=new Property("quality", rand() %100);
+    resilience=new Property("resilience", rand() %100);
+    usage=new Property("usage", rand() %100);
     return true;
 }
 #endif
@@ -338,9 +367,9 @@ void Product::show(bool details)
     printf("%s -> %d\n", name, c_id);
     if (!details)
         return;
-    printf("quality = %d\n", quality);
-    printf("resilience = %d\n", resilience);
-    printf("usage = %d\n", usage);
+    quality->show();
+    resilience->show();
+    usage->show();
 }
 
 void init_elements()
@@ -363,8 +392,8 @@ Animal::Animal()
 {
     c_id = Class_Animal;
     alive = true;
-    max_age = 1 + rand() % 36000; // 100 years
-    age = rand() % max_age;
+    max_age = new Property("max age", 1 + rand() % 36000); // 100 years
+    age = new Property("age", rand() % max_age->value);
     name = create_name(rand() % 2 + 2);
 }
 
@@ -372,8 +401,8 @@ Npc::Npc()
 {
     c_id = Class_Npc;
     alive = true;
-    max_age = 1 + rand() % 18000; // 50 years
-    age = rand() % max_age;
+    max_age = new Property("max age", 1 + rand() % 18000); // 50 years
+    age = new Property("age", rand() % max_age->value);
     name = create_name(rand() % 3 + 3);
 }
 
@@ -383,30 +412,31 @@ Plant::Plant()
     seedling_time = 7 + rand() % 14;
     growing_time = seedling_time + rand() % 150;
     flowers_time = growing_time + rand() % 30;
-    max_age = flowers_time + rand() % 100;
+    max_age = new Property("max age", flowers_time + rand() % 100);
     phase = (Plant_phase)(rand() % (Plant_fruits + 1));
     grown = false;
     water = rand() % 100;
+    age = new Property("age", 0);
     switch (phase)
     {
         case Plant_seed:
-            age = 1;
+            age->value = 1;
             planted = false;
             break;
         case Plant_seedling:
-            age = seedling_time;
+            age->value = seedling_time;
             planted = true;
             break;
         case Plant_growing:
-            age = growing_time;
+            age->value = growing_time;
             planted = true;
             break;
         case Plant_flowers:
-            age = flowers_time;
+            age->value = flowers_time;
             planted = true;
             break;
         case Plant_fruits:
-            age = max_age;
+            age->value = max_age->value;
             grown = true;
             planted = true;
             break;

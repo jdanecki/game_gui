@@ -95,7 +95,7 @@ bool PlayerServer::plant_with_seed(InventoryElement * el, int map_x, int map_y, 
 
             p->phase = Plant_seed;
             p->grown = false;
-            p->age = 1;
+            p->age->value = 1;
 
             drop(el);
             destroy(el);

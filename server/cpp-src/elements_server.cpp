@@ -92,9 +92,9 @@ bool PlantServer::grow()
     if (!water)
         return !grown;
     // water--;
-    age++;
+    age->value++;
 
-    if (age >= max_age)
+    if (age->value >= max_age->value)
     {
         if (phase != Plant_fruits)
         {
@@ -104,7 +104,7 @@ bool PlantServer::grow()
         }
         return !grown;
     }
-    if (age >= flowers_time)
+    if (age->value >= flowers_time)
     {
         if (phase != Plant_flowers)
         {
@@ -113,7 +113,7 @@ bool PlantServer::grow()
         }
         return !grown;
     }
-    if (age >= growing_time)
+    if (age->value >= growing_time)
     {
         if (phase != Plant_growing)
         {
@@ -122,7 +122,7 @@ bool PlantServer::grow()
         }
         return !grown;
     }
-    if (age >= seedling_time)
+    if (age->value >= seedling_time)
     {
         if (phase != Plant_seedling)
         {
