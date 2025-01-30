@@ -19,8 +19,8 @@ extern "C"
 
 void destroy(InventoryElement * el);
 
-const int max_delay_move = 10;
-const int max_delay_grow = 600;
+const int max_delay_move = 10;  // 1 sec.
+const int max_delay_grow = 600; // 1 min.
 
 class AnimalServer : public Animal
 {
@@ -37,6 +37,7 @@ class AnimalServer : public Animal
 
 class PlantServer : public Plant
 {
+    int * padding; // FIXME
     int delay_for_grow;
 
   public:

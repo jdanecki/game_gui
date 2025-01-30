@@ -23,7 +23,7 @@ SDL_Texture * ObjectSDL::get_texture()
     return NULL;
 }
 
-ElementSDL::ElementSDL(int id) : Element(base_elements[id])
+ElementSDL::ElementSDL(ElementData * data) : Element(base_elements[data->id])
 {
 }
 
@@ -32,26 +32,23 @@ SDL_Texture * ElementSDL::get_texture()
     return items_textures[get_base()->id];
 }
 
-#ifdef CORE_FOR_CLIENT
-IngredientSDL::IngredientSDL(int id) : Ingredient((Ingredient_id)id)
+IngredientSDL::IngredientSDL(IngredientData * data) : Ingredient(data->id)
 {
+    quality->value = data->quality;
+    resilience->value = data->resilience;
+    usage->value = data->usage;
 }
-ProductSDL::ProductSDL(int id) : Product((Product_id)id)
-{
-}
-
-#else
-IngredientSDL::IngredientSDL(int id) : Ingredient(nullptr, (Ingredient_id)id, Form_none)
-{
-}
-ProductSDL::ProductSDL(int id) : Product(nullptr, nullptr, (Product_id)id, Form_none)
-{
-}
-#endif
 
 SDL_Texture * IngredientSDL::get_texture()
 {
     return ing_textures[id];
+}
+
+ProductSDL::ProductSDL(ProductData * data) : Product(data->id)
+{
+    quality->value = data->quality;
+    resilience->value = data->resilience;
+    usage->value = data->usage;
 }
 
 SDL_Texture * ProductSDL::get_texture()

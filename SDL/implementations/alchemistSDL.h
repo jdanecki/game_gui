@@ -2,6 +2,7 @@
 #define ALCHEMIST_SDL_H
 
 #include "../../core/alchemist/elements.h"
+#include "../networking.h"
 #include "../texture.h"
 
 class Renderable
@@ -17,14 +18,14 @@ class IngredientSDL : public Ingredient, public Renderable
 {
   public:
     SDL_Texture * get_texture();
-    IngredientSDL(int id);
+    IngredientSDL(IngredientData * data);
 };
 
 class ProductSDL : public Product, public Renderable
 {
   public:
     SDL_Texture * get_texture();
-    ProductSDL(int id);
+    ProductSDL(ProductData * data);
 };
 
 class ObjectSDL : public Object, public Renderable
@@ -38,7 +39,7 @@ class ElementSDL : public Element, public Renderable
 {
   public:
     SDL_Texture * get_texture();
-    ElementSDL(int id);
+    ElementSDL(ElementData * data);
 };
 
 #endif

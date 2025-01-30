@@ -70,8 +70,21 @@ void draw_texts()
     {
         char * t = item->get_description();
         write_text(tx, ty, t, White, 15, 30);
-        delete t;
+        delete[] t;
         ty += 25;
+        int count = 0;
+        Property ** props = item->get_properties(&count);
+        if (props)
+        {
+            char buf[64];
+            for (int i = 0; i < count; i++)
+            {
+                sprintf(buf, "%s: %u", props[i]->name, props[i]->value);
+                write_text(tx, ty, buf, White, 15, 30);
+                ty += 25;
+            }
+            delete props;
+        }
     }
 }
 

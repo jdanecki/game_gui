@@ -230,6 +230,11 @@ class InventoryElement
         sprintf(buf, "%s: %s (%s)", get_class_name(), get_form_name(), get_name());
         return buf;
     }
+    virtual Property ** get_properties(int * count)
+    {
+        *count = 0;
+        return nullptr;
+    }
     virtual ~InventoryElement()
     {
     }
@@ -282,6 +287,19 @@ class Element : public InventoryElement
     Property * height;
     Property * volume; // lenght*width*height
 
+    Property ** get_properties(int * count)
+    {
+        Property ** props = new Property *[7];
+        props[0] = sharpness;
+        props[1] = smoothness;
+        props[2] = mass;
+        props[3] = length;
+        props[4] = width;
+        props[5] = height;
+        props[6] = volume;
+        *count = 7;
+        return props;
+    }
     virtual BaseElement * get_base()
     {
         return base;
@@ -364,16 +382,28 @@ class Ingredient : public InventoryElement
     }
 #ifdef CORE_FOR_CLIENT
     Ingredient(Ingredient_id i);
+    Property ** get_properties(int * count)
+    {
+        Property ** props = new Property *[3];
+        props[0] = quality;
+        props[1] = resilience;
+        props[2] = usage;
+
+        *count = 3;
+        return props;
+    }
+
 #else
     InventoryElement * el; // available only in server , move to IngredientServer class
     bool craft();
+    Ingredient(InventoryElement * from, Ingredient_id i, Form f);
 #endif
     Edible * get_edible()
     { // FIXME
         return nullptr;
         // return el->get_edible();
     }
-    Ingredient(InventoryElement * from, Ingredient_id i, Form f);
+
     ~Ingredient()
     {
         delete quality;
@@ -409,6 +439,16 @@ class Product : public InventoryElement
     }
 #ifdef CORE_FOR_CLIENT
     Product(Product_id i);
+    Property ** get_properties(int * count)
+    {
+        Property ** props = new Property *[3];
+        props[0] = quality;
+        props[1] = resilience;
+        props[2] = usage;
+
+        *count = 3;
+        return props;
+    }
 #else
     int ing_count;
     InventoryElement ** ings;
@@ -457,9 +497,12 @@ enum plant_types
 class Being : public InventoryElement
 {
     int * padding; // FIXME
+
   public:
+    // shared with client
     Property * age;
     Property * max_age;
+
     bool alive;
     bool can_talk;
     enum being_types type;
@@ -468,7 +511,7 @@ class Being : public InventoryElement
     {
         if (!alive)
         {
-            printf("%s is dead\n", get_name());
+            //  printf("%s is dead\n", get_name());
             return false;
         }
         age->value++;
@@ -483,11 +526,23 @@ class Being : public InventoryElement
     Being()
     {
         alive = true;
+
         max_age = new Property("max age", 1 + rand() % 36000); // 100 years
         age = new Property("age", rand() % max_age->value);
+
         name = create_name(5);
+        printf("new Being: name=%s uid=%lx\n", name, uid);
         req_form = Form_solid;
         can_talk = false;
+    }
+    Property ** get_properties(int * count)
+    {
+        Property ** props = new Property *[2];
+        props[0] = age;
+        props[1] = max_age;
+
+        *count = 2;
+        return props;
     }
     ~Being()
     {
@@ -500,7 +555,7 @@ class Being : public InventoryElement
     }
     void show(bool details = true)
     {
-        printf("Being %s alive=%d\n", name, alive);
+        printf("Being %s alive=%d uid=%lx\n", name, alive, uid);
         age->show();
         max_age->show();
     }
@@ -521,11 +576,13 @@ class Animal : public Being
 {
     int padding; // FIXME
   public:
+    // shared with client
     enum animal_types type;
+
     Animal();
     void show(bool details = true)
     {
-        printf("Animal %s alive=%d\n", name, alive);
+        printf("Animal %s alive=%d uid=%lx\n", name, alive, uid);
         age->show();
         max_age->show();
     }
@@ -569,16 +626,19 @@ class Plant : public Being
 
   public:
     bool planted;
-    bool grown;
     int water;
+
+    // shared with client
     enum plant_types type;
     Plant_phase phase;
+    bool grown;
+
     Plant();
     unsigned int get_packet_size() override;
     void to_bytes(unsigned char * buf) override;
     void show(bool details = true)
     {
-        printf("Plant -> %d name=%s grown=%d\n", c_id, name, grown);
+        printf("Plant -> %d name=%s grown=%d uid=%lx\n", c_id, name, grown, uid);
         age->show();
         max_age->show();
         if (details)
@@ -594,7 +654,7 @@ class Plant : public Being
     {
         if (phase != p)
         {
-            printf("%s growing: %s -> %s\n", name, Plant_phase_name[phase], Plant_phase_name[p]);
+            printf("%s changing phase: %s -> %s age=%u/%u\n", name, Plant_phase_name[phase], Plant_phase_name[p], age->value, max_age->value);
         }
         phase = p;
     }

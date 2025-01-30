@@ -54,13 +54,20 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                     id: plant.type_,
                     phase: plant.phase,
                     grown: plant.grown,
+                    age: unsafe { (*plant._base.age).value},
+                    max_age: unsafe { (*plant._base.max_age).value},
                 },
             }
         }
         core::Class_id_Class_Animal => {
-            // let animal = unsafe { &*(el as *const core::InventoryElement as *const core::Animal) };
+             let animal = unsafe { &*(el as *const core::InventoryElement as *const core::Animal) };
             ObjectData::Animal {
-                data: convert_inv_el(el),
+                data: AnimalData {
+                    base: convert_inv_el(el),
+                    id: animal.type_,
+                    age: unsafe { (*animal._base.age).value},
+                    max_age: unsafe { (*animal._base.max_age).value},
+                },
             }
         }
         _ => panic!(),

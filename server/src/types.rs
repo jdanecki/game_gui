@@ -72,6 +72,17 @@ pub struct PlantData {
     pub id: core::plant_types,
     pub phase: core::Plant_phase,
     pub grown: bool,
+    pub age: u32,
+    pub max_age: u32
+}
+
+#[repr(C)]
+#[derive(Serialize, Deserialize)]
+pub struct AnimalData {
+    pub base: InventoryElementData,
+    pub id: core::animal_types,
+    pub age: u32,
+    pub max_age: u32
 }
 
 #[repr(C)]
@@ -82,7 +93,7 @@ pub enum ObjectData {
     Ingredient { data: IngredientData },
     Product { data: ProductData },
     Plant { data: PlantData },
-    Animal { data: InventoryElementData },
+    Animal { data: AnimalData },
 }
 
 #[no_mangle]

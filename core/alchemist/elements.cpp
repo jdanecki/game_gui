@@ -181,7 +181,7 @@ Element::Element(BaseElement * b)
 {
     c_id = Class_Element;
     base = b;
-    sharpness = new Property("shaepeness", rand() % 100);
+    sharpness = new Property("sharpeness", rand() % 100);
     smoothness = new Property("smoothness", rand() % 100);
     length = new Property("length", 1 + rand() % 100);
     width = new Property("width", 1 + rand() % 100);
@@ -243,10 +243,10 @@ Ingredient::Ingredient(Ingredient_id i)
     c_id = Class_Ingredient;
     name = Ingredient_name[i];
     id = i;
-    // FIXME get values from server
-    quality = new Property("quality", rand() % 100);
-    resilience = new Property("resilience", rand() % 100);
-    usage = new Property("usage", rand() % 100);
+
+    quality = new Property("quality", 0);
+    resilience = new Property("resilience", 0);
+    usage = new Property("usage", 0);
 }
 #else
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
@@ -313,10 +313,9 @@ Product::Product(Product_id i)
     id = i;
     c_id = Class_Product;
     name = Product_name[i];
-    // FIXME get values from server
-    quality = new Property("quality", rand() % 100);
-    resilience = new Property("resilience", rand() % 100);
-    usage = new Property("usage", rand() % 100);
+    quality = new Property("quality", 0);
+    resilience = new Property("resilience", 0);
+    usage = new Property("usage", 0);
 }
 #else
 void Product::init(Product_id i, int c, Form f)
@@ -409,6 +408,7 @@ Npc::Npc()
     can_talk = true;
 }
 
+// FIXME split Plant to server/client side
 Plant::Plant()
 {
     c_id = Class_Plant;
