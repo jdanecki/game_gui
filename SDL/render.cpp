@@ -1,4 +1,8 @@
 #include "main.h"
+#include "texture.h"
+#include "window.h"
+#include <SDL2/SDL_render.h>
+#include <cstddef>
 
 // TODO move it
 int active_hotbar = 0;
@@ -205,6 +209,7 @@ bool draw_terrain()
                 // o->get_posittion(&x, &y);
                 SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
                 SDL_RenderCopy(renderer, r->get_texture(), NULL, &img_rect);
+                // SDL_RenderCopyEx(renderer, texture, NULL, &img_rect, 0, NULL, SDL_FLIP_HORIZONTAL);
             }
             else
             {
@@ -226,9 +231,9 @@ void draw_players()
         {
             SDL_Rect img_rect = {players[i]->x * tile_dungeon_size, players[i]->y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             if (players[i]->going_right)
-                SDL_RenderCopy(renderer, Texture.playerr, NULL, &img_rect);
+                SDL_RenderCopy(renderer, Texture.player, NULL, &img_rect);
             else
-                SDL_RenderCopy(renderer, Texture.playerl, NULL, &img_rect);
+                SDL_RenderCopyEx(renderer, Texture.player, NULL, &img_rect, 0, NULL, SDL_FLIP_HORIZONTAL);
         }
     }
     // render GUI
