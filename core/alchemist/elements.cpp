@@ -29,7 +29,8 @@ const char * Class_names[] = {"unknown", "Element", "Ingredient", "Product", "Pl
 
 Edible::Edible()
 {
-    caloric = new Property("caloric", rand() % 1000);;
+    caloric = new Property("caloric", rand() % 1000);
+    ;
     irrigation = new Property("irrigation", rand() % 500);
     poison = new Property("poison", 0);
     if (rand() % 100 < 10)
@@ -95,9 +96,9 @@ void Solid::show()
     printf("      *** Solid ***\n");
 
     stretching->show(); // rozciąganie
-    squeezing->show();   // ściskanie
-  bending->show();       // zginanie
-   fragility->show();   // kruchość
+    squeezing->show();  // ściskanie
+    bending->show();    // zginanie
+    fragility->show();  // kruchość
     solubility->show(); // rozpuszczalność
 }
 
@@ -181,7 +182,7 @@ Element::Element(BaseElement * b)
     c_id = Class_Element;
     base = b;
     sharpness = new Property("shaepeness", rand() % 100);
-    smoothness = new Property("smoothness",  rand() % 100);
+    smoothness = new Property("smoothness", rand() % 100);
     length = new Property("length", 1 + rand() % 100);
     width = new Property("width", 1 + rand() % 100);
     height = new Property("height", 1 + rand() % 100);
@@ -194,7 +195,7 @@ void Element::show(bool details)
     printf("Element -> %d: base=%s form=%s\n", c_id, base->name, get_form_name());
     if (!details)
         return;
-    sharpness->show();   // ostrość
+    sharpness->show();  // ostrość
     smoothness->show(); // gładkość
     length->show();
     width->show();
@@ -242,10 +243,10 @@ Ingredient::Ingredient(Ingredient_id i)
     c_id = Class_Ingredient;
     name = Ingredient_name[i];
     id = i;
-    //FIXME get values from server
-    quality=new Property("quality", rand() %100);
-    resilience=new Property("resilience", rand() %100);
-    usage=new Property("usage", rand() %100);
+    // FIXME get values from server
+    quality = new Property("quality", rand() % 100);
+    resilience = new Property("resilience", rand() % 100);
+    usage = new Property("usage", rand() % 100);
 }
 #else
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
@@ -256,8 +257,8 @@ Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
     id = i;
     req_form = f;
     quality = nullptr;
-    resilience=nullptr;
-    usage=nullptr;
+    resilience = nullptr;
+    usage = nullptr;
 }
 bool Ingredient::craft()
 {
@@ -267,9 +268,9 @@ bool Ingredient::craft()
         return false;
     }
 
-    quality=new Property("quality", rand() %100);
-    resilience=new Property("resilience", rand() %100);
-    usage=new Property("usage", rand() %100);
+    quality = new Property("quality", rand() % 100);
+    resilience = new Property("resilience", rand() % 100);
+    usage = new Property("usage", rand() % 100);
     return true;
 }
 #endif
@@ -312,10 +313,10 @@ Product::Product(Product_id i)
     id = i;
     c_id = Class_Product;
     name = Product_name[i];
-    //FIXME get values from server
-    quality=new Property("quality", rand() %100);
-    resilience=new Property("resilience", rand() %100);
-    usage=new Property("usage", rand() %100);
+    // FIXME get values from server
+    quality = new Property("quality", rand() % 100);
+    resilience = new Property("resilience", rand() % 100);
+    usage = new Property("usage", rand() % 100);
 }
 #else
 void Product::init(Product_id i, int c, Form f)
@@ -355,9 +356,9 @@ bool Product::craft() // executed only on server
     if (!check_ing())
         return false;
 
-    quality=new Property("quality", rand() %100);
-    resilience=new Property("resilience", rand() %100);
-    usage=new Property("usage", rand() %100);
+    quality = new Property("quality", rand() % 100);
+    resilience = new Property("resilience", rand() % 100);
+    usage = new Property("usage", rand() % 100);
     return true;
 }
 #endif
@@ -395,6 +396,7 @@ Animal::Animal()
     max_age = new Property("max age", 1 + rand() % 36000); // 100 years
     age = new Property("age", rand() % max_age->value);
     name = create_name(rand() % 2 + 2);
+    can_talk = false;
 }
 
 Npc::Npc()
@@ -404,6 +406,7 @@ Npc::Npc()
     max_age = new Property("max age", 1 + rand() % 18000); // 50 years
     age = new Property("age", rand() % max_age->value);
     name = create_name(rand() % 3 + 3);
+    can_talk = true;
 }
 
 Plant::Plant()
@@ -417,6 +420,7 @@ Plant::Plant()
     grown = false;
     water = rand() % 100;
     age = new Property("age", 0);
+    can_talk = false;
     switch (phase)
     {
         case Plant_seed:

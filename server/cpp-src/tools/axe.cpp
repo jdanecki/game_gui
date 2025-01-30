@@ -75,6 +75,8 @@ bool Axe::use(InventoryElement * object)
                 el_seed = new Element(base_elements[ID_ACORN2]);
                 break;
             }
+            default: // FIXME
+                return false;
         }
         ItemLocation loc = p->location;
         world_table[loc.data.chunk.map_y][loc.data.chunk.map_x]->add_object(el, loc.data.chunk.x, loc.data.chunk.y);

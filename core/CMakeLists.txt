@@ -10,7 +10,6 @@ add_library(pime SHARED
     alchemist/elements.cpp
 	alchemist/names.cpp
 	alchemist/el_list.cpp
-    alchemist/game_time.cpp
 	)
 
 target_link_libraries(pime)

@@ -10,13 +10,13 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: ElementData {
                     base: convert_inv_el(el),
                     id: unsafe { (*element.base).id },
-                    sharpness: (*element.sharpness).value,
-                    smoothness: (*element.smoothness).value,
-                    mass: (*element.mass).value,
-                    length: (*element.length).value,
-                    width: (*element.width).value,
-                    height: (*element.height).value,
-                    volume: (*element.volume).value,
+                    sharpness: unsafe {(*element.sharpness).value},
+                    smoothness: unsafe {(*element.smoothness).value},
+                    mass: unsafe {(*element.mass).value},
+                    length: unsafe {(*element.length).value},
+                    width: unsafe {(*element.width).value},
+                    height: unsafe {(*element.height).value},
+                    volume: unsafe {(*element.volume).value},
                 },
             }
         }
@@ -27,9 +27,9 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: IngredientData {
                     base: convert_inv_el(el),
                     id: ingredient.id,
-                    quality: (*ingredient.quality).value,
-                    resilience: (*ingredient.resilience).value,
-                    usage: (*ingredient.usage).value,
+                    quality: unsafe {(*ingredient.quality).value},
+                    resilience: unsafe {(*ingredient.resilience).value},
+                    usage: unsafe {(*ingredient.usage).value},
                 },
             }
         }
@@ -40,9 +40,9 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: ProductData {
                     base: convert_inv_el(el),
                     id: product.id,
-                    quality: (*product.quality).value,
-                    resilience: (*product.resilience).value,
-                    usage: (*product.usage).value,
+                    quality: unsafe {(*product.quality).value},
+                    resilience: unsafe {(*product.resilience).value},
+                    usage: unsafe {(*product.usage).value},
                 },
             }
         }

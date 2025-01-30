@@ -10,10 +10,10 @@ class Property
   public:
     const char * name;
     unsigned int value;
-    Property(const char *n, unsigned int v)
+    Property(const char * n, unsigned int v)
     {
-        name=n;
-        value=v;
+        name = n;
+        value = v;
     }
     void show()
     {
@@ -101,7 +101,7 @@ class BaseElement
     const char * name;
 
     int id; // texture id
-    Property *density;
+    Property * density;
     Edible * edible;
     Form form;
     Solid * solid;
@@ -230,8 +230,9 @@ class InventoryElement
         sprintf(buf, "%s: %s (%s)", get_class_name(), get_form_name(), get_name());
         return buf;
     }
-    virtual ~InventoryElement() {}
-
+    virtual ~InventoryElement()
+    {
+    }
 };
 
 enum object_types
@@ -293,7 +294,8 @@ class Element : public InventoryElement
     void show(bool details = true);
 
     Element(BaseElement * b);
-    ~Element() {
+    ~Element()
+    {
         delete sharpness;
         delete smoothness;
         delete mass;
@@ -459,15 +461,23 @@ class Being : public InventoryElement
     Property * age;
     Property * max_age;
     bool alive;
+    bool can_talk;
     enum being_types type;
 
     virtual bool grow()
     {
         if (!alive)
+        {
+            printf("%s is dead\n", get_name());
             return false;
-        age++;
-        if (age >= max_age)
+        }
+        age->value++;
+        // printf("%s:%s growing\n", get_class_name(), get_name());
+        if (age->value >= max_age->value)
+        {
             alive = false;
+            printf("%s is dying\n", get_name());
+        }
         return alive;
     }
     Being()
@@ -477,6 +487,7 @@ class Being : public InventoryElement
         age = new Property("age", rand() % max_age->value);
         name = create_name(5);
         req_form = Form_solid;
+        can_talk = false;
     }
     ~Being()
     {
@@ -517,7 +528,6 @@ class Animal : public Being
         printf("Animal %s alive=%d\n", name, alive);
         age->show();
         max_age->show();
-
     }
     /* bool tick()
      {

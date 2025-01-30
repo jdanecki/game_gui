@@ -50,9 +50,9 @@ pub struct ElementData {
 pub struct IngredientData {
     pub base: InventoryElementData,
     pub id: core::Ingredient_id,
-    pub quality: i32,
-    pub resilience: i32,
-    pub usage: i32,
+    pub quality: u32,
+    pub resilience: u32,
+    pub usage: u32,
 }
 
 #[repr(C)]
@@ -60,9 +60,9 @@ pub struct IngredientData {
 pub struct ProductData {
     pub base: InventoryElementData,
     pub id: core::Product_id,
-    pub quality: i32,
-    pub resilience: i32,
-    pub usage: i32,
+    pub quality: u32,
+    pub resilience: u32,
+    pub usage: u32,
 }
 
 #[repr(C)]
