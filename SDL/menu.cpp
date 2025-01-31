@@ -126,8 +126,8 @@ void Menu::show()
         mody2 = (game_size / 2) + (menu_opt_size * (options / 2));
     }
 
-    int modx = (game_size / 2) - (0.4 * game_size);
-    int modx2 = (game_size / 2) + (0.4 * game_size);
+    int modx = int((game_size / 2)) - (0.4 * game_size);
+    int modx2 = int((game_size / 2)) + (0.4 * game_size);
 
     SDL_Rect rect = {modx, mody, modx2 - modx, mody2 - mody};
     if (!(options < 10))
@@ -146,8 +146,16 @@ void Menu::show()
     }
     else
     {
-        draw_rectangle(modx, game_size / 2 - menu_opt_size / 2, modx2 - modx, menu_opt_size, SDL_Color{0, 255, 255, 255}, SDL_Color{0, 255, 255, 255}, SDL_Color{}, SDL_Color{});
-        draw_rectangle(modx, game_size / 2 - menu_opt_size / 2, modx2 - modx, menu_opt_size, SDL_Color{}, SDL_Color{}, SDL_Color{0, 255, 255, 255}, SDL_Color{0, 255, 255, 255});
+        if (options % 2)
+        {
+            draw_rectangle(modx, game_size / 2 - menu_opt_size / 2, modx2 - modx, menu_opt_size, SDL_Color{0, 255, 255, 255}, SDL_Color{0, 255, 255, 255}, SDL_Color{}, SDL_Color{});
+            draw_rectangle(modx, game_size / 2 - menu_opt_size / 2, modx2 - modx, menu_opt_size, SDL_Color{}, SDL_Color{}, SDL_Color{0, 255, 255, 255}, SDL_Color{0, 255, 255, 255});
+        }
+        else
+        {
+            draw_rectangle(modx, game_size / 2, modx2 - modx, menu_opt_size, SDL_Color{0, 255, 255, 255}, SDL_Color{0, 255, 255, 255}, SDL_Color{}, SDL_Color{});
+            draw_rectangle(modx, game_size / 2, modx2 - modx, menu_opt_size, SDL_Color{}, SDL_Color{}, SDL_Color{0, 255, 255, 255}, SDL_Color{0, 255, 255, 255});
+        }
     }
 
     if (options < 10)
