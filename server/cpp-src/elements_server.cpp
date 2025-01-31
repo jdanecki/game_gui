@@ -33,23 +33,29 @@ void AnimalServer::move()
     int _x = location.data.chunk.x;
     int _y = location.data.chunk.y;
 
-    switch (rand() % 4)
+    if ((_x == dst_loc_x && _y == dst_loc_y) /*|| (rand() % 5 ==1)*/)
     {
-        case 0: // up
-            _y--;
-            break;
-        case 1: // down
-            _y++;
-            break;
-        case 2: // left
-            // going_right=false;
-            _x--;
-            break;
-        case 3: // right
-            // going_right=true;
-            _x++;
-            break;
+        dst_loc_x = rand() % CHUNK_SIZE;
+        dst_loc_y = rand() % CHUNK_SIZE;
     }
+    else
+    {
+        if (rand() % 2)
+        {
+            if (_x < dst_loc_x)
+                _x++;
+            else
+                _x--;
+        }
+        if (rand() % 2)
+        {
+            if (_y < dst_loc_y)
+                _y++;
+            else
+                _y--;
+        }
+    }
+    //  printf("%d, %d -> dst[%d, %d]\n", _x, _y, dst_loc_x, dst_loc_y);
 
     if (_x >= CHUNK_SIZE)
         _x = CHUNK_SIZE - 1;

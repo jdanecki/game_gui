@@ -126,6 +126,7 @@ extern "C"
             player->map_x = map_x;
             player->map_y = map_y;
 
+            // FIXME when more chunks added
             if (x != player->x)
                 player->going_right = player->x > x ? 0 : 1;
             player->x = x;
@@ -227,6 +228,13 @@ extern "C"
             case ItemLocationLol::Tag::Chunk:
             {
                 // printf("added %ld to chunk %d %d\n", id, new_loc.chunk.map_x, new_loc.chunk.map_y);
+                ItemLocation old_l;
+                ItemLocation new_l;
+                old_l.data.chunk.x = old_loc.chunk.x;
+                old_l.data.chunk.y = old_loc.chunk.y;
+                new_l.data.chunk.x = new_loc.chunk.x;
+                new_l.data.chunk.y = new_loc.chunk.y;
+                el->update_item_location(old_l, new_l);
                 world_table[new_loc.chunk.map_y][new_loc.chunk.map_x]->add_object(el, new_loc.chunk.x, new_loc.chunk.y);
                 break;
             }

@@ -204,12 +204,8 @@ bool draw_terrain()
             Renderable * r = dynamic_cast<Renderable *>(o);
             if (o && r)
             {
-                int x = o->location.data.chunk.x;
-                int y = o->location.data.chunk.y;
-                // o->get_posittion(&x, &y);
-                SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-                SDL_RenderCopy(renderer, r->get_texture(), NULL, &img_rect);
-                // SDL_RenderCopyEx(renderer, texture, NULL, &img_rect, 0, NULL, SDL_FLIP_HORIZONTAL);
+                SDL_Rect img_rect = {o->get_x() * tile_dungeon_size, o->get_y() * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+                r->render(&img_rect);
             }
             else
             {
@@ -263,7 +259,10 @@ void draw_npc()
     }
 
     side = dir > 0 ? 0 : 1;
-    SDL_RenderCopy(renderer, npc_textures[side], NULL, &img_rect);
+    if (side)
+        SDL_RenderCopy(renderer, npc_texture, NULL, &img_rect);
+    else
+        SDL_RenderCopyEx(renderer, npc_texture, NULL, &img_rect, 0, NULL, SDL_FLIP_HORIZONTAL);
 }
 
 void draw()

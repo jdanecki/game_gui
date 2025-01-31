@@ -4,13 +4,28 @@
 #include "../../core/alchemist/elements.h"
 #include "../networking.h"
 #include "../texture.h"
+#include "../window.h"
 
 class Renderable
 {
+  protected:
+    bool flip;
+
   public:
+    Renderable()
+    {
+        flip = false;
+    }
     virtual SDL_Texture * get_texture()
     {
         return NULL;
+    }
+    virtual void render(SDL_Rect * rect)
+    {
+        if (flip)
+            SDL_RenderCopyEx(renderer, get_texture(), NULL, rect, 0, NULL, SDL_FLIP_HORIZONTAL);
+        else
+            SDL_RenderCopy(renderer, get_texture(), NULL, rect);
     }
 };
 

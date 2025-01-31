@@ -22,7 +22,8 @@ class Property
 };
 
 class Edible
-{
+{ // FIXME should be changed to being property
+  // when more npc's are added
   public:
     Property * irrigation;
     Property * poison;
@@ -124,7 +125,7 @@ union ItemLocationData
 {
     struct
     {
-        int map_x, map_y, x, y, z;
+        int map_x, map_y, x, y;
     } chunk;
     struct
     {
@@ -236,6 +237,9 @@ class InventoryElement
         return nullptr;
     }
     virtual ~InventoryElement()
+    {
+    }
+    virtual void update_item_location(ItemLocation &, ItemLocation &)
     {
     }
 };
@@ -567,10 +571,11 @@ class Being : public InventoryElement
 
 enum animal_types
 {
-    ANIMALID_pig
+    ANIMAL_ID_pig,
+    ANIMAL_ID_boar,
 };
 
-#define ANIMALS 1
+#define ANIMALS 2
 
 class Animal : public Being
 {
