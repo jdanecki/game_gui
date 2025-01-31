@@ -1,4 +1,8 @@
 #include "main.h"
+#include "texture.h"
+#include "window.h"
+#include <SDL2/SDL_render.h>
+#include <cstddef>
 
 // TODO move it
 int active_hotbar = 0;
@@ -70,8 +74,21 @@ void draw_texts()
     {
         char * t = item->get_description();
         write_text(tx, ty, t, White, 15, 30);
-        delete t;
+        delete[] t;
         ty += 25;
+        int count = 0;
+        Property ** props = item->get_properties(&count);
+        if (props)
+        {
+            char buf[64];
+            for (int i = 0; i < count; i++)
+            {
+                sprintf(buf, "%s: %u", props[i]->name, props[i]->value);
+                write_text(tx, ty, buf, White, 15, 30);
+                ty += 25;
+            }
+            delete props;
+        }
     }
 }
 
@@ -187,11 +204,8 @@ bool draw_terrain()
             Renderable * r = dynamic_cast<Renderable *>(o);
             if (o && r)
             {
-                int x = o->location.data.chunk.x;
-                int y = o->location.data.chunk.y;
-                // o->get_posittion(&x, &y);
-                SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
-                SDL_RenderCopy(renderer, r->get_texture(), NULL, &img_rect);
+                SDL_Rect img_rect = {o->get_x() * tile_dungeon_size, o->get_y() * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
+                r->render(&img_rect);
             }
             else
             {
@@ -213,9 +227,9 @@ void draw_players()
         {
             SDL_Rect img_rect = {players[i]->x * tile_dungeon_size, players[i]->y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             if (players[i]->going_right)
-                SDL_RenderCopy(renderer, Texture.playerr, NULL, &img_rect);
+                SDL_RenderCopy(renderer, Texture.player, NULL, &img_rect);
             else
-                SDL_RenderCopy(renderer, Texture.playerl, NULL, &img_rect);
+                SDL_RenderCopyEx(renderer, Texture.player, NULL, &img_rect, 0, NULL, SDL_FLIP_HORIZONTAL);
         }
     }
     // render GUI
@@ -245,7 +259,10 @@ void draw_npc()
     }
 
     side = dir > 0 ? 0 : 1;
-    SDL_RenderCopy(renderer, npc_textures[side], NULL, &img_rect);
+    if (side)
+        SDL_RenderCopy(renderer, npc_texture, NULL, &img_rect);
+    else
+        SDL_RenderCopyEx(renderer, npc_texture, NULL, &img_rect, 0, NULL, SDL_FLIP_HORIZONTAL);
 }
 
 void draw()

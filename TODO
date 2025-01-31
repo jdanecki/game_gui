@@ -2,4 +2,5 @@
     - don't build game_net for debug and release, only one target
 * refactor world generator
 * add npc conversation
-
+* names of elements are different on server and client
+* make npc and player as deratives of InventoryElement

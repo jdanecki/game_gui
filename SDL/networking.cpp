@@ -69,91 +69,6 @@ InventoryElement * remove_from_location(ItemLocationLol location, size_t id)
     return el;
 }
 
-// InventoryElement* el_from_data(unsigned char* data)
-// {
-//     int offset = 0;
-
-//     size_t uid = *(size_t*)&data[offset];
-//     offset += sizeof(size_t);
-
-//     Class_id c_id = (Class_id)data[offset];
-//     offset += sizeof(Class_id);
-
-//     /*int ox = *((int*)&data[offset]);
-//     offset += sizeof(int);
-
-//     int oy = data[offset];
-//     offset += sizeof(int);
-
-//     int oz = data[offset];
-//     offset += sizeof(int);*/
-//     ItemLocation* location = ((ItemLocation*)&data[offset]);
-//     offset += sizeof(ItemLocation);
-
-//     int id = -1;
-
-//     InventoryElement* el = NULL;
-//     switch (c_id)
-//     {
-//         case Class_Element:
-//         {
-//             offset += sizeof(unsigned int) * 7;
-//             int id = data[offset];
-//             offset += sizeof(int);
-//             el = new ElementSDL(id);
-//             printf("element(1) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-//             break;
-//         }
-//         case Class_Ingredient:
-//         {
-//             offset += sizeof(unsigned int) * 3;
-//             int id = data[offset];
-//             offset += sizeof(int);
-//             el = new IngredientSDL(id);
-//             printf("ingredient(2) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-//             break;
-//         }
-//         case Class_Product:
-//         {
-//             offset += sizeof(unsigned int) * 3;
-//             int id = data[offset];
-//             offset += sizeof(int);
-//             el = new ProductSDL(id);
-//             printf("product(3) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-//             break;
-//         }
-//         case Class_Plant:
-//         {
-//             PlantSDL* p = new PlantSDL();
-//             p->type = *((enum plant_types*)&data[offset]);
-//             offset += sizeof(p->type);
-//             p->phase = *((Plant_phase*)&data[offset]);
-//             offset += sizeof(p->phase);
-//             p->grown = *((bool*)&data[offset]);
-//             offset += sizeof(p->grown);
-//             el = p;
-//             printf("plant(4) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, p->type);
-//             break;
-//         }
-//         case Class_Animal:
-//             el = new AnimalSDL();
-//             printf("animal(5) %ld - %d,%d - %d\n", uid, location->data.chunk.x, location->data.chunk.y, id);
-//             break;
-//         default:
-//             printf("something(%d) %ld - %d,%d - %d\n", c_id, uid, location->data.chunk.x, location->data.chunk.y, id);
-//             abort();
-//     }
-//     if (el)
-//     {
-//         el->uid = uid;
-//         //el->set_posittion(ox, oy);
-//         //el->location.data.chunk.x = ox;
-//         //el->location.data.chunk.y = oy;
-//         el->location = *location;
-//     }
-//     return el;
-// }
-
 InventoryElement * el_from_data(ObjectData data)
 {
     InventoryElement * el = nullptr;
@@ -162,24 +77,22 @@ InventoryElement * el_from_data(ObjectData data)
         case ObjectData::Tag::InvElement:
             break;
         case ObjectData::Tag::Element:
-            el = new ElementSDL(data.element.data.id);
+            el = new ElementSDL(&data.element.data);
+
             break;
         case ObjectData::Tag::Ingredient:
-            el = new IngredientSDL(data.ingredient.data.id);
+            el = new IngredientSDL(&data.ingredient.data);
             break;
         case ObjectData::Tag::Product:
-            el = new ProductSDL(data.product.data.id);
+            el = new ProductSDL(&data.product.data);
             break;
         case ObjectData::Tag::Plant:
         {
-            Plant * p = new PlantSDL();
-            p->type = data.plant.data.id;
-            p->grown = data.plant.data.grown;
-            el = p;
+            el = new PlantSDL(&data.plant.data);
             break;
         }
         case ObjectData::Tag::Animal:
-            el = new AnimalSDL();
+            el = new AnimalSDL(&data.animal.data);
             break;
     }
     if (el)
@@ -213,6 +126,7 @@ extern "C"
             player->map_x = map_x;
             player->map_y = map_y;
 
+            // FIXME when more chunks added
             if (x != player->x)
                 player->going_right = player->x > x ? 0 : 1;
             player->x = x;
@@ -251,27 +165,6 @@ extern "C"
         printf("got id %ld\n", id);
     }
 
-    void update_inventory(uint8_t * data)
-    {
-        printf("THAT HAPPENED\n");
-        /*int offset = 1;
-        int item_num = *(int*)&data[offset];
-        for (int i = 0; i < item_num; i++)
-        {
-            InventoryElement* el = el_from_data(&data[5 + i*28]);
-
-            if (el)
-            {
-                player->inventory->add(el);
-                printf("invent %d %ld\n", el->c_id, el->uid);
-            }
-            else
-            {
-                printf("invalid item\n");
-            }
-        }*/
-    }
-
     void update_object(ObjectData data)
     {
         size_t uid = data.inv_element.data.uid;
@@ -290,10 +183,21 @@ extern "C"
                 case Class_Product:
                     break;
                 case Class_Plant:
+                {
                     Plant * p = dynamic_cast<Plant *>(el);
                     p->phase = data.plant.data.phase;
                     p->grown = data.plant.data.grown;
+                    p->age->value = data.plant.data.age;
+                    p->max_age->value = data.plant.data.max_age;
                     break;
+                }
+                case Class_Animal:
+                {
+                    Animal * p = dynamic_cast<Animal *>(el);
+                    p->age->value = data.animal.data.age;
+                    p->max_age->value = data.animal.data.max_age;
+                    break;
+                }
             }
             // printf("%s updated\n", el->get_name());
         }
@@ -324,6 +228,13 @@ extern "C"
             case ItemLocationLol::Tag::Chunk:
             {
                 // printf("added %ld to chunk %d %d\n", id, new_loc.chunk.map_x, new_loc.chunk.map_y);
+                ItemLocation old_l;
+                ItemLocation new_l;
+                old_l.data.chunk.x = old_loc.chunk.x;
+                old_l.data.chunk.y = old_loc.chunk.y;
+                new_l.data.chunk.x = new_loc.chunk.x;
+                new_l.data.chunk.y = new_loc.chunk.y;
+                el->update_item_location(old_l, new_l);
                 world_table[new_loc.chunk.map_y][new_loc.chunk.map_x]->add_object(el, new_loc.chunk.x, new_loc.chunk.y);
                 break;
             }

@@ -4,7 +4,7 @@
 void generator()
 {
     load_chunk(WORLD_CENTER, WORLD_CENTER);
-    printf("generated: %d items", world_table[128][128]->objects.size());
+    printf("generated: %d items\n", world_table[128][128]->objects.size());
 }
 
 void create_biome_plains(chunk * chunk)
@@ -77,7 +77,7 @@ void create_biome_plains(chunk * chunk)
             int x = rand() % CHUNK_SIZE;
             int y = rand() % CHUNK_SIZE;
 
-            a->type = ANIMALID_pig;
+            a->type = ANIMAL_ID_pig;
 
             chunk->add_object(a, x, y);
         }
@@ -94,7 +94,7 @@ void create_biome_forest(chunk * chunk)
         }
         // printf("\n");
     }
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 16; i++)
     {
         int b = rand() % BASE_ELEMENTS;
         Element * o = new Element(base_elements[b]);
@@ -106,19 +106,13 @@ void create_biome_forest(chunk * chunk)
     if (/*rand() % 2*/ 1)
     {
 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 10; i++)
         {
-            Animal * a = new AnimalServer();
-            int x = rand() % CHUNK_SIZE;
-            int y = rand() % CHUNK_SIZE;
-
-            a->type = ANIMALID_pig;
-
-            chunk->add_object(a, x, y);
+            chunk->add_object(new AnimalServer());
         }
     }
 
-    for (int i = 0; i < 32; i++)
+    for (int i = 0; i < 10; i++)
     {
         chunk->add_object(new PlantServer());
     }

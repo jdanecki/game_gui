@@ -19,8 +19,7 @@ enum object_textures_enum
 
 struct textures
 {
-    SDL_Texture * playerr;
-    SDL_Texture * playerl;
+    SDL_Texture * player;
     SDL_Texture * run_icon;
     SDL_Texture * sneak_icon;
 };
@@ -30,12 +29,11 @@ extern SDL_Texture * items_textures[BASE_ELEMENTS];
 extern SDL_Texture * ing_textures[ING_ELEMENTS];
 extern SDL_Texture * prod_textures[PROD_ELEMENTS];
 extern SDL_Texture * being_textures[BEINGS];
-extern SDL_Texture * animall_textures[ANIMALS];
-extern SDL_Texture * animalr_textures[ANIMALS];
+extern SDL_Texture * animal_textures[ANIMALS];
 extern SDL_Texture * plant_textures[PLANTS];
 extern SDL_Texture * grown_plant_textures[PLANTS];
 extern SDL_Texture * object_textures[TEXTURE_wall_max];
-extern SDL_Texture * npc_textures[2];
+extern SDL_Texture * npc_texture;
 extern SDL_Texture * up_mask;
 extern SDL_Texture * down_mask;
 extern struct textures Texture;

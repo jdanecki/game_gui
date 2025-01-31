@@ -1,3 +1,4 @@
+// GENERATED FILE
 #ifndef NETWORKING_H
 #define NETWORKING_H
 class UdpSocket
@@ -68,18 +69,18 @@ struct IngredientData
 {
     InventoryElementData base;
     Ingredient_id id;
-    int32_t quality;
-    int32_t resilience;
-    int32_t usage;
+    uint32_t quality;
+    uint32_t resilience;
+    uint32_t usage;
 };
 
 struct ProductData
 {
     InventoryElementData base;
     Product_id id;
-    int32_t quality;
-    int32_t resilience;
-    int32_t usage;
+    uint32_t quality;
+    uint32_t resilience;
+    uint32_t usage;
 };
 
 struct PlantData
@@ -88,6 +89,16 @@ struct PlantData
     plant_types id;
     Plant_phase phase;
     bool grown;
+    uint32_t age;
+    uint32_t max_age;
+};
+
+struct AnimalData
+{
+    InventoryElementData base;
+    animal_types id;
+    uint32_t age;
+    uint32_t max_age;
 };
 
 struct ObjectData
@@ -129,7 +140,7 @@ struct ObjectData
 
     struct Animal_Body
     {
-        InventoryElementData data;
+        AnimalData data;
     };
 
     Tag tag;

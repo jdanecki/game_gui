@@ -10,12 +10,11 @@ SDL_Texture * items_textures[BASE_ELEMENTS];
 SDL_Texture * ing_textures[ING_ELEMENTS];
 SDL_Texture * prod_textures[PROD_ELEMENTS];
 SDL_Texture * being_textures[BEINGS];
-SDL_Texture * animall_textures[ANIMALS];
-SDL_Texture * animalr_textures[ANIMALS];
+SDL_Texture * animal_textures[ANIMALS];
 SDL_Texture * plant_textures[PLANTS];
 SDL_Texture * grown_plant_textures[PLANTS];
 SDL_Texture * object_textures[TEXTURE_wall_max];
-SDL_Texture * npc_textures[2];
+SDL_Texture * npc_texture;
 
 SDL_Texture * load_texture(const char * texture_name)
 {
@@ -63,13 +62,12 @@ void add_prod_texture(int id, const char * file)
 
 void load_textures()
 {
-    Texture.playerr = load_texture("textures/player/playerr.png");
-    Texture.playerl = load_texture("textures/player/playerl.png");
+    Texture.player = load_texture("textures/player.png");
+
     Texture.run_icon = load_texture("textures/gui/run_icon.png");
     Texture.sneak_icon = load_texture("textures/gui/sneak_icon.png");
 
-    npc_textures[0] = load_texture("textures/npc/npcl.png");
-    npc_textures[1] = load_texture("textures/npc/npcr.png");
+    npc_texture = load_texture("textures/npc.png");
 
     add_tile_texture(TILE_AIR, "textures/game_tiles/air.png");
     add_tile_texture(TILE_STONE, "textures/game_tiles/stone.png");
@@ -135,8 +133,8 @@ void load_textures()
     grown_plant_textures[PLANTID_tree1] = load_texture("textures/plants/tree/tree1_grown.png");
     grown_plant_textures[PLANTID_tree2] = load_texture("textures/plants/tree/tree2_grown.png");
 
-    animall_textures[ANIMALID_pig] = load_texture("textures/animals/pigl.png");
-    animalr_textures[ANIMALID_pig] = load_texture("textures/animals/pigr.png");
+    animal_textures[ANIMAL_ID_pig] = load_texture("textures/animals/pig.png");
+    animal_textures[ANIMAL_ID_boar] = load_texture("textures/animals/boar.png");
 
     object_textures[TEXTURE_stone_wall] = load_texture("textures/objects/stone_wall.png");
     object_textures[TEXTURE_log_wall] = load_texture("textures/objects/log_wall.png");

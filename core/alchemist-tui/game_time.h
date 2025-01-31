@@ -1,7 +1,7 @@
 #ifndef GAME_TIME_H
 #define GAME_TIME_H
 
-#include "el_list.h"
+#include "../alchemist/el_list.h"
 
 class Game_time
 {
@@ -26,6 +26,5 @@ class Game_time
 };
 
 extern Game_time * game_time;
-// TODO fix that
-// extern void (*callback_daily)();
+extern void (*callback_daily)();
 #endif
