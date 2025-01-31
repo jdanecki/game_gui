@@ -4,3 +4,6 @@
 * add npc conversation
 * names of elements are different on server and client
 * make npc and player as deratives of InventoryElement
+* wait on network events on main_loop
+* update on server should be triggered by timer
+
