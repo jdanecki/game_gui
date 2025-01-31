@@ -5,10 +5,10 @@ serv:
 
 client:
 	cd SDL; ./configure
-	@make -C SDL/build
+	@make -C SDL/build -j $(nproc)
 
 tui:
-	@make -C core/alchemist-tui/
+	@make -C core/alchemist-tui/ -j $(nproc)
 	
 clean:
 	cd server; cargo clean

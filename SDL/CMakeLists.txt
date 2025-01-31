@@ -8,6 +8,7 @@ pkg_check_modules(SDL2_TTF SDL2_ttf)
 pkg_check_modules(SDL2_MIXER SDL2_mixer)
 
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 add_definitions(-DCORE_FOR_CLIENT)
 
