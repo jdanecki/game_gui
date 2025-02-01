@@ -94,6 +94,11 @@ void create_biome_forest(chunk * chunk)
         }
         // printf("\n");
     }
+#if 0
+    Element *o= new Element(base_elements[0]);
+    o->show(true);
+    chunk->add_object(o);
+#else
     for (int i = 0; i < 16; i++)
     {
         int b = rand() % BASE_ELEMENTS;
@@ -103,10 +108,11 @@ void create_biome_forest(chunk * chunk)
 
         chunk->add_object(o, x, y);
     }
+
     if (/*rand() % 2*/ 1)
     {
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
             chunk->add_object(new AnimalServer());
         }
@@ -116,6 +122,7 @@ void create_biome_forest(chunk * chunk)
     {
         chunk->add_object(new PlantServer());
     }
+#endif
 }
 
 void create_biome_desert(chunk * chunk)

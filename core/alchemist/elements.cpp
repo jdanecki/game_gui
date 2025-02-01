@@ -192,7 +192,7 @@ Element::Element(BaseElement * b)
 
 void Element::show(bool details)
 {
-    printf("Element -> %d: base=%s form=%s\n", c_id, base->name, get_form_name());
+    printf("Element -> %d: base=%s form=%s uid=%lx\n", c_id, base->name, get_form_name(), uid);
     if (!details)
         return;
     sharpness->show();  // ostrość

@@ -24,7 +24,7 @@ class Property
 
 class Edible
 { // FIXME should be changed to being property
-    // when more npc's are added
+  // when more npc's are added
   public:
     Property * irrigation;
     Property * poison;
@@ -536,7 +536,6 @@ class Being : public InventoryElement
         age = new Property("age", rand() % max_age->value);
 
         name = create_name(5);
-        printf("new Being: name=%s uid=%lx\n", name, uid);
         req_form = Form_solid;
         can_talk = false;
     }
