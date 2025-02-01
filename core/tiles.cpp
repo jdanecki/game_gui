@@ -3,7 +3,7 @@
 void chunk::add_object(InventoryElement * object, int x, int y)
 {
     objects.add(object);
-    if (Being * being = dynamic_cast<Being *>(object))
+    if (object->c_id == Class_Plant || object->c_id == Class_Animal)
     {
         beings.add(object);
     }

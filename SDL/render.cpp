@@ -128,7 +128,7 @@ void draw_maps()
         }
     }
 
-    unsigned int p = pixels[player->map_y * WORLD_SIZE + player->map_x];
+    //    unsigned int p = pixels[player->map_y * WORLD_SIZE + player->map_x];
     for (y = 0; y < 3; y++)
         for (x = 0; x < 3; x++)
         {

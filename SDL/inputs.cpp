@@ -199,7 +199,8 @@ void key_pressed(int key)
         case SDLK_F1:
         {
             InventoryElement * item = get_item_at_ppos(player);
-            item->show();
+            if (item)
+                item->show();
             break;
         }
         case SDLK_RETURN:
@@ -224,18 +225,15 @@ void mouse_pressed(SDL_MouseButtonEvent & event)
 
     SDL_GetMouseState(&x, &y);
 
-    int game_size;
     int tile_dungeon_size;
     int width = window_width - PANEL_WINDOW;
 
     if (width < window_height)
     {
-        game_size = width;
         tile_dungeon_size = width / (CHUNK_SIZE);
     }
     else
     {
-        game_size = window_height;
         tile_dungeon_size = window_height / (CHUNK_SIZE);
     }
 
@@ -272,7 +270,7 @@ void mouse_pressed(SDL_MouseButtonEvent & event)
 Uint64 handle_keyboard_state(const Uint8 * keys)
 {
     Uint64 current_time = SDL_GetTicks64();
-    int time_period = 0;
+    Uint64 time_period = 0;
     if (keys[SDL_SCANCODE_LSHIFT])
     {
         player->sneaking = 1;

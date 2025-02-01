@@ -198,6 +198,8 @@ extern "C"
                     p->max_age->value = data.animal.data.max_age;
                     break;
                 }
+                default:
+                    break;
             }
             // printf("%s updated\n", el->get_name());
         }

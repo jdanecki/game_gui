@@ -4,6 +4,7 @@
 #include "names.h"
 #include <cstdio>
 #include <cstdlib>
+#include <stdint.h>
 
 class Property
 {
@@ -23,7 +24,7 @@ class Property
 
 class Edible
 { // FIXME should be changed to being property
-  // when more npc's are added
+    // when more npc's are added
   public:
     Property * irrigation;
     Property * poison;

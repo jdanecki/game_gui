@@ -513,7 +513,7 @@ bool craft2elements(Product_id what)
 
 int craft(menu_actions a)
 {
-    InventoryElement * el = NULL;
+    //    InventoryElement * el = NULL;
 
     switch (a)
     {
@@ -534,6 +534,9 @@ int craft(menu_actions a)
         case MENU_CRAFT_AXE:
             if (craft2elements(PROD_AXE))
                 goto sent;
+            break;
+        default:
+            break;
     }
     status_code = 0;
     return 0;
@@ -688,6 +691,8 @@ int Menu::interact()
             break;
         case MENU_NPC_SAY:
             npc_say((Npc_say)menu_dialog->get_val());
+            return 0;
+        default:
             return 0;
     }
     return 1;

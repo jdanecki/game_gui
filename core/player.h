@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+
 #include "alchemist/el_list.h"
+#include <stdint.h>
 
 enum class direction
 {
@@ -12,7 +14,7 @@ enum class direction
 
 class Player
 {
-    int id;
+    uintptr_t id;
 
   public:
     int map_y;
@@ -31,7 +33,7 @@ class Player
     void pickup(InventoryElement * item);
     void drop(InventoryElement * item);
     InventoryElement * get_item_by_uid(size_t id);
-    int get_id()
+    uintptr_t get_id()
     {
         return id;
     }
