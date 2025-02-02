@@ -157,12 +157,12 @@ void set_item_at_ppos(InventoryElement * item, Player * player)
     set_item_at(item, player->map_x, player->map_y, player->x, player->y);
 }
 
-enum game_tiles get_tile_at(int chunk_x, int chunk_y, int x, int y)
+int get_tile_at(int chunk_x, int chunk_y, int x, int y)
 {
     return world_table[chunk_y][chunk_x]->table[y][x].tile;
 }
 
 enum game_tiles get_tile_at_ppos(Player * player)
 {
-    return get_tile_at(player->map_x, player->map_y, player->x, player->y);
+    return (game_tiles)get_tile_at(player->map_x, player->map_y, player->x, player->y);
 }

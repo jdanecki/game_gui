@@ -171,8 +171,9 @@ bool draw_terrain()
             {
                 SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
                 // enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
-                enum game_tiles tile = get_tile_at(128, 128, x, y);
+                int tile = get_tile_at(128, 128, x, y);
                 SDL_Texture * texture = tiles_textures[tile];
+                SDL_SetTextureColorMod(texture, base_elements[tile]->color.r, base_elements[tile]->color.g, base_elements[tile]->color.b);
                 SDL_RenderCopy(renderer, texture, NULL, &img_rect);
             }
         }

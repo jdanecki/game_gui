@@ -85,6 +85,7 @@ class BaseElement
     Edible * edible;
     Form form;
     Solid * solid;
+    struct {int r; int g; int b;} color;
 
     BaseElement(int index);
     void show(bool details = true);

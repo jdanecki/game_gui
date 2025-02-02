@@ -106,6 +106,10 @@ BaseElement::BaseElement(int index)
     form = Form_solid;
     solid = new Solid;
     density = 50 + rand() % 2000;
+    color.r = rand() % 256;
+    color.g = rand() % 256;
+    color.b = rand() % 256;
+    
     if (id >= SOLID_ELEMENTS)
     { // generate liquid
         form = Form_liquid;
