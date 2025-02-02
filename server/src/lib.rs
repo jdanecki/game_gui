@@ -5,6 +5,7 @@ use std::net::UdpSocket;
 
 mod convert_types;
 mod core;
+mod generator;
 mod types;
 
 #[no_mangle]
@@ -115,6 +116,7 @@ impl<'a> From<&'a [u8]> for ClientEvent<'a> {
 pub fn init_server() -> Result<Server, Box<dyn Error>> {
     let socket = UdpSocket::bind("127.0.0.1:1234")?;
     socket.set_nonblocking(true).unwrap();
+    generator::generate();
 
     Ok(Server {
         socket,
