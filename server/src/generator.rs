@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use crate::core;
 use crate::SEED;
@@ -17,7 +18,8 @@ pub fn generate() {
     }
     let terrains = create_terrains();
     let plants = create_plants(&terrains);
-    let mut regions = create_regions(&terrains, &plants);
+    let animals = create_animals(&plants);
+    let mut regions = create_regions(&terrains, &plants, &animals);
 
     simulate(&mut regions);
     println!("{:#?}", regions[0]);
@@ -26,7 +28,7 @@ pub fn generate() {
 fn simulate(regions: &mut Vec<Region>) {
     for r in regions {
         for (plant, num) in r.active_plants.iter_mut() {
-            *num += *num * plant.growth_speed as f32 * plant.possible_ground[r.terrain_type];
+            *num += *num * plant.growth_speed as f32 * plant.possible_ground[&*r.terrain_type];
         }
 
         let occupied_space: f32 = r.active_plants.iter().map(|(k, v)| k.size as f32 * v).sum();
@@ -47,24 +49,26 @@ fn simulate(regions: &mut Vec<Region>) {
     }
 }
 
-fn create_terrains() -> Vec<TerrainType> {
-    let mut terrains = Vec::<TerrainType>::with_capacity(REGIONS_NUM as usize);
+fn create_terrains() -> Vec<Rc<TerrainType>> {
+    let mut terrains = Vec::<Rc<TerrainType>>::with_capacity(REGIONS_NUM as usize);
     for i in 0..REGIONS_NUM {
-        terrains.push(TerrainType::new(i));
+        terrains.push(Rc::new(TerrainType::new(i)));
     }
     terrains
 }
 
-fn create_regions<'a>(
-    terrains: &'a Vec<TerrainType>,
-    plants: &'a Vec<PlantType>,
-) -> Vec<Region<'a>> {
+fn create_regions(
+    terrains: &Vec<Rc<TerrainType>>,
+    plants: &Vec<Rc<PlantType>>,
+    animals: &Vec<Rc<AnimalType>>,
+) -> Vec<Region> {
     let mut rng = rand::rng();
     let mut regions = vec![];
     for i in 0..REGIONS_NUM as usize {
         let r = Region::new(
-            &terrains[i],
+            Rc::clone(&terrains[i]),
             plants,
+            animals,
             rng.random_range(0..core::WORLD_SIZE),
             rng.random_range(0..core::WORLD_SIZE),
         );
@@ -83,21 +87,21 @@ fn create_regions<'a>(
     regions
 }
 
-fn create_plants(terrains: &Vec<TerrainType>) -> Vec<PlantType> {
+fn create_plants(terrains: &Vec<Rc<TerrainType>>) -> Vec<Rc<PlantType>> {
     let n = rand::random_range(10..20);
-    let mut plants = Vec::<PlantType>::with_capacity(n);
+    let mut plants = Vec::<Rc<PlantType>>::with_capacity(n);
     for i in 0..n {
-        plants.push(PlantType::new(i as u32, terrains));
+        plants.push(Rc::new(PlantType::new(i as u32, terrains)));
     }
 
     plants
 }
 
-fn create_animals<'a>(plants: &'a Vec<PlantType>) -> Vec<AnimalType<'a>> {
+fn create_animals(plants: &Vec<Rc<PlantType>>) -> Vec<Rc<AnimalType>> {
     let n = rand::random_range(5..15);
-    let mut animals = Vec::with_capacity(n);
+    let mut animals = Vec::<Rc<AnimalType>>::with_capacity(n);
     for i in 0..n {
-        // TODO
+        animals.push(Rc::new(AnimalType::new(i as u32, plants, &animals)));
     }
 
     animals
@@ -132,9 +136,9 @@ impl TerrainType {
 trait Food: std::fmt::Debug {}
 
 #[derive(Debug)]
-struct PlantType<'a> {
+struct PlantType {
     pub id: u32,
-    pub possible_ground: HashMap<&'a TerrainType, f32>,
+    pub possible_ground: HashMap<Rc<TerrainType>, f32>,
     pub size: u32,
     //pub sun_required: u32,
     pub growth_speed: f32,
@@ -142,15 +146,15 @@ struct PlantType<'a> {
     // overcrowd immunity
 }
 
-impl<'a> PlantType<'a> {
-    fn new(id: u32, terrains: &'a Vec<TerrainType>) -> PlantType<'a> {
+impl PlantType {
+    fn new(id: u32, terrains: &Vec<Rc<TerrainType>>) -> PlantType {
         let n = rand::random_range(1..terrains.len());
         let mut possible_ground = HashMap::new();
-        possible_ground.insert(terrains.choose(&mut rand::rng()).unwrap(), 1.0);
+        possible_ground.insert(Rc::clone(terrains.choose(&mut rand::rng()).unwrap()), 1.0);
         for _ in 1..n {
             let choice = terrains.choose(&mut rand::rng()).unwrap();
-            if !possible_ground.contains_key(&choice) {
-                possible_ground.insert(choice, rand::random_range(0.1..1.2));
+            if !possible_ground.contains_key(&**choice) {
+                possible_ground.insert(Rc::clone(choice), rand::random_range(0.1..1.2));
             }
         }
         PlantType {
@@ -162,47 +166,50 @@ impl<'a> PlantType<'a> {
     }
 }
 
-impl<'a> PartialEq for PlantType<'a> {
+impl PartialEq for PlantType {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
 
-impl<'a> Eq for PlantType<'a> {}
+impl Eq for PlantType {}
 
-impl<'a> std::hash::Hash for PlantType<'a> {
+impl std::hash::Hash for PlantType {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
 }
 
-impl<'a> Food for PlantType<'a> {}
+impl Food for PlantType {}
 
 #[derive(Debug)]
-struct AnimalType<'a> {
+struct AnimalType {
     pub id: u32,
-    pub possible_food: Vec<(&'a dyn Food, f32)>,
+    pub possible_food: Vec<(Rc<dyn Food>, f32)>,
     pub required_food: f32,
 }
 
-impl<'a> Food for AnimalType<'a> {}
+impl Food for AnimalType {}
 
-impl<'a> AnimalType<'a> {
-    fn new(id: u32, plants: &'a Vec<PlantType>, animals: &'a Vec<AnimalType>) -> AnimalType<'a> {
+impl AnimalType {
+    fn new(id: u32, plants: &Vec<Rc<PlantType>>, animals: &Vec<Rc<AnimalType>>) -> AnimalType {
         let food_num = rand::random_range(1..5);
-        let mut possible_food = Vec::with_capacity(food_num);
+        let mut possible_food: Vec<(Rc<dyn Food>, f32)> = Vec::with_capacity(food_num);
         if animals.len() > 0 {
             for _ in 0..food_num {
-                let food: &dyn Food = match rand::random_bool(0.5) {
-                    true => plants.choose(&mut rand::rng()).unwrap(),
-                    false => animals.choose(&mut rand::rng()).unwrap(),
+                let food = match rand::random_bool(0.5) {
+                    true => Rc::clone(plants.choose(&mut rand::rng()).unwrap()) as Rc<dyn Food>,
+                    false => Rc::clone(animals.choose(&mut rand::rng()).unwrap()) as Rc<dyn Food>,
                 };
                 possible_food.push((food, rand::random_range(0.1..1.1)));
             }
         } else {
             for _ in 0..food_num {
                 let food = plants.choose(&mut rand::rng()).unwrap();
-                possible_food.push((food, rand::random_range(0.1..1.1)));
+                possible_food.push((
+                    Rc::clone(food) as Rc<dyn Food>,
+                    rand::random_range(0.1..1.1),
+                ));
             }
         }
         AnimalType {
@@ -213,29 +220,51 @@ impl<'a> AnimalType<'a> {
     }
 }
 
+impl PartialEq for AnimalType {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for AnimalType {}
+
+impl std::hash::Hash for AnimalType {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+
 #[derive(Debug)]
-struct Region<'a> {
-    pub terrain_type: &'a TerrainType,
+struct Region {
+    pub terrain_type: Rc<TerrainType>,
     //pub liquid_type: u32,
     pub size: u32,
     pub coords: Coords,
-    pub active_plants: HashMap<&'a PlantType<'a>, f32>,
+    pub active_plants: HashMap<Rc<PlantType>, f32>,
+    pub active_animals: HashMap<Rc<AnimalType>, f32>,
 }
 
-impl<'a> Region<'a> {
+impl<'a> Region {
     pub fn new(
-        terrain_type: &'a TerrainType,
-        plants: &'a Vec<PlantType>,
+        terrain_type: Rc<TerrainType>,
+        plants: &Vec<Rc<PlantType>>,
+        animals: &Vec<Rc<AnimalType>>,
         x: u32,
         y: u32,
-    ) -> Region<'a> {
+    ) -> Region {
         let n = rand::random_range(5..10);
         let mut active_plants = HashMap::with_capacity(n);
-        let choices = plants.choose_multiple(&mut rand::rng(), 10);
+        let choices = plants.choose_multiple(&mut rand::rng(), n);
         for plant in choices {
             if plant.possible_ground.keys().any(|t| *t == terrain_type) {
-                active_plants.insert(plant, 100.0);
+                active_plants.insert(Rc::clone(plant), 100.0);
             }
+        }
+        let n = rand::random_range(5..10);
+        let mut active_animals = HashMap::with_capacity(n);
+        let choices = animals.choose_multiple(&mut rand::rng(), 10);
+        for animal in choices {
+            active_animals.insert(Rc::clone(animal), 5.0);
         }
         Region {
             terrain_type,
@@ -243,6 +272,7 @@ impl<'a> Region<'a> {
             size: 0,
             coords: Coords::new(x as i32, y as i32),
             active_plants,
+            active_animals,
         }
     }
 }
