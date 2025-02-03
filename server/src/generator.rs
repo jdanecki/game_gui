@@ -21,8 +21,12 @@ pub fn generate() {
     let animals = create_animals(&plants);
     let mut regions = create_regions(&terrains, &plants, &animals);
 
-    simulate(&mut regions);
-    println!("{:#?}", regions[0]);
+    println!("{:#?}", regions);
+    for _ in 0..100 {
+        simulate(&mut regions);
+        //        println!("{:#?}", regions[0]);
+    }
+    println!("{:#?}", regions);
 }
 
 fn simulate(regions: &mut Vec<Region>) {
@@ -46,6 +50,73 @@ fn simulate(regions: &mut Vec<Region>) {
         // new plants grow depending on:
         //    num * ground_modifier * growth_speed_modifier
         //    capped at space avaible
+        let mut changes = vec![];
+        for (animal, num) in r.active_animals.iter() {
+            let found_plants: f32 = animal
+                .possible_food_plant
+                .iter()
+                .map(|(food, multiplier)| {
+                    if r.active_plants.contains_key(food) {
+                        r.active_plants[food] / r.size as f32 * multiplier * animal.speed
+                    } else {
+                        0.0
+                    }
+                })
+                .sum();
+            let found_animals: f32 = animal
+                .possible_food_animal
+                .iter()
+                .map(|(food, multiplier)| {
+                    if r.active_animals.contains_key(food) {
+                        r.active_animals[food] / r.size as f32 * multiplier * animal.speed
+                    } else {
+                        0.0
+                    }
+                })
+                .sum();
+            let found_food = found_animals + found_plants;
+            if found_food < 0.01 {
+                changes.push((Rc::clone(animal), -num));
+                continue;
+            }
+            let percentage = if (animal.required_food / found_food) < 1.0 {
+                animal.required_food / found_food
+            } else {
+                1.0
+            };
+            for (plant, _) in animal.possible_food_plant.iter() {
+                if r.active_plants.contains_key(plant) {
+                    *r.active_plants.get_mut(plant).unwrap() = r.active_plants[plant]
+                        - r.active_plants[plant] / r.size as f32
+                            * (animal.speed / 32.0)
+                            * percentage;
+                }
+            }
+            for (food, _) in animal.possible_food_animal.iter() {
+                if r.active_animals.contains_key(food) {
+                    changes.push((
+                        Rc::clone(food),
+                        -r.active_animals[food] / r.size as f32
+                            * (animal.speed / 32.0)
+                            * percentage,
+                    ))
+                }
+            }
+            let percentage = (found_food / animal.required_food).clamp(0.0, 1.2);
+            changes.push((
+                Rc::clone(animal),
+                r.active_animals[animal] * (percentage - 0.9),
+            ))
+        }
+        for (animal, num) in changes {
+            if r.active_animals.contains_key(&animal) {
+                if (r.active_animals[&animal] + num).abs() < 0.01 {
+                    r.active_animals.remove(&animal);
+                } else {
+                    *r.active_animals.get_mut(&animal).unwrap() += num;
+                }
+            }
+        }
     }
 }
 
@@ -185,8 +256,10 @@ impl Food for PlantType {}
 #[derive(Debug)]
 struct AnimalType {
     pub id: u32,
-    pub possible_food: Vec<(Rc<dyn Food>, f32)>,
+    pub possible_food_plant: Vec<(Rc<PlantType>, f32)>,
+    pub possible_food_animal: Vec<(Rc<AnimalType>, f32)>,
     pub required_food: f32,
+    pub speed: f32,
 }
 
 impl Food for AnimalType {}
@@ -194,28 +267,34 @@ impl Food for AnimalType {}
 impl AnimalType {
     fn new(id: u32, plants: &Vec<Rc<PlantType>>, animals: &Vec<Rc<AnimalType>>) -> AnimalType {
         let food_num = rand::random_range(1..5);
-        let mut possible_food: Vec<(Rc<dyn Food>, f32)> = Vec::with_capacity(food_num);
+        let mut possible_food_plant: Vec<(Rc<PlantType>, f32)> = Vec::new();
+        let mut possible_food_animal: Vec<(Rc<AnimalType>, f32)> = Vec::new();
         if animals.len() > 0 {
             for _ in 0..food_num {
-                let food = match rand::random_bool(0.5) {
-                    true => Rc::clone(plants.choose(&mut rand::rng()).unwrap()) as Rc<dyn Food>,
-                    false => Rc::clone(animals.choose(&mut rand::rng()).unwrap()) as Rc<dyn Food>,
+                match rand::random_bool(0.5) {
+                    true => possible_food_plant.push((
+                        Rc::clone(plants.choose(&mut rand::rng()).unwrap()),
+                        rand::random_range(0.1..1.1),
+                    )),
+                    false => possible_food_animal.push((
+                        Rc::clone(animals.choose(&mut rand::rng()).unwrap()),
+                        rand::random_range(0.1..1.1),
+                    )),
                 };
-                possible_food.push((food, rand::random_range(0.1..1.1)));
             }
         } else {
             for _ in 0..food_num {
                 let food = plants.choose(&mut rand::rng()).unwrap();
-                possible_food.push((
-                    Rc::clone(food) as Rc<dyn Food>,
-                    rand::random_range(0.1..1.1),
-                ));
+                possible_food_plant.push((Rc::clone(food), rand::random_range(0.1..1.1)));
             }
         }
+        let required_food = rand::random_range(1.0..10.0);
         AnimalType {
             id,
-            possible_food,
-            required_food: rand::random_range(1.0..10.0),
+            possible_food_plant,
+            possible_food_animal,
+            required_food,
+            speed: rand::random_range(16.0..64.0),
         }
     }
 }
@@ -234,7 +313,6 @@ impl std::hash::Hash for AnimalType {
     }
 }
 
-#[derive(Debug)]
 struct Region {
     pub terrain_type: Rc<TerrainType>,
     //pub liquid_type: u32,
@@ -244,7 +322,7 @@ struct Region {
     pub active_animals: HashMap<Rc<AnimalType>, f32>,
 }
 
-impl<'a> Region {
+impl Region {
     pub fn new(
         terrain_type: Rc<TerrainType>,
         plants: &Vec<Rc<PlantType>>,
@@ -257,7 +335,7 @@ impl<'a> Region {
         let choices = plants.choose_multiple(&mut rand::rng(), n);
         for plant in choices {
             if plant.possible_ground.keys().any(|t| *t == terrain_type) {
-                active_plants.insert(Rc::clone(plant), 100.0);
+                active_plants.insert(Rc::clone(plant), 1000.0);
             }
         }
         let n = rand::random_range(5..10);
@@ -274,5 +352,21 @@ impl<'a> Region {
             active_plants,
             active_animals,
         }
+    }
+}
+
+impl std::fmt::Debug for Region {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "Region: \n    size: {:?}\n    terrain: {:?}\n",
+            self.size, self.terrain_type.id
+        ))?;
+        for (plant, num) in self.active_plants.iter() {
+            f.write_fmt(format_args!("Plant {}: {}\n", plant.id, num))?;
+        }
+        for (animal, num) in self.active_animals.iter() {
+            f.write_fmt(format_args!("Animal {} {}\n", animal.id, num))?;
+        }
+        f.write_str("\n")
     }
 }
