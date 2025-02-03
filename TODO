@@ -6,4 +6,10 @@
 * make npc and player as deratives of InventoryElement
 * wait on network events on main_loop
 * update on server should be triggered by timer
-
+* Generation
+* Unique items (one of a kind)
+    - Duplicable by some magic item
+    - Requires X of Y to duplicate
+    - Rare
+* Duplicator for above
+    - Rare
