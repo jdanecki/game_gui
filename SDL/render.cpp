@@ -72,22 +72,34 @@ void draw_texts()
     InventoryElement * item = get_item_at_ppos(player);
     if (item)
     {
-        char * t = item->get_description();
-        write_text(tx, ty, t, White, 15, 30);
-        delete[] t;
-        ty += 25;
-        int count = 0;
-        Property ** props = item->get_properties(&count);
-        if (props)
+
+        char * t = player->get_el_description(item);
+        if (t)
         {
-            char buf[64];
-            for (int i = 0; i < count; i++)
+            write_text(tx, ty, t, White, 15, 30);
+            delete[] t;
+            ty += 25;
+            int count = 0;
+            Property ** props = item->get_properties(&count);
+            if (props)
             {
-                sprintf(buf, "%s: %u", props[i]->name, props[i]->value);
-                write_text(tx, ty, buf, White, 15, 30);
-                ty += 25;
+                char buf[64];
+                for (int i = 0; i < count; i++)
+                {
+                    sprintf(buf, "%s: %u", props[i]->name, props[i]->value);
+                    write_text(tx, ty, buf, White, 15, 30);
+                    ty += 25;
+                }
+                delete props;
             }
-            delete props;
+        }
+        else
+        {
+            t = new char[256];
+            sprintf(t, "It looks like %s, but ", item->get_class_name());
+            write_text(tx, ty, t, White, 15, 30);
+            write_text(tx, ty + 25, "I don't know what it's exactly", White, 15, 30);
+            delete[] t;
         }
     }
 }

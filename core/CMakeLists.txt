@@ -4,8 +4,10 @@ project(pime)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(pime SHARED
-    world.cpp player.cpp 
-    tiles.cpp
+    world.cpp 
+    player.cpp 
+    tiles.cpp 
+    npc.cpp
 
     alchemist/elements.cpp
 	alchemist/names.cpp

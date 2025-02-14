@@ -60,7 +60,7 @@ InventoryElement * remove_from_location(ItemLocationLol location, size_t id)
             // printf("removed %ld from player %ld\n", id, location.player.id);
             el = players[location.player.id]->get_item_by_uid(id);
             players[location.player.id]->drop(el);
-            if (location.player.id == player->get_id())
+            if ((int)location.player.id == player->get_id())
             {
                 update_hotbar();
             }
@@ -162,6 +162,7 @@ extern "C"
         printf("seed: %ld\n", seed);
         srand(seed);
         init_elements();
+        init_sentences();
         printf("got id %ld\n", id);
     }
 
@@ -244,7 +245,7 @@ extern "C"
             {
                 // printf("added %ld to player %ld\n", id, new_loc.player.id);
                 players[new_loc.player.id]->pickup(el);
-                if (new_loc.player.id == player->get_id())
+                if ((int)new_loc.player.id == player->get_id())
                 {
                     update_hotbar(); // FIXME - remove only one element
                 }

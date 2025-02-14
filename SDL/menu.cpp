@@ -65,6 +65,12 @@ void Menu::add(const char * e, enum menu_actions a, SDL_Texture * t, int index, 
     entries[index] = new Menu_entry(e, a, item_id, nullptr, t);
     added++;
 }
+
+void Menu::add(const char * e, enum menu_actions a, Sentence * s, InventoryElement * p_el)
+{
+    entries[added] = new Menu_entry(e, a, s, p_el);
+    added++;
+}
 void Menu::add(const char * e, enum menu_actions a, int val, InventoryElement * p_el)
 {
     entries[added] = new Menu_entry(e, a, val, p_el, nullptr);
@@ -90,6 +96,11 @@ int Menu::get_val(int v)
 int Menu::get_val()
 {
     return entries[menu_pos]->value;
+}
+
+Sentence * Menu::get_sentence()
+{
+    return entries[menu_pos]->sentence;
 }
 
 InventoryElement * Menu::get_el()
@@ -217,6 +228,25 @@ Menu_entry::Menu_entry(const char * e, enum menu_actions a, int v, InventoryElem
     action = a;
     value = v;
     el = _el;
+    if (el)
+    {
+        entry = new char[64];
+        sprintf(entry, "%s %s", e, el->get_name());
+        dynamic_entry = true;
+    }
+    else
+    {
+        entry = (char *)e;
+        dynamic_entry = false;
+    }
+}
+
+Menu_entry::Menu_entry(const char * e, menu_actions a, Sentence * s, InventoryElement * _el)
+{
+    texture = nullptr;
+    action = a;
+    el = _el;
+    sentence = s;
     if (el)
     {
         entry = new char[64];
@@ -689,10 +719,10 @@ int Menu::interact()
 
         case MENU_NPC:
             return npc();
-            break;
+
         case MENU_NPC_SAY:
-            npc_say((Npc_say)menu_dialog->get_val());
-            return 0;
+            return npc_say(menu_dialog->get_sentence());
+
         default:
             return 0;
     }

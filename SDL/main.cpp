@@ -11,6 +11,7 @@ int auto_explore;
 
 Player * players[PLAYER_NUM];
 Player * player;
+
 bool finish;
 
 const NetClient * client;
@@ -122,6 +123,8 @@ int setup()
         return 1;
 
     client = init();
+    // FIXME
+    current_npc = new Npc;
 
     return 0;
 }
