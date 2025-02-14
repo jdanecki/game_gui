@@ -154,7 +154,7 @@ void loop()
     // int dst_map_x=player.map_x;
     // int dst_map_y=player.map_y;
 
-    print_status("Welcome in game!");
+    print_status(0, "Welcome in game!");
 
     for (;;)
     {

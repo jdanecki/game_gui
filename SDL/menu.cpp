@@ -250,7 +250,7 @@ Menu_entry::Menu_entry(const char * e, menu_actions a, Sentence * s, InventoryEl
     if (el)
     {
         entry = new char[64];
-        sprintf(entry, "%s %s", e, el->get_name());
+        sprintf(entry, "%s item?", e);
         dynamic_entry = true;
     }
     else
@@ -569,12 +569,10 @@ int craft(menu_actions a)
         default:
             break;
     }
-    status_code = 0;
     return 0;
 
 sent:
     sprintf(status_line, "Starting crafting");
-    status_code = 1;
     return 1;
 }
 

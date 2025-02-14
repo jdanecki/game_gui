@@ -5,7 +5,7 @@ CORE=../world.cpp ../tiles.cpp ../player.cpp ../npc.cpp
 SERVER=../../server/cpp-src/elements_server.cpp
 
 all:
-	g++ -Wall -Wno-switch -DCORE_TUI -g -o alchemist \
+	ccache g++ -Wall -Wno-switch -DCORE_TUI -g -o alchemist \
         $(ALCHEMIST) $(SERVER) $(TOOLS)  $(CORE) \
         main.cpp test_axe.cpp show_list.cpp game_time.cpp plants.cpp 
 

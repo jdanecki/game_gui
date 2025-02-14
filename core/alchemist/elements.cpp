@@ -260,6 +260,7 @@ Ingredient::Ingredient(Ingredient_id i)
     quality = new Property("quality", 0);
     resilience = new Property("resilience", 0);
     usage = new Property("usage", 0);
+    crafted = true;
 }
 #else
 Ingredient::Ingredient(InventoryElement * from, Ingredient_id i, Form f)
@@ -331,6 +332,7 @@ Product::Product(Product_id i)
     quality = new Property("quality", 0);
     resilience = new Property("resilience", 0);
     usage = new Property("usage", 0);
+    crafted = true;
 }
 #else
 void Product::init(Product_id i, int c, Form f)

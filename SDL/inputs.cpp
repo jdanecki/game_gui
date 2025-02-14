@@ -42,7 +42,7 @@ void update_window_size()
     if (tile_size < 32)
         tile_size = 32;
 
-    SDL_SetWindowSize(main_window, (tile_size * CHUNK_SIZE) + PANEL_WINDOW, tile_size * CHUNK_SIZE + STATUS_LINE);
+    SDL_SetWindowSize(main_window, (tile_size * CHUNK_SIZE) + PANEL_WINDOW, tile_size * CHUNK_SIZE + STATUS_LINES);
     SDL_GetWindowSize(main_window, &window_width, &window_height);
 }
 
@@ -55,7 +55,6 @@ void key_pressed(int key)
     {
         case SDLK_v:
             sprintf(status_line, " ");
-            status_code = 1;
             break;
         case SDLK_t:
             player->hotbar[active_hotbar] = NULL;
@@ -323,7 +322,8 @@ Uint64 handle_keyboard_state(const Uint8 * keys)
     if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_A] ||
         keys[SDL_SCANCODE_LEFT])
     {
-        print_status("");
+        print_status(0, " ");
+        print_status(1, " ");
         last_frame_press = 1;
         return 0;
     }

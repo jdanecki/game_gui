@@ -6,6 +6,7 @@
 #include "show_list.h"
 #include "test_axe.h"
 #include <cstdio>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <termios.h>
@@ -29,6 +30,15 @@ void daily_call()
     animals->tick();
 }
 
+void print_status(int l, const char * format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
+    fflush(stdout);
+}
 void notify_destroy(size_t id, ItemLocation location)
 {
 }
@@ -351,7 +361,6 @@ void talk()
         printf("Who do you want to talk to?\n");
         current_npc = dynamic_cast<Npc *>(select_element(npcs));
         sentences->enable_all();
-        sentences->disable(NPC_Say_bye);
         player->start_conversation(current_npc);
     }
     if (current_npc)

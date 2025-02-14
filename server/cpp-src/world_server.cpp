@@ -1,5 +1,6 @@
 #include "world_server.h"
 #include "elements_server.h"
+#include <stdarg.h>
 
 void generator()
 {
@@ -223,4 +224,14 @@ void update()
             a=NULL;
             world_table[player.map_y][player.map_x]->animals[i]=NULL;
         }*/
+}
+
+void print_status(int l, const char * format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
+    fflush(stdout);
 }

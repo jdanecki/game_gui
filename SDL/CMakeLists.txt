@@ -9,6 +9,8 @@ pkg_check_modules(SDL2_MIXER SDL2_mixer)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch")
+set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "ccache")
+set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "ccache")
 
 add_definitions(-DCORE_FOR_CLIENT)
 

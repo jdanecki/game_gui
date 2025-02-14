@@ -164,6 +164,7 @@ extern "C"
         init_elements();
         init_sentences();
         printf("got id %ld\n", id);
+        print_status(1, "player %d connected", id);
     }
 
     void update_object(ObjectData data)
@@ -207,9 +208,9 @@ extern "C"
         else
         {
             if (el)
-                printf("bad data for update object %ld %d real %d\n", uid, c_id, el->c_id);
+                print_status(1, "bad data for update object %ld %d real %d", uid, c_id, el->c_id);
             else
-                printf("non existing object for update object %ld %d\n", uid, c_id);
+                print_status(1, "non existing object for update object %ld %d", uid, c_id);
         }
     }
 
@@ -223,7 +224,7 @@ extern "C"
 
         if (!el)
         {
-            printf("not found item to remove %d %d\n", old_loc.chunk.map_x, old_loc.chunk.map_y);
+            print_status(1, "not found item to remove %d %d", old_loc.chunk.map_x, old_loc.chunk.map_y);
             return;
         }
         switch (new_loc.tag)
@@ -276,12 +277,14 @@ extern "C"
                     // el->get_posittion(&item_x,&item_y);
                     world_table[y][x]->add_object(el, item_x, item_y);
                     offset += el->get_packet_size();
+
+                    print_status(1, "created object: %s", el->get_name());
                 }
                 //}
             }
             else
             {
-                printf("inexisting chunk\n");
+                print_status(1, "inexisting chunk");
             }
         }
     }
@@ -291,16 +294,15 @@ extern "C"
         InventoryElement * el = remove_from_location(location, id);
         if (el)
         {
-            printf("delete %ld\n", id);
+            print_status(1, "delete %ld", id);
             delete el;
         }
         else
-            printf("deleting inexisting item %ld\n", id);
+            print_status(1, "deleting inexisting item %ld", id);
     }
 
     void failed_craft()
     {
-        printf("failed craft\n");
-        print_status("failed craft");
+        print_status(1, "failed craft");
     }
 }

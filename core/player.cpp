@@ -1,6 +1,8 @@
 #include "player.h"
 #include "tiles.h"
 
+extern void print_status(int i, const char * format, ...);
+
 void Player::pickup(InventoryElement * item)
 {
     inventory->add(item);
@@ -69,7 +71,7 @@ bool Player::say(Sentence * s)
         return false;
     if (!talking_to)
     {
-        printf("conversation not started yet!\n");
+        print_status(1, "conversation not started yet!");
         return false;
     }
     switch (s->id)
@@ -83,23 +85,23 @@ bool Player::say(Sentence * s)
         {
             Sentence * answer = s->get_answer();
 
-            printf("%s says: %s\n", talking_to->get_name(), answer->question);
+            print_status(0, "%s says: %s", talking_to->get_name(), answer->question);
             s->disable();
             switch (answer->id)
             {
                 case NPC_Say_nothing:
                     break;
                 case NPC_Ask_do_we_know_each_other:
-                    printf("%s: Don't you remember me? I'm..., we've met some time ago.\n", get_name());
+                    print_status(1, "%s: Don't you remember me? I'm..., we've met some time ago.", get_name());
                     break;
                 case NPC_Say_I_dont_know_you:
-                    printf("%s: Let me introduce myself...\n", get_name());
+                    print_status(1, "%s: Let me introduce myself...", get_name());
                     break;
                 case NPC_Say_Im_not_fine:
-                    printf("%s: I'm sorry...\n", get_name());
+                    print_status(1, "%s: I'm sorry...", get_name());
                     break;
                 case NPC_Ask_do_you_really_care:
-                    printf("%s: Not really... Hmm, I was kidding.\n", get_name());
+                    print_status(1, "%s: Not really... Hmm, I was kidding.", get_name());
             }
 
             if (s->id == NPC_Say_bye)
@@ -128,11 +130,11 @@ void Player::ask(enum Npc_say s, InventoryElement * el)
             char * des = get_el_description(el);
             if (des)
             {
-                printf("%s says: I know it. It's %s\n", get_name(), des);
+                print_status(1, "%s says: I know it. It's %s", get_name(), des);
                 talking_to->set_known(el);
             }
             else
-                printf("%s says: I don't know it\n", get_name());
+                print_status(1, "%s says: I don't know it", get_name());
             break;
     }
 }

@@ -15,7 +15,7 @@ char text[300];
 
 void draw_hotbar()
 {
-    int ty = window_height - 80;
+    int ty = window_height - 112;
 
     for (int i = 0; i < 10; i++)
     {
@@ -33,8 +33,15 @@ void draw_hotbar()
             SDL_RenderCopy(renderer, texture, NULL, &rect);
             if (i == active_hotbar)
             {
-                sprintf(text, "%s (%s)", item->get_form_name(), item->get_name());
-                write_text(tx + 3, rect.y + 50, text, Yellow, 10, 20);
+                char * t = player->get_el_description(item);
+                if (t)
+                {
+                    write_text(tx + 3, rect.y + 50, t, Yellow, 10, 20);
+                }
+                else
+                {
+                    write_text(tx + 3, rect.y + 50, item->get_form_name(), Yellow, 10, 20);
+                }
             }
         }
         if (i == active_hotbar)
@@ -163,7 +170,7 @@ void draw_maps()
         window_rec.h = 0;
     }
     window_rec.x = width + 10;
-    window_rec.y = window_height - WORLD_SIZE - STATUS_LINE;
+    window_rec.y = window_height - WORLD_SIZE - STATUS_LINES;
 
     SDL_RenderCopy(renderer, map, NULL, &window_rec);
 }
@@ -201,9 +208,7 @@ bool draw_terrain()
     }
     else
     {
-        print_status("chunk not loaded");
-        status_code = 0;
-
+        print_status(1, "chunk not loaded");
         return false;
     }
     chunk * c = world_table[128][128];
@@ -289,8 +294,13 @@ void draw()
         // FIXME when more chunks enabled
         // draw_maps();
     }
-    sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed");
-    write_text(5, window_height - 32, text, White, 15, 30);
+    if (status_line[0] != ' ')
+    {
+        write_text(5, window_height - 64, status_line, White, 15, 30);
+    }
+
+    if (status_line2[0] != ' ')
+        write_text(5, window_height - 32, status_line2, White, 15, 30);
 
     if (current_menu)
         current_menu->show();
