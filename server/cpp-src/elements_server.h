@@ -36,8 +36,6 @@ class AnimalServer : public Animal
         delay_for_move = max_delay_move; // 600 * 100ms -> 1min
         dst_loc_x = rand() % CHUNK_SIZE;
         dst_loc_y = rand() % CHUNK_SIZE;
-        type = (enum animal_types)(rand() % ANIMALS);
-        printf("type=%d\n", type);
     }
 };
 

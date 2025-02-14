@@ -2,6 +2,7 @@
 #include "networking.h"
 #include "world_server.h"
 
+#ifndef CORE_TUI
 void to_bytes_binding(InventoryElement * el, unsigned char * buf)
 {
     el->to_bytes(buf);
@@ -21,6 +22,7 @@ void destroy(InventoryElement * el)
     }
     delete el;
 }
+#endif
 
 void AnimalServer::move()
 {
@@ -82,7 +84,6 @@ bool AnimalServer::tick()
 
 PlantServer::PlantServer()
 {
-    type = (enum plant_types)(rand() % PLANTS);
     delay_for_grow = max_delay_grow;
 }
 
@@ -106,7 +107,9 @@ bool PlantServer::grow()
         {
             grown = true;
             change_phase(Plant_fruits);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -115,7 +118,9 @@ bool PlantServer::grow()
         if (phase != Plant_flowers)
         {
             change_phase(Plant_flowers);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -124,7 +129,9 @@ bool PlantServer::grow()
         if (phase != Plant_growing)
         {
             change_phase(Plant_growing);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -133,7 +140,9 @@ bool PlantServer::grow()
         if (phase != Plant_seedling)
         {
             change_phase(Plant_seedling);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }

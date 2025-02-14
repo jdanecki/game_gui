@@ -4,11 +4,13 @@
 void generator()
 {
     load_chunk(WORLD_CENTER, WORLD_CENTER);
-    printf("generated: %d items\n", world_table[128][128]->objects.size());
+    printf("generated: %d items\n", world_table[128][128]->objects.nr_elements);
 }
 
 void create_biome_plains(chunk * chunk)
 {
+// FIXME
+#if 0
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
         for (int x = 0; x < CHUNK_SIZE; x++)
@@ -82,6 +84,7 @@ void create_biome_plains(chunk * chunk)
             chunk->add_object(a, x, y);
         }
     }
+#endif
 }
 
 void create_biome_forest(chunk * chunk)
@@ -101,8 +104,7 @@ void create_biome_forest(chunk * chunk)
 #else
     for (int i = 0; i < 16; i++)
     {
-        int b = rand() % BASE_ELEMENTS;
-        Element * o = new Element(base_elements[b]);
+        Element * o = new Element();
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
@@ -127,6 +129,8 @@ void create_biome_forest(chunk * chunk)
 
 void create_biome_desert(chunk * chunk)
 {
+    // FIXME
+#if 0
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
         for (int x = 0; x < CHUNK_SIZE; x++)
@@ -145,11 +149,12 @@ void create_biome_desert(chunk * chunk)
 
         chunk->add_object(o, x, y);
     }
+#endif
 }
 
 void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 {
-    enum biomes random_biome = (enum biomes)(rand() % BIOMES);
+    //  enum biomes random_biome = (enum biomes)(rand() % BIOMES);
 
     create_biome_forest(chunk);
     /*

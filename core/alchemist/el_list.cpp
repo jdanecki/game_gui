@@ -23,7 +23,7 @@ void ListElement::show(bool details)
     el->show(details);
 }
 
-InvList::InvList(const char * n)
+ElementsList::ElementsList(const char * n)
 {
     name = n;
     nr_elements = 0;
@@ -31,15 +31,15 @@ InvList::InvList(const char * n)
     head = NULL;
 }
 
-InvList::InvList()
+ElementsList::ElementsList()
 {
-    name = "foo";
+    name = "Elements list";
     nr_elements = 0;
     tail = NULL;
     head = NULL;
 }
 
-ListElement * InvList::find(void * what)
+ListElement * ElementsList::find(void * what)
 {
     ListElement * cur = head;
     while (cur)
@@ -49,6 +49,107 @@ ListElement * InvList::find(void * what)
         cur = cur->next;
     }
     return NULL;
+}
+
+void ElementsList::show(bool details)
+{
+    ListElement * cur = head;
+    printf("--- %s (%d) ---\n", name, nr_elements);
+    while (cur)
+    {
+        cur->show(details);
+        cur = cur->next;
+    }
+}
+
+void ElementsList::enable_all()
+{
+    ListElement * cur = head;
+
+    while (cur)
+    {
+        cur->enable();
+        cur = cur->next;
+    }
+}
+
+void ElementsList::tick()
+{
+    ListElement * cur = head;
+
+    while (cur)
+    {
+        ListElement * next = cur->next;
+        bool alive = cur->tick();
+        if (!alive)
+        {
+            remove(cur);
+        }
+        cur = next;
+    }
+}
+
+ListElement * ElementsList::add(ListElement * entry)
+{
+    if (!entry)
+    {
+        printf("adding NULL pointer\n");
+    }
+    if (nr_elements)
+    {
+        tail->add(entry);
+        tail = entry;
+    }
+    else
+    {
+        head = entry;
+        tail = entry;
+    }
+    nr_elements++;
+    return entry;
+}
+
+void ElementsList::remove(ListElement * el)
+{
+    if (!head)
+        return;
+    ListElement * cur = head;
+    ListElement * tmp;
+    if (head == el)
+    {
+        tmp = head->next;
+        if (!tail)
+        {
+            exit(0);
+        }
+        if (tail == el) // only 1 element on the list
+        {
+            if (head == tail)
+                tail = NULL;
+        }
+        free(head);
+        nr_elements--;
+        head = tmp;
+        return;
+    }
+    while (cur) // more then 1 element on the list
+    {
+        if (!cur->next)
+            break;
+        if (cur->next == el)
+        {
+            tmp = cur->next;
+            cur->next = cur->next->next;
+            if (tail == el)
+            {
+                tail = cur;
+            }
+            free(tmp);
+            nr_elements--;
+            return;
+        }
+        cur = cur->next;
+    }
 }
 
 InventoryElement ** InvList::find_form(enum Form f, int * count)
@@ -76,7 +177,8 @@ InventoryElement ** InvList::find_form(enum Form f, int * count)
         return a;
     }
 }
-
+// FIXME
+#if 0
 InventoryElement ** InvList::find_id(enum Item_id id, int * count)
 {
     ListElement * cur = head;
@@ -105,80 +207,13 @@ InventoryElement ** InvList::find_id(enum Item_id id, int * count)
         return a;
     }
 }
+#endif
 
-void InvList::show(bool details)
-{
-    ListElement * cur = head;
-    printf("--- %s (%d) ---\n", name, nr_elements);
-    while (cur)
-    {
-        cur->show(details);
-        cur = cur->next;
-    }
-}
-
-void InvList::enable_all()
-{
-    ListElement * cur = head;
-
-    while (cur)
-    {
-        cur->enable();
-        cur = cur->next;
-    }
-}
-
-int InvList::size()
-{
-    int size = 0;
-    ListElement * cur = head;
-    while (cur)
-    {
-        size++;
-        cur = cur->next;
-    }
-    return size;
-}
-
-void InvList::tick()
-{
-    ListElement * cur = head;
-
-    while (cur)
-    {
-        ListElement * next = cur->next;
-        bool alive = cur->tick();
-        if (!alive)
-        {
-            remove(cur->el);
-        }
-        cur = next;
-    }
-}
-
-void InvList::add(InventoryElement * el)
+InventoryElement * InvList::add(InventoryElement * el)
 {
     ListElement * entry = new ListElement(el);
-    add(entry);
-}
-
-void InvList::add(ListElement * entry)
-{
-    if (!entry)
-    {
-        printf("adding NULL pointer\n");
-    }
-    if (nr_elements)
-    {
-        tail->add(entry);
-        tail = entry;
-    }
-    else
-    {
-        head = entry;
-        tail = entry;
-    }
-    nr_elements++;
+    ElementsList::add(entry);
+    return el;
 }
 
 void InvList::remove(InventoryElement * el)
@@ -192,7 +227,6 @@ void InvList::remove(InventoryElement * el)
         tmp = head->next;
         if (!tail)
         {
-            printf("!!! tail is null %s\n", el->get_name());
             exit(0);
         }
         if (tail->el == el) // only 1 element on the list

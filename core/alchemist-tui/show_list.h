@@ -13,12 +13,12 @@ class Show_el : public ListElement
     void show(bool details = true);
 };
 
-class Show_list : public InvList
+class Show_list : public ElementsList
 {
     char prompt;
 
   public:
-    Show_list(char p) : InvList("select list")
+    Show_list(char p) : ElementsList("select list")
     {
         prompt = p;
     }
@@ -44,7 +44,7 @@ extern const char * clrscr;
 
 int kbhit();
 char wait_key(char prompt);
-ListElement * select_list_element(InvList * list);
+ListElement * select_list_element(ElementsList * list);
 InventoryElement * select_element(InvList * list);
 bool select_inventory2(InventoryElement ** el1, InventoryElement ** el2);
 

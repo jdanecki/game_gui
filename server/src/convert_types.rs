@@ -9,7 +9,7 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
             ObjectData::Element {
                 data: ElementData {
                     base: convert_inv_el(el),
-                    id: unsafe { (*element.base).id },
+                    id: unsafe { (*element.base)._base.id },
                     sharpness: unsafe {(*element.sharpness).value},
                     smoothness: unsafe {(*element.smoothness).value},
                     mass: unsafe {(*element.mass).value},
@@ -51,7 +51,7 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
             ObjectData::Plant {
                 data: PlantData {
                     base: convert_inv_el(el),
-                    id: plant.type_,
+                    id: unsafe { (*plant.base)._base.id },
                     phase: plant.phase,
                     grown: plant.grown,
                     age: unsafe { (*plant._base.age).value},
@@ -63,8 +63,8 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
              let animal = unsafe { &*(el as *const core::InventoryElement as *const core::Animal) };
             ObjectData::Animal {
                 data: AnimalData {
-                    base: convert_inv_el(el),
-                    id: animal.type_,
+                    base: convert_inv_el(el),                    
+                    id: unsafe { (*animal.base)._base.id },
                     age: unsafe { (*animal._base.age).value},
                     max_age: unsafe { (*animal._base.max_age).value},
                 },

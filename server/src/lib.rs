@@ -160,7 +160,8 @@ fn add_player(
         //(*p.inventory).add(el);
         players.push(p);
     }
-    println!("{:?} , players {:?}", peer, players);
+    //println!("{:?} , players {:?}", peer, players);
+
     update_chunk_for_player(server, &mut peer, (128, 128));
     //FIXME
 //    update_player_inventory(server, &mut peer, players);
@@ -184,10 +185,10 @@ fn update_players(server: &Server, players: &mut Vec<core::PlayerServer>) {
 #[allow(non_snake_case)]
 fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
     unsafe {
-        let mut list = *list;
-        let object_num = list.size();
+        let list = *list;
+        let object_num = list._base.nr_elements;
         data.extend_from_slice(&object_num.to_le_bytes());
-        let mut cur = list.head;
+        let mut cur = list._base.head;
         while cur != std::ptr::null_mut() {
             let el = (*cur).el;
             let size = core::get_packet_size_binding((*cur).el) as usize;
@@ -248,11 +249,11 @@ fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8))
 }
 
 fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
-    let mut chunk;
+    let chunk;
     unsafe {
         chunk = *core::world_table[coords.1 as usize][coords.0 as usize];
 
-        let mut le = chunk.objects.head;
+        let mut le = chunk.objects._base.head;
         while le != std::ptr::null_mut() {
             let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
@@ -416,7 +417,7 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
     update_players(server, players);
     unsafe {
         let list = std::ptr::addr_of_mut!(core::objects_to_create);
-        let mut le = (*list).head;
+        let mut le = (*list)._base.head;
         while le != std::ptr::null_mut() {
             let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
@@ -428,12 +429,12 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
             server.broadcast(&data);
         }
 
-        while (*list).head != std::ptr::null_mut() {
-            (*list).remove((*(*list).head).el);
+        while (*list)._base.head != std::ptr::null_mut() {
+            (*list).remove((*(*list)._base.head).el);
         }
 
         let el = std::ptr::addr_of_mut!(core::objects_to_update);
-        let mut le = (*el).head;
+        let mut le = (*el)._base.head;
         while le != std::ptr::null_mut() {
             let mut data = vec![core::PACKET_OBJECT_UPDATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
@@ -444,8 +445,8 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
             le = (*le).next;
             server.broadcast(&data);
         }
-        while (*el).head != std::ptr::null_mut() {
-            (*el).remove((*(*el).head).el);
+        while (*el)._base.head != std::ptr::null_mut() {
+            (*el).remove((*(*el)._base.head).el);
         }
     }
     send_location_updates(server);

@@ -336,6 +336,7 @@ Menu * create_inv_category_menu(enum Form f)
     return menu_inventory_categories2;
 }
 // FIXME
+#if 0
 void create_inv_menu(Item_id id)
 {
     printf("szukam %d\n", id);
@@ -361,7 +362,7 @@ void create_inv_menu(Item_id id)
     }
     current_menu = nullptr;
 }
-
+#endif
 void Menu::go_down()
 {
     menu_pos++;
@@ -558,7 +559,7 @@ int Menu::interact()
             // FIXME - doesn't work for beings
         case MENU_CATEGORIE:
         { // FIXME don't use elements'id but c_id and type
-            create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
+            // create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
             return 0;
         }
 

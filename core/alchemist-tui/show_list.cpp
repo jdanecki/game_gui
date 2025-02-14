@@ -1,4 +1,5 @@
 #include "show_list.h"
+#include "../npc.h"
 #include "game_time.h"
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -17,7 +18,8 @@ const char * colorWhite = "\033[1;37m";
 const char * colorNormal = "\033[0m";
 const char * clrscr = "\033[H\033[J";
 
-extern InvList * inventory;
+extern Npc * current_npc;
+extern Player * player;
 
 int kbhit()
 {
@@ -31,7 +33,7 @@ int kbhit()
 
 char wait_key(char prompt)
 {
-    printf("\r%s [%c] > ", game_time->get_time(), prompt);
+    printf("\r%s %s [%c] > ", game_time->get_time(), current_npc ? current_npc->get_name() : " ", prompt);
     while (!kbhit())
     {
         usleep(1000);
@@ -110,7 +112,7 @@ void Show_list::unselect_all()
     }
 }
 
-ListElement * select_list_element(InvList * list)
+ListElement * select_list_element(ElementsList * list)
 {
     ListElement * elems = list->head;
     Show_list * show_cat = new Show_list('e');
@@ -151,7 +153,7 @@ InventoryElement * select_element(InvList * list)
 
 bool select_inventory2(InventoryElement ** el1, InventoryElement ** el2)
 {
-    ListElement * inv = inventory->head;
+    ListElement * inv = player->inventory->head;
     Show_list * show_cat = new Show_list('i');
     char k = 'a';
 

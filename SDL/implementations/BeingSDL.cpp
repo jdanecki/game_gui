@@ -2,19 +2,18 @@
 
 SDL_Texture * BeingSDL::get_texture()
 {
-    return being_textures[type];
+    return nullptr;
 }
 
 SDL_Texture * AnimalSDL::get_texture()
 {
-    return animal_textures[type];
+    return animal_textures[get_id()];
 }
 
-AnimalSDL::AnimalSDL(AnimalData * data)
+AnimalSDL::AnimalSDL(AnimalData * data) : Animal(data->id)
 {
     age->value = data->age;
     max_age->value = data->max_age;
-    type = data->id;
 }
 
 void AnimalSDL::update_item_location(ItemLocation & old_loc, ItemLocation & new_loc)
@@ -24,15 +23,13 @@ void AnimalSDL::update_item_location(ItemLocation & old_loc, ItemLocation & new_
 
 SDL_Texture * PlantSDL::get_texture()
 {
-    if (grown)
-        return grown_plant_textures[type];
-    else
-        return plant_textures[type];
+    // FIXME combine plant textures in one file for each phase
+    // if (grown)
+    return plant_textures[get_id()];
 }
 
-PlantSDL::PlantSDL(PlantData * data)
+PlantSDL::PlantSDL(PlantData * data) : Plant(data->id)
 {
-    type = data->id;
     grown = data->grown;
     age->value = data->age;
     max_age->value = data->max_age;

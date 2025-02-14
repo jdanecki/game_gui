@@ -86,7 +86,7 @@ struct ProductData
 struct PlantData
 {
     InventoryElementData base;
-    plant_types id;
+    int32_t id;
     Plant_phase phase;
     bool grown;
     uint32_t age;
@@ -96,7 +96,7 @@ struct PlantData
 struct AnimalData
 {
     InventoryElementData base;
-    animal_types id;
+    int32_t id;
     uint32_t age;
     uint32_t max_age;
 };

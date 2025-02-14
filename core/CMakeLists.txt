@@ -10,6 +10,7 @@ add_library(pime SHARED
     alchemist/elements.cpp
 	alchemist/names.cpp
 	alchemist/el_list.cpp
+    alchemist/npc_talk.cpp
 	)
 
 target_link_libraries(pime)

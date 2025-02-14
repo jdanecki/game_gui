@@ -69,7 +69,7 @@ pub struct ProductData {
 #[derive(Serialize, Deserialize)]
 pub struct PlantData {
     pub base: InventoryElementData,
-    pub id: core::plant_types,
+    pub id: i32,
     pub phase: core::Plant_phase,
     pub grown: bool,
     pub age: u32,
@@ -79,8 +79,8 @@ pub struct PlantData {
 #[repr(C)]
 #[derive(Serialize, Deserialize)]
 pub struct AnimalData {
-    pub base: InventoryElementData,
-    pub id: core::animal_types,
+    pub base: InventoryElementData,    
+    pub id: i32,
     pub age: u32,
     pub max_age: u32
 }

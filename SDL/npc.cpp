@@ -6,6 +6,7 @@ extern int active_hotbar;
 
 int npc()
 {
+#if 0
     if (menu_dialog)
     {
         delete menu_dialog;
@@ -25,11 +26,13 @@ int npc()
 
     menu_dialog->add("Cancel", MENU_CANCEL);
     current_menu = menu_dialog;
+#endif
     return 0;
 }
 
 void npc_say(enum Npc_say s)
 {
+#if 0
     switch (s)
     {
         case NPC_Say_hello:
@@ -46,4 +49,5 @@ void npc_say(enum Npc_say s)
             print_status("NPC says: I don't know %s", el->get_name());
             break;
     }
+#endif
 }

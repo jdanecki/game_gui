@@ -47,6 +47,8 @@ Axe::Axe(InventoryElement * el1, InventoryElement * el2) : Product(el1, el2, PRO
 
 bool Axe::use(InventoryElement * object)
 {
+    return false;
+#if 0
     Plant * p = dynamic_cast<Plant *>(object);
 
     if (p && (p->type == PLANTID_tree || p->type == PLANTID_tree1 || p->type == PLANTID_tree2))
@@ -55,7 +57,8 @@ bool Axe::use(InventoryElement * object)
         Element * el_seed = nullptr;
 
         // FIXME change this to object->use
-        switch (p->type)
+
+switch (p->type)
         {
             case PLANTID_tree:
             {
@@ -78,6 +81,7 @@ bool Axe::use(InventoryElement * object)
             default: // FIXME
                 return false;
         }
+
         ItemLocation loc = p->location;
         world_table[loc.data.chunk.map_y][loc.data.chunk.map_x]->add_object(el, loc.data.chunk.x, loc.data.chunk.y);
         world_table[loc.data.chunk.map_y][loc.data.chunk.map_x]->add_object(el_seed, loc.data.chunk.x, loc.data.chunk.y);
@@ -92,6 +96,7 @@ bool Axe::use(InventoryElement * object)
     }
 
     return true;
+#endif
 }
 
 bool Axe::check_ing()
