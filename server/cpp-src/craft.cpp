@@ -67,11 +67,8 @@ bool craft(int product_id, int ingredients_num, const size_t * ingredients_ids, 
     }
     if (crafted)
     {
-        // FIXME remove this flag
-        // #ifndef FUNNY_STUFF_FOR_SDL
         world_table[player->map_y][player->map_x]->add_object(crafted, player->x, player->y);
         objects_to_create.add(crafted);
-        // #endif
         printf("crafted\n");
         return true;
     }

@@ -9,14 +9,14 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
             ObjectData::Element {
                 data: ElementData {
                     base: convert_inv_el(el),
-                    id: unsafe { (*element.base).id },
-                    sharpness: element.sharpness,
-                    smoothness: element.smoothness,
-                    mass: element.mass,
-                    length: element.length,
-                    width: element.width,
-                    height: element.height,
-                    volume: element.volume,
+                    id: unsafe { (*element.base)._base.id },
+                    sharpness: unsafe {(*element.sharpness).value},
+                    smoothness: unsafe {(*element.smoothness).value},
+                    mass: unsafe {(*element.mass).value},
+                    length: unsafe {(*element.length).value},
+                    width: unsafe {(*element.width).value},
+                    height: unsafe {(*element.height).value},
+                    volume: unsafe {(*element.volume).value},
                 },
             }
         }
@@ -27,9 +27,9 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: IngredientData {
                     base: convert_inv_el(el),
                     id: ingredient.id,
-                    quality: ingredient.quality,
-                    resilience: ingredient.resilience,
-                    usage: ingredient.usage,
+                    quality: unsafe {(*ingredient.quality).value},
+                    resilience: unsafe {(*ingredient.resilience).value},
+                    usage: unsafe {(*ingredient.usage).value},
                 },
             }
         }
@@ -40,9 +40,9 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
                 data: ProductData {
                     base: convert_inv_el(el),
                     id: product.id,
-                    quality: product.quality,
-                    resilience: product.resilience,
-                    usage: product.usage,
+                    quality: unsafe {(*product.quality).value},
+                    resilience: unsafe {(*product.resilience).value},
+                    usage: unsafe {(*product.usage).value},
                 },
             }
         }
@@ -51,16 +51,23 @@ pub fn convert_to_data(el: &core::InventoryElement) -> ObjectData {
             ObjectData::Plant {
                 data: PlantData {
                     base: convert_inv_el(el),
-                    id: plant.type_,
+                    id: unsafe { (*plant.base)._base.id },
                     phase: plant.phase,
                     grown: plant.grown,
+                    age: unsafe { (*plant._base.age).value},
+                    max_age: unsafe { (*plant._base.max_age).value},
                 },
             }
         }
         core::Class_id_Class_Animal => {
-            // let animal = unsafe { &*(el as *const core::InventoryElement as *const core::Animal) };
+             let animal = unsafe { &*(el as *const core::InventoryElement as *const core::Animal) };
             ObjectData::Animal {
-                data: convert_inv_el(el),
+                data: AnimalData {
+                    base: convert_inv_el(el),                    
+                    id: unsafe { (*animal.base)._base.id },
+                    age: unsafe { (*animal._base.age).value},
+                    max_age: unsafe { (*animal._base.max_age).value},
+                },
             }
         }
         _ => panic!(),

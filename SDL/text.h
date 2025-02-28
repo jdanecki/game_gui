@@ -15,7 +15,7 @@ void write_text(int x, int y, const char * text, SDL_Color color, int scale_x, i
 int load_font();
 
 extern char status_line[256];
-extern int status_code;
-extern void print_status(const char * format, ...);
+extern char status_line2[256];
+extern void print_status(int i, const char * format, ...);
 
 #endif

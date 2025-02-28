@@ -51,6 +51,8 @@ bool PlayerServer::use_item_on_object(InventoryElement * item, InventoryElement 
 
 bool PlayerServer::plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
 {
+    // FIXME
+#if 0
     if (get_tile_at_ppos(this) == TILE_GRASS || get_tile_at_ppos(this) == TILE_DIRT)
     {
         int id = el->get_id();
@@ -95,13 +97,14 @@ bool PlayerServer::plant_with_seed(InventoryElement * el, int map_x, int map_y, 
 
             p->phase = Plant_seed;
             p->grown = false;
-            p->age = 1;
+            p->age->value = 1;
 
             drop(el);
             destroy(el);
             return true;
         }
     }
+#endif
     return false;
 }
 

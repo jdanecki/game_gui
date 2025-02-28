@@ -1,7 +1,8 @@
 #include "alchemistSDL.h"
 
 SDL_Texture * ObjectSDL::get_texture()
-{
+{ // FIXME
+#if 0
     if (type == OBJECT_wall)
     {
         switch (base->id)
@@ -20,10 +21,11 @@ SDL_Texture * ObjectSDL::get_texture()
                 break;
         }
     }
+#endif
     return NULL;
 }
 
-ElementSDL::ElementSDL(int id) : Element(base_elements[id])
+ElementSDL::ElementSDL(ElementData * data) : Element(data->id)
 {
 }
 
@@ -32,20 +34,26 @@ SDL_Texture * ElementSDL::get_texture()
     return items_textures[get_base()->id];
 }
 
-IngredientSDL::IngredientSDL(int id) : Ingredient(nullptr, (Ingredient_id)id, Form_none)
+IngredientSDL::IngredientSDL(IngredientData * data) : Ingredient(data->id)
 {
+    quality->value = data->quality;
+    resilience->value = data->resilience;
+    usage->value = data->usage;
 }
 
 SDL_Texture * IngredientSDL::get_texture()
 {
-    return ing_textures[id];
+    return ing_textures[get_id()];
 }
 
-ProductSDL::ProductSDL(int id) : Product(nullptr, nullptr, (Product_id)id, Form_none)
+ProductSDL::ProductSDL(ProductData * data) : Product(data->id)
 {
+    quality->value = data->quality;
+    resilience->value = data->resilience;
+    usage->value = data->usage;
 }
 
 SDL_Texture * ProductSDL::get_texture()
 {
-    return prod_textures[id];
+    return prod_textures[get_id()];
 }

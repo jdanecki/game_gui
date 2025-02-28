@@ -50,9 +50,9 @@ pub struct ElementData {
 pub struct IngredientData {
     pub base: InventoryElementData,
     pub id: core::Ingredient_id,
-    pub quality: i32,
-    pub resilience: i32,
-    pub usage: i32,
+    pub quality: u32,
+    pub resilience: u32,
+    pub usage: u32,
 }
 
 #[repr(C)]
@@ -60,18 +60,29 @@ pub struct IngredientData {
 pub struct ProductData {
     pub base: InventoryElementData,
     pub id: core::Product_id,
-    pub quality: i32,
-    pub resilience: i32,
-    pub usage: i32,
+    pub quality: u32,
+    pub resilience: u32,
+    pub usage: u32,
 }
 
 #[repr(C)]
 #[derive(Serialize, Deserialize)]
 pub struct PlantData {
     pub base: InventoryElementData,
-    pub id: core::plant_types,
+    pub id: i32,
     pub phase: core::Plant_phase,
     pub grown: bool,
+    pub age: u32,
+    pub max_age: u32
+}
+
+#[repr(C)]
+#[derive(Serialize, Deserialize)]
+pub struct AnimalData {
+    pub base: InventoryElementData,    
+    pub id: i32,
+    pub age: u32,
+    pub max_age: u32
 }
 
 #[repr(C)]
@@ -82,7 +93,7 @@ pub enum ObjectData {
     Ingredient { data: IngredientData },
     Product { data: ProductData },
     Plant { data: PlantData },
-    Animal { data: InventoryElementData },
+    Animal { data: AnimalData },
 }
 
 #[no_mangle]

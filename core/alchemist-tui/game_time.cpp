@@ -29,9 +29,8 @@ void Game_time::update_time(int sec)
         days = days % 360;
     }
     int delta_days = years * 360 + days - start_day;
-    // TODO fix it
-    //    for (int d=0; d < delta_days; d++)
-    //      callback_daily();
+    for (int d = 0; d < delta_days; d++)
+        callback_daily();
 }
 char * Game_time::get_time()
 {

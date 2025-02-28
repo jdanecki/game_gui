@@ -1,7 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "../core/alchemist/elements.h"
+#include "../core/alchemist/npc_talk.h"
 #include "text.h"
 
 enum menu_actions
@@ -39,6 +39,21 @@ enum menu_actions
     MENU_ITEM = 0x1000,
 };
 
+class Menu_entry
+{
+  public:
+    SDL_Texture * texture;
+    char * entry;
+    bool dynamic_entry;
+    enum menu_actions action;
+    int value;
+    InventoryElement * el;
+    Sentence * sentence;
+    Menu_entry(const char * e, enum menu_actions a, int v, InventoryElement * _el, SDL_Texture * t);
+    Menu_entry(const char * e, enum menu_actions a, Sentence * s, InventoryElement * _el);
+    ~Menu_entry();
+};
+
 class Menu
 {
   public:
@@ -46,23 +61,27 @@ class Menu
     int options;
     int menu_pos;
     int added;
-    SDL_Texture ** texture;
-    const char ** entries;
-    enum menu_actions * actions;
-    int * values;
-    Element ** el;
+    Menu_entry ** entries;
+
     bool show_texture;
     bool show_texture_literal;
     Menu(const char * n, int opt);
+    ~Menu();
     void add(const char * e, enum menu_actions a);
     void add(const char * e, enum menu_actions a, int val);
-    void add(const char * e, enum menu_actions a, Element * p_el);
-    void add(const char * e, enum menu_actions a, SDL_Texture * _texture, int index, int item_id);
+    void add(const char * e, enum menu_actions a, int val, InventoryElement * p_el);
+    void add(const char * e, enum menu_actions a, InventoryElement * p_el);
+    void add(const char * e, enum menu_actions a, SDL_Texture * t, int index, int item_id);
+    void add(const char * e, enum menu_actions a, Sentence * s, InventoryElement * p_el);
     int get_val(int v);
     int get_val();
+    Sentence * get_sentence();
+    InventoryElement * get_el();
     void show();
     void go_down();
     void go_up();
+    int interact();
+    int handle_item(int i);
 };
 
 extern Menu * menu_main;

@@ -1,26 +1,49 @@
-#include "el_list.h"
+#include "../alchemist/el_list.h"
+#include "../alchemist/npc_talk.h"
+#include "../npc.h"
 #include "game_time.h"
+#include "plants.h"
+#include "show_list.h"
 #include "test_axe.h"
 #include <cstdio>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
 
-InvList * inventory;
 InvList * elements;
-InvList * plants;
+InvList * animals;
+InvList * npcs;
+
+Player * player;
+
+Npc * current_npc;
 
 void (*callback_daily)();
 
 void daily_call()
 {
-    //  printf("daily call\n");
+    printf("daily call\n");
     plants->tick();
+    animals->tick();
 }
 
+void print_status(int l, const char * format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
+    fflush(stdout);
+}
 void notify_destroy(size_t id, ItemLocation location)
+{
+}
+
+void update_location(size_t id, ItemLocation old_loc, ItemLocation new_loc)
 {
 }
 
@@ -32,124 +55,124 @@ void help()
     printf("s - Show\n");
     printf("h - Harvest plant\n");
     printf("o - sOw plant\n");
+    printf("u - hUnt animal\n");
     printf("@ - change clock\n");
-    printf("f - find\n");
+    printf("f - Find\n");
+    printf("p - Pickup up element\n");
+    printf("d - Drop element\n");
+    printf("# - conversation\n");
 }
 
-InventoryElement * select_element(InvList * list)
+void show_description()
 {
-    ListElement * elems = list->head;
-    Show_list * show_cat = new Show_list('e');
-    char k = 'a';
-
-    while (elems)
-    {
-        if (elems->is_enabled())
-        {
-            show_cat->add(new Show_el(k, elems));
-            k++;
-        }
-        elems = elems->next;
-    }
-    printf("%s", colorCyan);
-    show_cat->show(false);
-    elems = show_cat->select_el();
-    if (!elems)
-        return nullptr;
-    if (elems->el)
-    {
-        printf("%s%s", colorNormal, colorGreenBold);
-        printf("selected %s\n", elems->el->get_name());
-        return elems->el;
-    }
-
-    return nullptr;
-}
-
-void harvest_plant()
-{
-    ListElement * cur = plants->head;
-    while (cur)
-    {
-        Plant * p = (Plant *)cur->el;
-        if (!p->planted)
-            cur->disable();
-        cur = cur->next;
-    }
-
-    InventoryElement * el = select_element(plants);
-    plants->enable_all();
+    printf("Which item do you want to describe?\n");
+    InventoryElement * el = select_element(player->inventory);
     if (!el)
         return;
-    inventory->add(el);
-    plants->remove(el);
-    printf("plant: %s harvested to inventory\n", el->get_name());
+    char * des = player->get_el_description(el);
+    if (des)
+        printf("%s\n", des);
+    else
+        printf("It looks like %s, but I don't know what it's exactly\n", el->get_class_name());
 }
 
 void show()
 {
     printf("%sb/B - base elements (details off/on)\n", colorCyan);
+    printf("1/! - base animals (details off/on)\n");
+    printf("2/@ - base plants (details off/on)\n");
+
     printf("e/E - elements (details off/on)\n");
     printf("i/I - inventory (details off/on)\n");
     printf("p/P - plants (details off/on)\n");
-
+    printf("a/A - animals (details off/on)\n");
+    printf("n/N - npcs/player (details off/on)\n");
+    printf("d - item description\n");
     printf("%s%s", colorNormal, colorGreenBold);
 
     char c = wait_key('s');
     switch (c)
     {
         case 'b':
-            show_base_elements(false);
-            break;
-        case 'i':
-            inventory->show(false);
-            break;
-        case 'e':
-            elements->show(false);
-            break;
-        case 'p':
-            plants->show(false);
-            break;
         case 'B':
-            show_base_elements(true);
+            show_base_table(Class_BaseElement, c == 'B');
             break;
+
+        case '1':
+        case '!':
+            show_base_table(Class_BaseAnimal, c == '!');
+            break;
+
+        case '2':
+        case '@':
+            show_base_table(Class_BasePlant, c == '@');
+            break;
+
+        case 'i':
         case 'I':
-            inventory->show(true);
+            player->inventory->show(c == 'I');
             break;
+
+        case 'e':
         case 'E':
-            elements->show(true);
+            elements->show(c == 'E');
             break;
+
+        case 'a':
+        case 'A':
+            animals->show(c == 'A');
+            break;
+
+        case 'p':
         case 'P':
-            plants->show(true);
+            plants->show(c == 'P');
+            break;
+
+        case 'n':
+        case 'N':
+            npcs->show(c == 'N');
+            player->show(c == 'N');
+            break;
+
+        case 'd':
+            show_description();
             break;
     }
+}
+void add_new_element()
+{
+    Element * el = new Element;
+    elements->add(el);
+    printf("new Element %s found\n", el->get_name());
+}
+
+void add_new_animal()
+{
+    Animal * el = new Animal;
+    animals->add(el);
+    printf("new Animal %s found\n", el->get_name());
 }
 
 void add_new_plant()
 {
-    Plant * p = new Plant();
-    if (p->phase == Plant_seed)
-    {
-        elements->add(p);
-        printf("new Plant seed %s found\n", p->get_name());
-    }
-    else
-    {
-        plants->add(p);
-        printf("new Plant %s found\n", p->get_name());
-    }
+    Plant * p = new Plant;
+    plants->add(p);
+    printf("new Plant %s found\n", p->get_name());
 }
 
-void add_new_element()
+void add_new_npc()
 {
-    Element * el = new Element(base_elements[rand() % BASE_ELEMENTS]);
-    elements->add(el);
-    printf("new Element %s found\n", el->get_name());
+    Npc * el = new Npc;
+    npcs->add(el);
+    printf("new NPC %s found\n", el->get_name());
 }
+
 void find_new()
 {
     printf("%se - Element\n", colorCyan);
     printf("p - Plant\n");
+    printf("a - Animal\n");
+    printf("n - Npc\n");
     printf("%s%s", colorNormal, colorGreenBold);
 
     char c = wait_key('f');
@@ -160,6 +183,12 @@ void find_new()
             break;
         case 'p':
             add_new_plant();
+            break;
+        case 'a':
+            add_new_animal();
+            break;
+        case 'n':
+            add_new_npc();
             break;
     }
 }
@@ -194,9 +223,36 @@ void change_clock()
     }
 }
 
+void clone()
+{
+    InventoryElement * el = select_element(player->inventory);
+    if (!el)
+        return;
+    el->show();
+    Class_id cid = el->get_base_cid();
+    InventoryElement * new_el;
+    switch (cid)
+    {
+        case Class_BaseElement:
+            new_el = new Element(el->get_id());
+            break;
+        case Class_BaseAnimal:
+            new_el = new Animal(el->get_id());
+            break;
+        case Class_BasePlant:
+            new_el = new Plant(el->get_id());
+            break;
+    }
+    if (!new_el)
+        return;
+    player->inventory->add(new_el);
+    new_el->show();
+}
+
 void test()
 {
     printf("%sa - test axe\n", colorCyan);
+    printf("c - clone item\n");
 
     printf("%s%s", colorNormal, colorGreenBold);
 
@@ -207,54 +263,13 @@ void test()
         {
             Axe * axe = test_axe();
             if (axe)
-                inventory->add(axe);
+                player->inventory->add(axe);
         }
         break;
+        case 'c':
+            clone();
+            break;
     }
-}
-
-bool select_inventory2(InventoryElement ** el1, InventoryElement ** el2)
-{
-    ListElement * inv = inventory->head;
-    Show_list * show_cat = new Show_list('i');
-    char k = 'a';
-
-    while (inv)
-    {
-        show_cat->add(new Show_el(k, inv));
-        k++;
-        inv = inv->next;
-    }
-    printf("%s", colorCyan);
-    show_cat->show(false);
-    bool sel = show_cat->multi_select();
-    if (!sel)
-        return false;
-
-    printf("%swybrane zasoby: ", colorGreen);
-    Show_el * el = (Show_el *)show_cat->head;
-    int count = 0;
-
-    while (el)
-    {
-        if (el->selected)
-        {
-            printf("%s ", el->l_el->el->get_name());
-            count++;
-            if (!*el1)
-                *el1 = el->l_el->el;
-            else
-                *el2 = el->l_el->el;
-        }
-        el = (Show_el *)el->next;
-    }
-    if (count == 2)
-    {
-        puts("");
-        return true;
-    }
-
-    return false;
 }
 
 void craft()
@@ -276,60 +291,120 @@ void craft()
             Axe * axe = new Axe(el1, el2);
             if (!axe->craft())
                 return;
-            inventory->add(axe);
-            inventory->remove(el1);
-            inventory->remove(el2);
+            player->inventory->add(axe);
+            player->inventory->remove(el1);
+            player->inventory->remove(el2);
             printf("axe added to inventory\n");
         }
         break;
         case 'b':
         {
-            InventoryElement * el = select_element(elements);
+            InventoryElement * el = select_element(player->inventory);
             if (!el)
                 return;
             AxeBlade * axe_blade = new AxeBlade(el);
             if (!axe_blade->craft())
+            {
+                delete axe_blade;
                 return;
-            inventory->add(axe_blade);
-            elements->remove(el);
+            }
+            player->inventory->add(axe_blade);
+            player->inventory->remove(el);
             printf("axe blade added to inventory\n");
         }
         break;
         case 'h':
         {
-            InventoryElement * el = select_element(elements);
+            InventoryElement * el = select_element(player->inventory);
             if (!el)
                 return;
             AxeHandle * axe_handle = new AxeHandle(el);
             if (!axe_handle->craft())
+            {
+                delete axe_handle;
                 return;
-            inventory->add(axe_handle);
-            elements->remove(el);
+            }
+            player->inventory->add(axe_handle);
+            player->inventory->remove(el);
             printf("axe handle added to inventory\n");
         }
         break;
     }
 }
 
-void sow_plant()
+void pickup()
 {
-    ListElement * cur = elements->head;
-    while (cur)
-    {
-        if (cur->el->c_id != Class_Plant)
-            cur->disable();
-        cur = cur->next;
-    }
-
+    printf("Which item do you want to pick up?\n");
     InventoryElement * el = select_element(elements);
-    elements->enable_all();
     if (!el)
         return;
+    player->inventory->add(el);
     elements->remove(el);
-    plants->add(el);
-    Plant * p = (Plant *)el;
-    p->sow();
-    printf("%s planted\n", el->get_name());
+    printf("%s added to inventory\n", el->get_name());
+}
+
+void drop()
+{
+    printf("Which item do you want to drop?\n");
+    InventoryElement * el = select_element(player->inventory);
+    if (!el)
+        return;
+    printf("%s dropped from inventory\n", el->get_name());
+    elements->add(el);
+    player->inventory->remove(el);
+}
+
+void talk()
+{
+    if (!current_npc)
+    {
+        printf("Who do you want to talk to?\n");
+        current_npc = dynamic_cast<Npc *>(select_element(npcs));
+        sentences->enable_all();
+        player->start_conversation(current_npc);
+    }
+    if (current_npc)
+    {
+        if (!player->inventory->nr_elements)
+            sentences->disable(NPC_Ask_do_you_know_item);
+        else
+        {
+            sentences->enable(NPC_Ask_do_you_know_item);
+        }
+        Sentence * s = dynamic_cast<Sentence *>(select_list_element(sentences));
+
+        printf("%s%s", colorNormal, colorRedBold);
+        printf("%s: %s\n", player->get_name(), s->question);
+
+        if (s->id == NPC_Ask_do_you_know_item)
+        {
+            InventoryElement * el = select_element(player->inventory);
+            if (el)
+            {
+                player->ask(s, el);
+            }
+        }
+        else
+        {
+            if (player->say(s))
+            {
+                current_npc = nullptr;
+            }
+        }
+
+        printf("%s%s", colorNormal, colorGreenBold);
+    }
+}
+
+void hunt()
+{
+    InventoryElement * el = select_element(animals);
+    //   plants->enable_all();
+    if (!el)
+        return;
+    player->inventory->add(el);
+    animals->remove(el);
+    printf("animal: %s hunted to inventory\n", el->get_name());
 }
 
 void play()
@@ -338,6 +413,7 @@ void play()
     while (1)
     {
         char c = wait_key('>');
+
         switch (c)
         {
             case 't':
@@ -366,18 +442,32 @@ void play()
             case 'o':
                 sow_plant();
                 break;
+            case 'u':
+                hunt();
+                break;
             case 'f':
                 find_new();
                 break;
+            case '#':
+                talk();
+                break;
+            case 'p':
+                pickup();
+                break;
+            case 'd':
+                drop();
+                break;
         }
         game_time->update_time(1);
+        plants->tick();
+        animals->tick();
+        npcs->tick();
     }
 }
 
-int main()
+struct termios old_stdin, stdin_tty;
+void set_terminal()
 {
-    struct termios old_stdin, stdin_tty;
-
     setbuf(stdout, nullptr);
     printf("%s", clrscr);
     tcgetattr(0, &old_stdin);
@@ -389,22 +479,41 @@ int main()
 
     tcflush(0, TCIFLUSH);
     ioctl(0, TCXONC, 1);
+}
+
+int main()
+{
+    set_terminal();
 
     srandom(time(nullptr));
     init_elements();
     game_time = new Game_time;
 
-    inventory = new InvList("inventory");
     elements = new InvList("elements");
     plants = new InvList("plants");
+    animals = new InvList("animals");
+    npcs = new InvList("npcs");
 
     for (int i = 0; i < 5; i++)
         add_new_element();
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 2; i++)
     {
         add_new_plant();
     }
+
+    for (int i = 0; i < 2; i++)
+    {
+        add_new_animal();
+    }
+
+    for (int i = 0; i < 1; i++)
+    {
+        add_new_npc();
+    }
+    player = new Player(0);
+
+    init_sentences();
 
     callback_daily = daily_call;
     play();

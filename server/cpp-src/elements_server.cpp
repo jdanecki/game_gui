@@ -2,6 +2,7 @@
 #include "networking.h"
 #include "world_server.h"
 
+#ifndef CORE_TUI
 void to_bytes_binding(InventoryElement * el, unsigned char * buf)
 {
     el->to_bytes(buf);
@@ -21,30 +22,42 @@ void destroy(InventoryElement * el)
     }
     delete el;
 }
+#endif
 
 void AnimalServer::move()
 {
+    delay_for_move--;
+    if (delay_for_move)
+        return;
+    delay_for_move = max_delay_move;
+
     ItemLocation l = location;
     int _x = location.data.chunk.x;
     int _y = location.data.chunk.y;
 
-    switch (rand() % 4)
+    if ((_x == dst_loc_x && _y == dst_loc_y) /*|| (rand() % 5 ==1)*/)
     {
-        case 0: // up
-            _y--;
-            break;
-        case 1: // down
-            _y++;
-            break;
-        case 2: // left
-            // going_right=false;
-            _x--;
-            break;
-        case 3: // right
-            // going_right=true;
-            _x++;
-            break;
+        dst_loc_x = rand() % CHUNK_SIZE;
+        dst_loc_y = rand() % CHUNK_SIZE;
     }
+    else
+    {
+        if (rand() % 2)
+        {
+            if (_x < dst_loc_x)
+                _x++;
+            else
+                _x--;
+        }
+        if (rand() % 2)
+        {
+            if (_y < dst_loc_y)
+                _y++;
+            else
+                _y--;
+        }
+    }
+    //  printf("%d, %d -> dst[%d, %d]\n", _x, _y, dst_loc_x, dst_loc_y);
 
     if (_x >= CHUNK_SIZE)
         _x = CHUNK_SIZE - 1;
@@ -65,63 +78,80 @@ void AnimalServer::move()
 
 bool AnimalServer::tick()
 {
-    Animal::tick();
     move();
-    return true;
+    return Being::tick();
+}
+
+PlantServer::PlantServer()
+{
+    delay_for_grow = max_delay_grow;
 }
 
 bool PlantServer::grow()
 {
+    delay_for_grow--;
+    if (delay_for_grow)
+        return false;
+    delay_for_grow = max_delay_grow;
+
     if (grown)
         return false;
     if (!water)
         return !grown;
     // water--;
-    age++;
+    age->value++;
 
-    if (age >= max_age)
+    if (age->value >= max_age->value)
     {
         if (phase != Plant_fruits)
         {
             grown = true;
             change_phase(Plant_fruits);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
-    if (age >= flowers_time)
+    if (age->value >= flowers_time)
     {
         if (phase != Plant_flowers)
         {
             change_phase(Plant_flowers);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
-    if (age >= growing_time)
+    if (age->value >= growing_time)
     {
         if (phase != Plant_growing)
         {
             change_phase(Plant_growing);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
-    if (age >= seedling_time)
+    if (age->value >= seedling_time)
     {
         if (phase != Plant_seedling)
         {
             change_phase(Plant_seedling);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
     return !grown;
 }
-
+/*
 bool PlantServer::tick()
 {
     grow();
     Plant::tick();
     return true;
-}
+}*/

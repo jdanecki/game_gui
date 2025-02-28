@@ -1,9 +1,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "../core/player.h"
 #include "../core/world.h"
 #include "implementations/alchemistSDL.h"
+#include "npc.h"
 #include "text.h"
 #include "window.h"
 #include <SDL2/SDL.h>
@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 // #include <SDL2/SDL2_framerate.h>
-#include "../core/alchemist/game_time.h"
 #include "../core/tiles.h"
 #include "inputs.h"
 #include "menu.h"

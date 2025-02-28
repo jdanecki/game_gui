@@ -32,77 +32,127 @@ class ListElement
     ListElement(InventoryElement * entry);
     ListElement() : el(nullptr), next(nullptr)
     {
+        enable();
+    }
+    virtual bool check(void * what)
+    {
+        return what == this;
     }
 };
 
-class InvList
+class ElementsTable : public ListElement
+{
+    int count;
+    bool * elements;
+    Class_id c_id;
+
+  public:
+    ElementsTable(int c, Class_id t)
+    {
+        elements = new bool[c];
+        for (int i = 0; i < c; i++)
+            elements[i] = false;
+        c_id = t;
+        count = c;
+    }
+
+    bool is_known(int i)
+    {
+        return elements[i];
+    }
+    void set_known(int i)
+    {
+        elements[i] = true;
+    }
+    void set_all_known()
+    {
+        for (int i = 0; i < count; i++)
+            elements[i] = true;
+    }
+    bool check(void * what)
+    {
+        Class_id i = *(Class_id *)what;
+        return i == c_id;
+    }
+};
+
+class BaseTable : public ListElement
+{
+    int count;
+    Base ** base;
+    Class_id c_id;
+
+  public:
+    BaseTable(int c, Class_id t)
+    {
+        base = new Base *[c];
+        for (int i = 0; i < c; i++)
+            base[i] = nullptr;
+        c_id = t;
+        count = c;
+    }
+    void add(int i, Base * b)
+    {
+        base[i] = b;
+    }
+    void show(bool details)
+    {
+        for (int i = 0; i < count; i++)
+            base[i]->show(details);
+    }
+    bool check(void * what)
+    {
+        Class_id i = *(Class_id *)what;
+        return i == c_id;
+    }
+    Base * get_random()
+    {
+        return base[rand() % count];
+    }
+    Base * get(int i)
+    {
+        return base[i];
+    }
+};
+
+class ElementsList
 {
   public:
     const char * name;
     int nr_elements;
     ListElement * head;
     ListElement * tail;
-
-    InvList(const char * n);
-    InvList();
+    ElementsList(const char * n);
+    ElementsList();
     ListElement * find(void * what);
     bool virtual find_check(ListElement * el, void * what)
     {
-        return el == what;
+        return el->check(what);
+    }
+    void show(bool details = true);
+    void enable_all();
+    ListElement * add(ListElement * el);
+    void remove(ListElement * el);
+    void tick();
+};
+
+class InvList : public ElementsList
+{
+  public:
+    InvList(const char * n) : ElementsList(n)
+    {
+    }
+    InvList() : ElementsList("Inventory list")
+    {
     }
     //    bool virtual find_at_check(ListElement *el, void * pos) { return false; }
     InventoryElement ** find_form(enum Form f, int * count);
-    InventoryElement ** find_id(enum Item_id id, int * count);
-    void show(bool details = true);
-    void add(InventoryElement * el);
-    void add(ListElement * el);
+
+    // FIXME
+    // InventoryElement ** find_id(enum Item_id id, int * count);
+
+    InventoryElement * add(InventoryElement * el);
     void remove(InventoryElement * el);
-    int get_count(InventoryElement * el);
-    void tick();
-    void enable_all();
-    int size();
 };
-
-class Show_el : public ListElement
-{
-  public:
-    char c;
-    bool selected;
-    ListElement * l_el;
-    Show_el(char _c, ListElement * _el);
-    void show(bool details = true);
-};
-
-class Show_list : public InvList
-{
-    char prompt;
-
-  public:
-    Show_list(char p) : InvList("select list")
-    {
-        prompt = p;
-    }
-    ListElement * select_el();
-    bool multi_select();
-    void unselect_all();
-    bool find_check(ListElement * el, void * what);
-};
-
-extern const char * colorGray;
-extern const char * colorRed;
-extern const char * colorRedBold;
-extern const char * colorGreen;
-extern const char * colorGreenBold;
-extern const char * colorYellow;
-extern const char * colorYellowBold;
-extern const char * colorBlue;
-extern const char * colorMagenta;
-extern const char * colorCyan;
-extern const char * colorWhite;
-extern const char * colorNormal;
-extern const char * clrscr;
-
-int kbhit();
-char wait_key(char prompt);
 
 #endif // EL_LIST_H

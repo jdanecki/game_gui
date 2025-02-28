@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(pime)
 
 set(CMAKE_BUILD_TYPE Debug)
+set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "ccache")
+set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "ccache")
 
 add_subdirectory(../../core core)
 

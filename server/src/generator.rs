@@ -14,7 +14,7 @@ pub fn generate() {
         core::srand(SEED as u32);
         println!("{}", core::rand());
         core::init_elements();
-        //core::generator();
+        core::generator();
     }
     let terrains = create_terrains();
     let mut plants = create_plants(&terrains);
