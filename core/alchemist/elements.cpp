@@ -152,29 +152,6 @@ void BaseElement::show(bool details)
         edible->show();
 }
 
-#ifndef CORE_TUI
-unsigned int InventoryElement::get_packet_size()
-{
-    // if (get_base())
-    return sizeof(size_t) + sizeof(Class_id) + sizeof(ItemLocation);
-    // return sizeof(int)*4;
-}
-
-void InventoryElement::to_bytes(unsigned char * buf)
-{
-    //    unsigned char* bytes = (unsigned char*)malloc(get_packet_size());
-    int offset = 0;
-    memcpy(&buf[offset], &uid, sizeof(uid));
-    offset += sizeof(uid);
-    memcpy(&buf[offset], &c_id, sizeof(Class_id));
-    offset += sizeof(Class_id);
-
-    memcpy(&buf[offset], &location, sizeof(location));
-    offset += sizeof(location);
-
-    printf("class %d - uid: %ld - %d %d\n", c_id, uid, location.data.chunk.x, location.data.chunk.y);
-}
-#endif
 Element::Element()
 {
     Class_id id = Class_BaseElement;
@@ -221,39 +198,6 @@ void Element::show(bool details)
 
     base->show(details);
 }
-
-#ifndef CORE_TUI
-unsigned int Element::get_packet_size()
-{
-    return InventoryElement::get_packet_size() + sizeof(unsigned int) * 7 + sizeof(int);
-}
-
-void Element::to_bytes(unsigned char * buf)
-{
-    InventoryElement::to_bytes(buf);
-    int offset = InventoryElement::get_packet_size();
-    // printf("packet size %d\n", offset);
-
-    memcpy(&buf[offset], &sharpness, sizeof(sharpness->value));
-    offset += sizeof(sharpness);
-    memcpy(&buf[offset], &smoothness, sizeof(smoothness->value));
-    offset += sizeof(smoothness);
-    memcpy(&buf[offset], &mass, sizeof(mass->value));
-    offset += sizeof(mass);
-    memcpy(&buf[offset], &length, sizeof(length->value));
-    offset += sizeof(length);
-    memcpy(&buf[offset], &width, sizeof(width->value));
-    offset += sizeof(width);
-    memcpy(&buf[offset], &height, sizeof(height->value));
-    offset += sizeof(height);
-    memcpy(&buf[offset], &volume, sizeof(volume->value));
-    offset += sizeof(volume);
-
-    memcpy(&buf[offset], &base->id, sizeof(base->id));
-    offset += sizeof(base->id);
-    printf("element %d\n", base->id);
-}
-#endif
 
 #ifdef CORE_FOR_CLIENT
 Ingredient::Ingredient(Ingredient_id i)
@@ -305,28 +249,6 @@ void Ingredient::show(bool details)
     usage->show();
     printf("form = %s", Form_name[req_form]);
 }
-#ifndef CORE_TUI
-unsigned int Ingredient::get_packet_size()
-{
-    return InventoryElement::get_packet_size() + sizeof(Ingredient_id) + sizeof(int) * 3;
-}
-
-void Ingredient::to_bytes(unsigned char * buf)
-{
-    InventoryElement::to_bytes(buf);
-    int offset = InventoryElement::get_packet_size();
-
-    memcpy(&buf[offset], &quality, sizeof(quality->value));
-    offset += sizeof(quality);
-    memcpy(&buf[offset], &resilience, sizeof(resilience->value));
-    offset += sizeof(resilience);
-    memcpy(&buf[offset], &usage, sizeof(usage->value));
-    offset += sizeof(usage);
-
-    memcpy(&buf[offset], &id, sizeof(id));
-    offset += sizeof(id);
-}
-#endif
 
 #ifdef CORE_FOR_CLIENT
 Product::Product(Product_id i)
@@ -530,21 +452,3 @@ Plant::Plant(BasePlant * b)
     init(b);
 }
 
-#ifndef CORE_TUI
-unsigned int Plant::get_packet_size()
-{
-    return InventoryElement::get_packet_size() + sizeof(base->id) + sizeof(phase) + sizeof(grown);
-}
-
-void Plant::to_bytes(unsigned char * buf)
-{
-    InventoryElement::to_bytes(buf);
-    int offset = InventoryElement::get_packet_size();
-
-    memcpy(&buf[offset], &base->id, sizeof(base->id));
-    memcpy(&buf[offset], &phase, sizeof(phase));
-    offset += sizeof(phase);
-    memcpy(&buf[offset], &grown, sizeof(grown));
-    offset += sizeof(grown);
-}
-#endif

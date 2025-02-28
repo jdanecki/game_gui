@@ -256,36 +256,23 @@ extern "C"
 
     void create_object(ObjectData data)
     {
-        int x = 128; // data.inv_element.data.location.chunk.x;
-        int y = 128; // data.inv_element.data.location.chunk.y;
+        int x = 128; // data.inv_element.data.location.chunk.map_x;
+        int y = 128; // data.inv_element.data.location.chunk.map_y;
         if (world_table[y][x])
         {
-            int x = 128;
-            int y = 128;
-            if (world_table[y][x])
+            InventoryElement * el = el_from_data(data);
+            if (el)
             {
-                int offset = 0;
-                // for (int i = 0; i < num; i++)
-                //{
-                //   if (offset + 30 > num)
-                //     break;
-                InventoryElement * el = el_from_data(data);
-                if (el)
-                {
-                    int item_x = el->location.data.chunk.x;
-                    int item_y = el->location.data.chunk.y;
-                    // el->get_posittion(&item_x,&item_y);
-                    world_table[y][x]->add_object(el, item_x, item_y);
-                    offset += el->get_packet_size();
+                int item_x = el->location.data.chunk.x;
+                int item_y = el->location.data.chunk.y;
+                world_table[y][x]->add_object(el, item_x, item_y);
 
-                    print_status(1, "created object: %s", el->get_name());
-                }
-                //}
+                print_status(1, "created object: %s", el->get_name());
             }
-            else
-            {
-                print_status(1, "inexisting chunk");
-            }
+        }
+        else
+        {
+            print_status(1, "inexisting chunk");
         }
     }
 

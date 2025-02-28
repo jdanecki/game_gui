@@ -228,10 +228,6 @@ class InventoryElement
     {
         return uid;
     }
-#ifndef CORE_TUI
-    virtual unsigned int get_packet_size();
-    virtual void to_bytes(unsigned char * buf);
-#endif
     virtual char * get_description()
     {
         char * buf = new char[128];
@@ -355,10 +351,6 @@ class Element : public InventoryElement
     {
         return base->c_id;
     }
-#ifndef CORE_TUI
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
-#endif
 };
 
 enum Ingredient_id
@@ -433,10 +425,6 @@ class Ingredient : public InventoryElement
         delete usage;
     }
     void show(bool details = true);
-#ifndef CORE_TUI
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
-#endif
 
     char * get_description()
     {
@@ -727,10 +715,6 @@ class Plant : public Being
     {
         return base->c_id;
     }
-#ifndef CORE_TUI
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
-#endif
 };
 
 #define SOLID_ELEMENTS 17

@@ -3,16 +3,6 @@
 #include "world_server.h"
 
 #ifndef CORE_TUI
-void to_bytes_binding(InventoryElement * el, unsigned char * buf)
-{
-    el->to_bytes(buf);
-}
-
-unsigned int get_packet_size_binding(InventoryElement * el)
-{
-    return el->get_packet_size();
-}
-
 void destroy(InventoryElement * el)
 {
     notify_destroy(el->get_uid(), el->location);

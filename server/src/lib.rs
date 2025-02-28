@@ -155,18 +155,11 @@ fn add_player(
 
     unsafe {
         let p = core::PlayerServer::new(players.len() as i32);
-
-        //let el = &mut core::Element::new(core::base_elements[0]) as *mut core::Element;
-        //let el = el as *mut core::InventoryElement;
-        //println!("item {} {}", (*el).c_id, (*el).uid);
-        //(*p.inventory).add(el);
         players.push(p);
     }
     //println!("{:?} , players {:?}", peer, players);
 
     update_chunk_for_player(server, &mut peer, (128, 128));
-    //FIXME
-//    update_player_inventory(server, &mut peer, players);
 }
 
 fn update_players(server: &Server, players: &mut Vec<core::PlayerServer>) {
@@ -179,50 +172,9 @@ fn update_players(server: &Server, players: &mut Vec<core::PlayerServer>) {
         data[17..21].clone_from_slice(&p._base.x.to_le_bytes());
         data[21..25].clone_from_slice(&p._base.y.to_le_bytes());
 
-        //println!("updating players{:?}", data);
         server.broadcast(&data);
     }
 }
-
-#[allow(non_snake_case)]
-fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
-    unsafe {
-        let list = *list;
-        let object_num = list._base.nr_elements;
-        data.extend_from_slice(&object_num.to_le_bytes());
-        let mut cur = list._base.head;
-        while cur != std::ptr::null_mut() {
-            let el = (*cur).el;
-            let size = core::get_packet_size_binding((*cur).el) as usize;
-            let mut buf = vec![0 as u8];
-            buf.resize(size, 0);
-            core::to_bytes_binding(el, buf.as_mut_ptr());
-            //println!("{:?}", buf);
-
-            let o = std::slice::from_raw_parts(buf.as_ptr(), size);
-            data.extend_from_slice(o);
-            cur = (*cur).next;
-        }
-    }
-}
-//FIXME
-/*
-fn update_player_inventory(
-    server: &Server,
-    peer: &SocketAddr,
-    players: &mut Vec<core::PlayerServer>,
-) {
-    let id = server.clients.get(peer).unwrap();
-
-    let mut data = vec![core::PACKET_INVENTORY_UPDATE as u8];
-    unsafe {
-        let inv = &mut *players[*id]._base.inventory;
-        InvList_to_bytes(&mut data, inv);
-    }
-
-    server.socket.send_to(&data, peer).unwrap();
-    
-}*/
 
 fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
     let mut data = vec![
@@ -266,11 +218,6 @@ fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords
             le = (*le).next;
             server.socket.send_to(&data, peer).unwrap();
         }
-        /*if chunk.objects.size() <= 64 {
-            InvList_to_bytes(&mut data, &mut chunk.objects);
-        } else {
-            println!("TODO to much items in chunk");
-        }*/
     }
 }
 
