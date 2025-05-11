@@ -256,7 +256,7 @@ void draw_players()
     // render players
     for (int i = 0; i < PLAYER_NUM; i++)
     {
-        if (players[i])
+        if (players[i] && player->map_x == players[i]->map_x && player->map_y == players[i]->map_y)
         {
             SDL_Rect img_rect = {players[i]->x * tile_dungeon_size, players[i]->y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             if (players[i]->going_right)
