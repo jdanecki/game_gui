@@ -1,4 +1,5 @@
 #include "main.h"
+#include "networking.h"
 #include "texture.h"
 #include "window.h"
 #include <SDL2/SDL_render.h>
@@ -10,8 +11,12 @@ int width;
 int tx;
 int game_size;
 int tile_dungeon_size;
+int request_delay = 0;
 
 char text[300];
+
+// TODO remove that when not necessary
+extern NetClient* client;
 
 void draw_hotbar()
 {
@@ -72,7 +77,7 @@ void draw_texts()
 {
     int ty = 10;
 
-    sprintf(text, "Hunger=%d Irrigation=%d", player->hunger, player->thirst);
+    sprintf(text, "Hunger=%d Irrigation=%d %d %d", player->hunger, player->thirst, player->map_x, player->map_y);
     write_text(tx, ty, text, (player->hunger < 100 || player->thirst < 100) ? Red : White, 15, 30);
     ty += 25;
 
@@ -192,28 +197,37 @@ bool draw_terrain()
     }
 
     // render terrain
-    if (world_table[128][128])
+    if (world_table[player->map_y][player->map_x])
     {
+        request_delay = 0;
         for (int y = 0; y < CHUNK_SIZE; y++)
         {
             for (int x = 0; x < CHUNK_SIZE; x++)
             {
                 SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
                 // enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
-                int tile = get_tile_at(128, 128, x, y);
-                SDL_Texture * texture = tiles_textures[tile];
-                // FIXME
-                //SDL_SetTextureColorMod(texture, base_elements[tile]->color.r, base_elements[tile]->color.g, base_elements[tile]->color.b);
+                int tile = get_tile_at(player->map_x, player->map_y, x, y);
+                SDL_Texture * texture = tiles_textures[(tile+1) % 6];
+                SDL_SetTextureColorMod(texture, get_base_element(tile)->color.r,  get_base_element(tile)->color.g, get_base_element(tile)->color.b);
                 SDL_RenderCopy(renderer, texture, NULL, &img_rect);
             }
         }
     }
     else
     {
+        if (request_delay == 0)
+        {
+            send_packet_request_chunk(client, player->map_x, player->map_y);
+            request_delay = 20;
+        }
+        else
+        {
+            request_delay--;
+        }
         print_status(1, "chunk not loaded");
         return false;
     }
-    chunk * c = world_table[128][128];
+    chunk * c = world_table[player->map_y][player->map_x];
     if (c)
     {
         ListElement * el = c->objects.head;

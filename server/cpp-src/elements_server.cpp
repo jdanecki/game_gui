@@ -14,6 +14,20 @@ void destroy(InventoryElement * el)
 }
 #endif
 
+AnimalServer::AnimalServer()
+{
+    delay_for_move = max_delay_move; // 600 * 100ms -> 1min
+    dst_loc_x = rand() % CHUNK_SIZE;
+    dst_loc_y = rand() % CHUNK_SIZE;
+}
+
+AnimalServer::AnimalServer(int id) : Animal(id)
+{
+    delay_for_move = max_delay_move; // 600 * 100ms -> 1min
+    dst_loc_x = rand() % CHUNK_SIZE;
+    dst_loc_y = rand() % CHUNK_SIZE;
+}
+
 void AnimalServer::move()
 {
     delay_for_move--;
@@ -73,6 +87,11 @@ bool AnimalServer::tick()
 }
 
 PlantServer::PlantServer()
+{
+    delay_for_grow = max_delay_grow;
+}
+
+PlantServer::PlantServer(int id) : Plant(id)
 {
     delay_for_grow = max_delay_grow;
 }
@@ -145,3 +164,17 @@ bool PlantServer::tick()
     Plant::tick();
     return true;
 }*/
+AnimalServer* create_animal(int id)
+{
+    return new AnimalServer(id);
+}
+
+PlantServer* create_plant(int id)
+{
+    return new PlantServer(id);
+}
+
+Element* create_element(int id)
+{
+    return new Element(id);
+}

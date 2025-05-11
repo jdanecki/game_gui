@@ -7,7 +7,7 @@ SDL_Texture * BeingSDL::get_texture()
 
 SDL_Texture * AnimalSDL::get_texture()
 {
-    return animal_textures[get_id()];
+    return animal_textures[get_id() % 2];
 }
 
 AnimalSDL::AnimalSDL(AnimalData * data) : Animal(data->id)
@@ -25,7 +25,7 @@ SDL_Texture * PlantSDL::get_texture()
 {
     // FIXME combine plant textures in one file for each phase
     // if (grown)
-    return plant_textures[get_id()];
+    return plant_textures[get_id() % 6];
 }
 
 PlantSDL::PlantSDL(PlantData * data) : Plant(data->id)

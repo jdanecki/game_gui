@@ -234,7 +234,7 @@ void InvList::remove(InventoryElement * el)
             if (head == tail)
                 tail = NULL;
         }
-        free(head);
+        delete head;
         nr_elements--;
         head = tmp;
         return;
@@ -251,7 +251,7 @@ void InvList::remove(InventoryElement * el)
             {
                 tail = cur;
             }
-            free(tmp);
+            delete tmp;
             nr_elements--;
             return;
         }

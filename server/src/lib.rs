@@ -62,6 +62,10 @@ pub enum ClientEvent<'a> {
         x: i32,
         y: i32,
     },
+    RequestChunk {
+        x: i32,
+        y: i32,
+    },
     Whatever,
 }
 
@@ -106,6 +110,10 @@ impl<'a> From<&'a [u8]> for ClientEvent<'a> {
                 map_y: i32::from_le_bytes(value[13..17].try_into().unwrap()),
                 x: i32::from_le_bytes(value[17..21].try_into().unwrap()),
                 y: i32::from_le_bytes(value[21..25].try_into().unwrap()),
+            },
+            core::PACKET_REQUEST_CHUNK => ClientEvent::RequestChunk {
+                x: i32::from_le_bytes(value[1..5].try_into().unwrap()),
+                y: i32::from_le_bytes(value[5..9].try_into().unwrap()),
             },
             1 => ClientEvent::Whatever,
             _ => panic!("invalid event {:?}", value),
@@ -356,6 +364,15 @@ fn handle_packet(
                 println!("planted OK");
             } else {
                 println!("failed to plant");
+            }
+        },
+        ClientEvent::RequestChunk { x, y } => unsafe {
+            println!("received {} {}", x, y);
+            if !(x < 0 || x > core::WORLD_SIZE as i32 || y < 0 || y > core::WORLD_SIZE as i32) {
+                if core::world_table[y as usize][x as usize] != std::ptr::null_mut() {
+                    update_chunk_for_player(server, peer, (x as u8, y as u8));
+                    println!("request received {} {}", x, y);
+                }
             }
         },
         ClientEvent::Whatever => println!("whatever"),

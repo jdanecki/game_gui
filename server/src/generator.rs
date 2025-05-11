@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -5,7 +6,105 @@ use crate::core;
 use crate::SEED;
 use rand::prelude::*;
 
-const REGIONS_NUM: u32 = 1;
+const REGIONS_NUM: u32 = 1000;
+
+thread_local! {
+static WORLD: RefCell<World> = panic!("world not created yet");
+}
+
+#[no_mangle]
+pub extern "C" fn load_chunk(map_x: i32, map_y: i32) {
+    WORLD.with_borrow(|world| {
+        let region = world
+            .regions
+            .iter()
+            .min_by_key(|r| {
+                r.coords.distance_squared(&Coords {
+                    x: map_x as i32,
+                    y: map_y as i32,
+                })
+            })
+            .unwrap();
+        unsafe {
+            let mut chunk = Box::new(core::chunk::new(map_x, map_y));
+            for y in 0..core::CHUNK_SIZE as usize {
+                for x in 0..core::CHUNK_SIZE as usize {
+                    chunk.table[y][x] = core::tile {
+                        tile: region.terrain_type.id as i32,
+                    };
+                }
+            }
+            for (rock, num) in region.rocks_types.iter() {
+                // TODO remove +1 for each object
+                let prob = num * 10.0 + 1.0;
+                do_times(prob, || {
+                    chunk.add_object1(
+                        core::create_element(rock.id as i32) as *mut core::InventoryElement
+                    );
+                })
+            }
+            for (plant, num) in region.active_plants.iter() {
+                let prob = num / region.size as f32 + 1.0;
+                println!("plant {prob}");
+                do_times(prob, || {
+                    chunk.add_object1(
+                        core::create_plant(plant.id as i32) as *mut core::InventoryElement
+                    );
+                });
+            }
+            for (animal, num) in region.active_animals.iter() {
+                let prob = num / region.size as f32 + 1.0;
+                println!("animal {prob}");
+                do_times(prob, || {
+                    chunk.add_object1(
+                        core::create_animal(animal.id as i32) as *mut core::InventoryElement
+                    );
+                })
+            }
+            core::world_table[map_y as usize][map_x as usize] = Box::into_raw(chunk);
+        }
+    });
+}
+
+fn do_times<F>(prob: f32, mut f: F)
+where
+    F: FnMut() -> (),
+{
+    if prob < 1.0 {
+        if rand::random_bool(prob as f64) {
+            f();
+        }
+    } else {
+        for _ in 0..(prob * 2.0) as u32 {
+            if rand::random_bool(0.5) {
+                f();
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+struct World {
+    // terrains: Vec<Rc<TerrainType>>, maybe it will be useful in the future
+    plants: Vec<Rc<PlantType>>,
+    animals: Vec<Rc<AnimalType>>,
+    regions: Vec<Region>,
+}
+
+impl World {
+    fn new() -> World {
+        let terrains = create_terrains();
+        let plants = create_plants(&terrains);
+        let animals = create_animals(&plants);
+        let regions = create_regions(&terrains, &plants, &animals);
+        World {
+            // terrains,
+            plants,
+            animals,
+            regions,
+        }
+    }
+}
 
 pub fn generate() {
     unsafe {
@@ -14,20 +113,17 @@ pub fn generate() {
         core::srand(SEED as u32);
         println!("{}", core::rand());
         core::init_elements();
-        core::generator();
+        //core::generator();
     }
-    let terrains = create_terrains();
-    let mut plants = create_plants(&terrains);
-    let mut animals = create_animals(&plants);
-    let mut regions = create_regions(&terrains, &plants, &animals);
+    let mut world = World::new();
 
-    println!("{:#?}", plants);
-    println!("{:#?}", animals);
-    println!("{:#?}", regions[0]);
-    simulate(&mut regions, &mut plants, &mut animals);
-    println!("{:#?}", regions[0]);
+    println!("{:#?}", world.plants);
+    println!("{:#?}", world.animals);
+    println!("{:#?}", world.regions[0]);
+    simulate(&mut world.regions, &mut world.plants, &mut world.animals);
+    println!("{:#?}", world.regions[0]);
     for _ in 0..1000 {
-        simulate(&mut regions, &mut plants, &mut animals);
+        simulate(&mut world.regions, &mut world.plants, &mut world.animals);
         // for r in regions.iter() {
         //     print!(
         //         "[{}] {:7.2} {:7.2} ",
@@ -45,7 +141,10 @@ pub fn generate() {
         // println!("");
     }
     //    simulate(&mut regions);
-    println!("{:#?}", regions[0]);
+    println!("{:#?}", world.regions[0]);
+
+    WORLD.set(world);
+    load_chunk(128, 128);
 }
 
 fn simulate(
@@ -58,8 +157,8 @@ fn simulate(
             *num += *num * plant.growth_speed as f32 * plant.possible_ground[&*r.terrain_type];
         }
 
-        let occupied_space: f32 = r.active_plants.iter().map(|(k, v)| k.size as f32 * v).sum();
-        let sun_amount = r.size as f32; //(r.size * core::CHUNK_SIZE * core::CHUNK_SIZE) as f32;
+        let occupied_space: f32 = (r.size as i32 - r.free_space()) as f32;
+        let sun_amount = (r.size * core::CHUNK_SIZE * core::CHUNK_SIZE) as f32;
         let mut plants_to_remove = vec![];
         if occupied_space > sun_amount {
             for (plant, num) in r.active_plants.iter_mut() {
@@ -121,7 +220,7 @@ fn simulate(
         }
         for (animal, num) in changes {
             if r.active_animals.contains_key(&animal) {
-                if (r.active_animals[&animal] + num).abs() < 0.01 {
+                if r.active_animals[&animal] + num < 0.01 {
                     r.active_animals.remove(&animal);
                 } else {
                     *r.active_animals.get_mut(&animal).unwrap() += num;
@@ -160,6 +259,19 @@ fn simulate(
                 // animals.push(new_animal);
             }
         }
+
+        /*for (_, num) in r.active_plants.iter() {
+            if *num == std::f32::NAN || *num == f32::INFINITY {
+                println!("{:#?}", r);
+            }
+        }
+
+        for (_, num) in r.active_animals.iter() {
+            if *num == std::f32::NAN || *num == f32::INFINITY {
+                println!("{:#?}", r);
+            }
+        }*/
+
         // if rand::random_bool(0.01) {
         //     let new_plant = Rc::new(PlantType::new(
         //         plants.len() as u32,
@@ -175,8 +287,8 @@ fn simulate(
 }
 
 fn create_terrains() -> Vec<Rc<TerrainType>> {
-    let mut terrains = Vec::<Rc<TerrainType>>::with_capacity(REGIONS_NUM as usize);
-    for i in 0..REGIONS_NUM {
+    let mut terrains = Vec::<Rc<TerrainType>>::with_capacity(core::BASE_ELEMENTS as usize);
+    for i in 0..core::BASE_ELEMENTS {
         terrains.push(Rc::new(TerrainType::new(i)));
     }
     terrains
@@ -210,7 +322,8 @@ fn create_regions(
 
     for i in 0..REGIONS_NUM as usize {
         let r = Region::new(
-            Rc::clone(&terrains[i]),
+            Rc::clone(&terrains[i % core::BASE_ELEMENTS as usize]),
+            terrains,
             plants,
             animals,
             centers[i].x as u32,
@@ -296,7 +409,7 @@ impl PlantType {
             id,
             possible_ground,
             size: rand::random_range(1..3),
-            growth_speed: rand::random_range(0.05..0.5),
+            growth_speed: rand::random_range(0.1..0.4),
         }
     }
 }
@@ -413,6 +526,7 @@ impl std::hash::Hash for AnimalType {
 struct Region {
     pub terrain_type: Rc<TerrainType>,
     //pub liquid_type: u32,
+    pub rocks_types: HashMap<Rc<TerrainType>, f32>,
     pub size: u32,
     pub coords: Coords,
     pub active_plants: HashMap<Rc<PlantType>, f32>,
@@ -422,6 +536,7 @@ struct Region {
 impl Region {
     pub fn new(
         terrain_type: Rc<TerrainType>,
+        rocks: &Vec<Rc<TerrainType>>,
         plants: &Vec<Rc<PlantType>>,
         animals: &Vec<Rc<AnimalType>>,
         x: u32,
@@ -452,23 +567,29 @@ impl Region {
                 active_animals.insert(Rc::clone(animal), 5.0);
             }
         }
+        let n = rand::random_range(3..10);
+        let mut rocks_types = HashMap::with_capacity(n);
+        for r in rocks.choose_multiple(&mut rand::rng(), n) {
+            rocks_types.insert(Rc::clone(r), rand::random_range(0.1..1.0));
+        }
         Region {
             terrain_type,
             //liquid_type: 0,
+            rocks_types,
             size,
             coords: Coords::new(x as i32, y as i32),
             active_plants,
             active_animals,
         }
     }
-    pub fn free_space(&self) -> u32 {
-        let free = self.size
+    pub fn free_space(&self) -> i32 {
+        let free = (self.size * core::CHUNK_SIZE * core::CHUNK_SIZE) as i32
             - self
                 .active_plants
                 .iter()
                 .map(|(plant, num)| plant.size as f32 * num)
-                .sum::<f32>() as u32;
-        free
+                .sum::<f32>() as i32;
+        free as i32
     }
 }
 

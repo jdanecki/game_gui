@@ -452,3 +452,8 @@ Plant::Plant(BasePlant * b)
     init(b);
 }
 
+BaseElement* get_base_element(int id)
+{
+    BaseTable* table = (BaseTable*)base_list->head;
+    return (BaseElement*)table->get(id);
+}

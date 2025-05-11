@@ -174,36 +174,23 @@ void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 */
 }
 
-char load_chunk(int x, int y)
-{
-    // FIXME when more chunks enabled
-    if (x != 128)
-        return 0;
-    if (y != 128)
-        return 0;
-
-    if (x >= 0 && x < WORLD_SIZE && y >= 0 && y < WORLD_SIZE)
-    {
-        if (world_table[y][x] == NULL)
-        {
-            chunk * c = new chunk(x, y);
-            printf("load_chunk: %d %d\n", x, y);
-            generate_chunk(c, x, y);
-            world_table[y][x] = c;
-        }
-        return 1;
-    }
-    return 0;
-}
-
 void update()
 {
-    // TODO update more chunks
-    ListElement * el = world_table[128][128]->beings.head;
-    while (el)
+    // TODO maybe in the future make it smarter
+    for (int y = 0; y < WORLD_SIZE; y++)
     {
-        el->el->tick();
-        el = el->next;
+        for (int x = 0; x < WORLD_SIZE; x++)
+        {
+            chunk* c = world_table[y][x];
+            if (!c)
+                continue;
+            ListElement * el = world_table[y][x]->beings.head;
+            while (el)
+            {
+                el->el->tick();
+                el = el->next;
+            }
+        }
     }
     // TODO kill animals
     /*            if (!a->alive)

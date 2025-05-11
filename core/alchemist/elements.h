@@ -724,10 +724,12 @@ class Plant : public Being
 #define ING_ELEMENTS 6
 #define PROD_ELEMENTS 3
 
-#define BASE_ANIMALS 2
-#define BASE_PLANTS 6
+#define BASE_ANIMALS 40
+#define BASE_PLANTS 30
 
 void init_elements();
 void show_base_table(Class_id id, bool details);
+
+BaseElement* get_base_element(int id);
 
 #endif
