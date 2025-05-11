@@ -13,3 +13,10 @@
 * new action: look at item -> show properties
 * emotions: anger, fear, disgust, joy
 
+* Generation
+* Unique items (one of a kind)
+    - Duplicable by some magic item
+    - Requires X of Y to duplicate
+    - Rare
+* Duplicator for above
+    - Rare
