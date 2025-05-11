@@ -26,6 +26,7 @@ pub extern "C" fn load_chunk(map_x: i32, map_y: i32) {
             })
             .unwrap();
         unsafe {
+            println!("{:#?}", region);
             let mut chunk = Box::new(core::chunk::new(map_x, map_y));
             for y in 0..core::CHUNK_SIZE as usize {
                 for x in 0..core::CHUNK_SIZE as usize {
@@ -122,7 +123,7 @@ pub fn generate() {
     println!("{:#?}", world.regions[0]);
     simulate(&mut world.regions, &mut world.plants, &mut world.animals);
     println!("{:#?}", world.regions[0]);
-    for _ in 0..1000 {
+    for _ in 0..100 {
         simulate(&mut world.regions, &mut world.plants, &mut world.animals);
         // for r in regions.iter() {
         //     print!(
@@ -141,7 +142,7 @@ pub fn generate() {
         // println!("");
     }
     //    simulate(&mut regions);
-    println!("{:#?}", world.regions[0]);
+    println!("{:#?}", world.regions);
 
     WORLD.set(world);
     load_chunk(128, 128);
@@ -157,7 +158,8 @@ fn simulate(
             *num += *num * plant.growth_speed as f32 * plant.possible_ground[&*r.terrain_type];
         }
 
-        let occupied_space: f32 = (r.size as i32 - r.free_space()) as f32;
+        //let occupied_space: f32 = (r.size as i32 - r.free_space()) as f32;
+        let occupied_space = r.occupied_space() as f32;
         let sun_amount = (r.size * core::CHUNK_SIZE * core::CHUNK_SIZE) as f32;
         let mut plants_to_remove = vec![];
         if occupied_space > sun_amount {
@@ -272,17 +274,33 @@ fn simulate(
             }
         }*/
 
-        // if rand::random_bool(0.01) {
-        //     let new_plant = Rc::new(PlantType::new(
-        //         plants.len() as u32,
-        //         &vec![Rc::clone(&r.terrain_type)],
-        //     ));
-        //     plants.push(Rc::clone(&new_plant));
-        //     r.active_plants.insert(
-        //         Rc::clone(&new_plant),
-        //         r.free_space().min(r.size / 10) as f32,
-        //     );
-        // }
+        if rand::random_bool(0.01) {
+            if let Some(new_plant) = plants
+                .iter()
+                .filter(|plant| plant.possible_ground.contains_key(&r.terrain_type))
+                .choose(&mut rand::rng())
+            {
+                r.active_plants.insert(
+                    Rc::clone(new_plant),
+                    r.free_space().min((r.total_size() / 10) as i32) as f32,
+                );
+            } else {
+                println!("gowno {:#?}", r);
+            }
+            //let new_plant = Rc::clone()
+        }
+
+        if rand::random_bool(0.001) {
+            let new_plant = Rc::new(PlantType::new(
+                plants.len() as u32,
+                &vec![Rc::clone(&r.terrain_type)],
+            ));
+            plants.push(Rc::clone(&new_plant));
+            r.active_plants.insert(
+                Rc::clone(&new_plant),
+                r.free_space().min((r.total_size() / 10) as i32) as f32,
+            );
+        }
     }
 }
 
@@ -396,7 +414,7 @@ struct PlantType {
 
 impl PlantType {
     fn new(id: u32, terrains: &Vec<Rc<TerrainType>>) -> PlantType {
-        let n = rand::random_range(1..terrains.len() + 1);
+        let n = rand::random_range(terrains.len() / 2..terrains.len() + 1);
         let mut possible_ground = HashMap::new();
         possible_ground.insert(Rc::clone(terrains.choose(&mut rand::rng()).unwrap()), 1.0);
         for _ in 1..n {
@@ -583,13 +601,19 @@ impl Region {
         }
     }
     pub fn free_space(&self) -> i32 {
-        let free = (self.size * core::CHUNK_SIZE * core::CHUNK_SIZE) as i32
-            - self
-                .active_plants
-                .iter()
-                .map(|(plant, num)| plant.size as f32 * num)
-                .sum::<f32>() as i32;
+        let free = (self.size * core::CHUNK_SIZE * core::CHUNK_SIZE) as i32 - self.occupied_space();
         free as i32
+    }
+    pub fn occupied_space(&self) -> i32 {
+        let occupied = self
+            .active_plants
+            .iter()
+            .map(|(plant, num)| plant.size as f32 * num)
+            .sum::<f32>() as i32;
+        occupied
+    }
+    pub fn total_size(&self) -> u32 {
+        self.size * core::CHUNK_SIZE * core::CHUNK_SIZE
     }
 }
 

@@ -21,7 +21,7 @@ AnimalServer::AnimalServer()
     dst_loc_y = rand() % CHUNK_SIZE;
 }
 
-AnimalServer::AnimalServer(int id) : Animal(id)
+AnimalServer::AnimalServer(int id) : Animal(id % BASE_ANIMALS)
 {
     delay_for_move = max_delay_move; // 600 * 100ms -> 1min
     dst_loc_x = rand() % CHUNK_SIZE;
@@ -91,7 +91,7 @@ PlantServer::PlantServer()
     delay_for_grow = max_delay_grow;
 }
 
-PlantServer::PlantServer(int id) : Plant(id)
+PlantServer::PlantServer(int id) : Plant(id % BASE_PLANTS)
 {
     delay_for_grow = max_delay_grow;
 }
