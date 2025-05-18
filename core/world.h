@@ -11,7 +11,7 @@ extern chunk * world_table[WORLD_SIZE][WORLD_SIZE];
 
 void remove_from_chunks(InventoryElement * object);
 
-enum game_tiles get_tile_at(int chunk_x, int chunk_y, int x, int y);
+int get_tile_at(int chunk_x, int chunk_y, int x, int y);
 enum game_tiles get_tile_at_ppos(Player * player);
 
 Being ** get_being_at_ppos(Player * player);

@@ -31,14 +31,8 @@ class AnimalServer : public Animal
   public:
     void move();
     bool tick() override;
-    AnimalServer()
-    {
-        delay_for_move = max_delay_move; // 600 * 100ms -> 1min
-        dst_loc_x = rand() % CHUNK_SIZE;
-        dst_loc_y = rand() % CHUNK_SIZE;
-        type = (enum animal_types)(rand() % ANIMALS);
-        printf("type=%d\n", type);
-    }
+    AnimalServer();
+    AnimalServer(int id);
 };
 
 class PlantServer : public Plant
@@ -50,6 +44,11 @@ class PlantServer : public Plant
     bool grow() override;
     // bool tick() override;
     PlantServer();
+    PlantServer(int id);
 };
+
+AnimalServer* create_animal(int id);
+PlantServer* create_plant(int id);
+Element* create_element(int id);
 
 #endif

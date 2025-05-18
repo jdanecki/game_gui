@@ -4,6 +4,7 @@
 #include "names.h"
 #include <cstdio>
 #include <cstdlib>
+#include <stdint.h>
 
 class Property
 {
@@ -23,7 +24,8 @@ class Property
 
 class Edible
 { // FIXME should be changed to being property
-  // when more npc's are added
+    // when more npc's are added
+    // can be eaten by humans or animals
   public:
     Property * irrigation;
     Property * poison;
@@ -49,7 +51,7 @@ class Solid
 
 enum Form
 {
-    Form_none = 0,
+    Form_unknown = 0,
     Form_solid = 1,
     Form_liquid,
     Form_gas,
@@ -59,55 +61,52 @@ extern const char * Form_name[];
 
 enum Class_id
 {
-    Class_Element = 1,
+    Class_Unknown = 0,
+    Class_BaseElement,
+    Class_BaseAnimal,
+    Class_BasePlant,
+
+    Class_Element,
     Class_Ingredient,
     Class_Product,
+
+    Class_Being,
     Class_Plant,
     Class_Animal,
+    Class_Player,
     Class_Npc,
 };
 
 extern const char * Class_names[];
 
-enum Item_id
-{
-    // SOLID START HERE
-    ID_STONE,
-    ID_LOG,
-    ID_LOG1,
-    ID_LOG2,
-    ID_SAND,
-    ID_STICK,
-    ID_STRAWBERRY_SEEDS,
-    ID_ACORN,
-    ID_ACORN1,
-    ID_ACORN2,
-    ID_PUMPKIN_SEEDS,
-    ID_WATERMELON_SEEDS,
-    // LIQUID START HERE
-    ID_WATER,
-    // GAS START HERE
-    ID_HELIUM,
-    // FOOD START HERE
-    ID_PUMPKIN,
-    ID_WATERMELON,
-    ID_CHERRY,
-    ID_STRAWBERRY,
-    ID_RAW_HAM
-};
-
-class BaseElement
+class Base
 {
   public:
     const char * name;
+    int id; // index in BaseTable
+    Class_id c_id;
+    Base(int index, Class_id c)
+    {
+        id = index;
+        name = nullptr;
+        c_id = c;
+    }
+    virtual void show(bool details = true)
+    {
+        printf("Base name=%s id=%d \n", name, id);
+    }
+};
 
-    int id; // texture id
+class BaseElement : public Base
+{
+  public:
     Property * density;
-    Edible * edible;
+    Edible * edible; // not known by default
     Form form;
     Solid * solid;
+    struct {int r; int g; int b;} color;
 
-    BaseElement(int index);
+    BaseElement(Form f, int index);
     ~BaseElement()
     {
         delete density;
@@ -149,18 +148,18 @@ class InventoryElement
     const char * name;
 
   public:
+    bool crafted;
     ItemLocation location;
     size_t uid;
     Class_id c_id;
     Form req_form;
 
-    bool known;
     InventoryElement()
     {
-        req_form = Form_none;
-        known = true;
+        req_form = Form_unknown;
         uid = (size_t)this;
         name = nullptr;
+        crafted = false;
     }
     virtual bool use(int map_x, int map_y, int x, int y)
     {
@@ -193,14 +192,21 @@ class InventoryElement
     {
         return Form_name[req_form];
     }
-    virtual int get_id();
+    virtual int get_id()
+    {
+        return -1;
+    }
+    virtual Class_id get_base_cid()
+    {
+        return Class_Unknown;
+    }
     virtual Edible * get_edible()
     {
-        return NULL;
+        return nullptr;
     }
     virtual BaseElement * get_base()
     {
-        return NULL;
+        return nullptr;
     }
 #ifndef CORE_FOR_CLIENT
 
@@ -222,9 +228,6 @@ class InventoryElement
     {
         return uid;
     }
-    virtual unsigned int get_packet_size();
-    virtual void to_bytes(unsigned char * buf);
-
     virtual char * get_description()
     {
         char * buf = new char[128];
@@ -281,6 +284,7 @@ class Object : public InventoryElement
 class Element : public InventoryElement
 {
     BaseElement * base;
+    void init(BaseElement * b);
 
   public:
     Property * sharpness;
@@ -304,7 +308,7 @@ class Element : public InventoryElement
         *count = 7;
         return props;
     }
-    virtual BaseElement * get_base()
+    BaseElement * get_base()
     {
         return base;
     }
@@ -314,8 +318,9 @@ class Element : public InventoryElement
     }
 
     void show(bool details = true);
-
+    Element();
     Element(BaseElement * b);
+    Element(int i);
     ~Element()
     {
         delete sharpness;
@@ -332,7 +337,7 @@ class Element : public InventoryElement
     }
     const char * get_name()
     {
-        return known ? base->name : "unknown";
+        return base->name;
     }
     const char * get_form_name()
     {
@@ -342,8 +347,10 @@ class Element : public InventoryElement
     {
         return base->id;
     }
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
+    Class_id get_base_cid()
+    {
+        return base->c_id;
+    }
 };
 
 enum Ingredient_id
@@ -354,6 +361,9 @@ enum Ingredient_id
     ING_KNIFE_BLADE,
     ING_KNIFE_HANDLE,
 
+    ING_PICKAXE_BLADE,
+    ING_PICKAXE_HANDLE,
+
     ING_NUM,
 
 };
@@ -361,13 +371,13 @@ enum Ingredient_id
 enum Product_id
 {
     PROD_AXE,
-    PROD_KNIFE
+    PROD_KNIFE,
+    PROD_PICKAXE,
 };
 
 extern const char * Ingredient_name[];
 extern const char * Product_name[];
 extern const char * items_name[];
-// extern const char * food_name[];
 
 class Ingredient : public InventoryElement
 {
@@ -415,8 +425,7 @@ class Ingredient : public InventoryElement
         delete usage;
     }
     void show(bool details = true);
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
+
     char * get_description()
     {
         char * buf = new char[128];
@@ -481,23 +490,6 @@ class Product : public InventoryElement
     }
 };
 
-enum being_types
-{
-};
-#define BEINGS 0
-
-enum plant_types
-{
-    PLANTID_strawberry,
-    PLANTID_tree,
-    PLANTID_tree1,
-    PLANTID_tree2,
-    PLANTID_pumpkin,
-    PLANTID_watermelon,
-};
-
-#define PLANTS 6
-
 class Being : public InventoryElement
 {
     int * padding; // FIXME
@@ -509,7 +501,6 @@ class Being : public InventoryElement
 
     bool alive;
     bool can_talk;
-    enum being_types type;
 
     virtual bool grow()
     {
@@ -530,12 +521,11 @@ class Being : public InventoryElement
     Being()
     {
         alive = true;
-
+        c_id = Class_Being;
         max_age = new Property("max age", 1 + rand() % 36000); // 100 years
         age = new Property("age", rand() % max_age->value);
 
-        name = create_name(5);
-        printf("new Being: name=%s uid=%lx\n", name, uid);
+        name = nullptr;
         req_form = Form_solid;
         can_talk = false;
     }
@@ -559,7 +549,7 @@ class Being : public InventoryElement
     }
     void show(bool details = true)
     {
-        printf("Being %s alive=%d uid=%lx\n", name, alive, uid);
+        printf("%s %s alive=%d uid=%lx\n", Class_names[c_id], name, alive, uid);
         age->show();
         max_age->show();
     }
@@ -569,43 +559,64 @@ class Being : public InventoryElement
     }
 };
 
-enum animal_types
+class BaseAnimal : public Base
 {
-    ANIMAL_ID_pig,
-    ANIMAL_ID_boar,
-};
+  public:
+    bool carnivorous; // mięsożerny
+    bool swimming;
+    bool flying;
 
-#define ANIMALS 2
+    BaseAnimal(int index) : Base(index, Class_BaseAnimal)
+    {
+        id = index;
+        carnivorous = rand() % 2;
+        swimming = rand() % 2;
+        flying = rand() % 2;
+        name = create_name(10);
+    }
+    void show(bool details = true)
+    {
+        printf("BaseAnimal:\n");
+        printf("carnivorous=%d\n", carnivorous);
+        printf("swimming=%d\n", swimming);
+        printf("flying=%d\n", flying);
+        if (details)
+            Base::show(details);
+    }
+};
 
 class Animal : public Being
 {
-    int padding; // FIXME
+    // int padding; // FIXME
+    BaseAnimal * base;
+    void init(BaseAnimal * b);
+
   public:
     // shared with client
-    enum animal_types type;
 
+    Animal(BaseAnimal * b);
     Animal();
+    Animal(int i);
     void show(bool details = true)
     {
         printf("Animal %s alive=%d uid=%lx\n", name, alive, uid);
         age->show();
         max_age->show();
+        if (details)
+            base->show(details);
     }
     /* bool tick()
      {
          return grow();
      }*/
-};
-
-class Npc : public Being
-{
-  public:
-    Npc();
-    void show(bool details = true)
+    int get_id() override
     {
-        printf("Npc %s alive=%d\n", name, alive);
-        age->show();
-        max_age->show();
+        return base->id;
+    }
+
+    Class_id get_base_cid()
+    {
+        return base->c_id;
     }
 };
 
@@ -620,9 +631,32 @@ enum Plant_phase
 
 extern const char * Plant_phase_name[];
 
+class BasePlant : public Base
+{
+  public:
+    bool flowers;
+    bool leaves;
+    BasePlant(int index) : Base(index, Class_BasePlant)
+    {
+        flowers = rand() % 2;
+        leaves = rand() % 2;
+        name = create_name(15);
+    }
+    void show(bool details = true)
+    {
+        printf("BasePlant:\n");
+        printf("flowers=%d\n", flowers);
+        printf("leaves=%d\n", leaves);
+        if (details)
+            Base::show(details);
+    }
+};
+
 class Plant : public Being
 {
-    int padding; // FIXME
+    //   int padding; // FIXME
+    BasePlant * base;
+    void init(BasePlant * b);
 
   protected:
     unsigned int seedling_time;
@@ -634,13 +668,13 @@ class Plant : public Being
     int water;
 
     // shared with client
-    enum plant_types type;
+
     Plant_phase phase;
     bool grown;
 
+    Plant(BasePlant * b);
     Plant();
-    unsigned int get_packet_size() override;
-    void to_bytes(unsigned char * buf) override;
+    Plant(int i);
     void show(bool details = true)
     {
         printf("Plant -> %d name=%s grown=%d uid=%lx\n", c_id, name, grown, uid);
@@ -654,32 +688,48 @@ class Plant : public Being
     void sow()
     {
         planted = 1;
+        change_phase(Plant_seedling);
     }
     void change_phase(Plant_phase p)
     {
         if (phase != p)
         {
+            switch (phase)
+            {
+                case Plant_seedling:
+                    age->value = 1;
+                    break;
+                case Plant_seed:
+                    age->value = 0;
+                    break;
+            }
             printf("%s changing phase: %s -> %s age=%u/%u\n", name, Plant_phase_name[phase], Plant_phase_name[p], age->value, max_age->value);
         }
         phase = p;
     }
+    int get_id() override
+    {
+        return base->id;
+    }
+    Class_id get_base_cid()
+    {
+        return base->c_id;
+    }
 };
 
-#define SOLID_ELEMENTS 12
-#define FOOD_ELEMENTS 5
+#define SOLID_ELEMENTS 17
 #define LIQUID_ELEMENTS 1
 #define GAS_ELEMENTS 1
+#define BASE_ELEMENTS (SOLID_ELEMENTS + LIQUID_ELEMENTS + GAS_ELEMENTS)
+#define ING_ELEMENTS 6
+#define PROD_ELEMENTS 3
 
-#define NOT_FOOD_ELEMENTS (SOLID_ELEMENTS + LIQUID_ELEMENTS + GAS_ELEMENTS)
-
-#define BASE_ELEMENTS (SOLID_ELEMENTS + FOOD_ELEMENTS + LIQUID_ELEMENTS + GAS_ELEMENTS)
-
-#define ING_ELEMENTS 4
-#define PROD_ELEMENTS 2
-
-extern BaseElement * base_elements[BASE_ELEMENTS];
+#define BASE_ANIMALS 40
+#define BASE_PLANTS 30
 
 void init_elements();
-void show_base_elements(bool details);
+void show_base_table(Class_id id, bool details);
+
+BaseElement* get_base_element(int id);
 
 #endif

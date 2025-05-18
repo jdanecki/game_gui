@@ -65,6 +65,12 @@ void Menu::add(const char * e, enum menu_actions a, SDL_Texture * t, int index, 
     entries[index] = new Menu_entry(e, a, item_id, nullptr, t);
     added++;
 }
+
+void Menu::add(const char * e, enum menu_actions a, Sentence * s, InventoryElement * p_el)
+{
+    entries[added] = new Menu_entry(e, a, s, p_el);
+    added++;
+}
 void Menu::add(const char * e, enum menu_actions a, int val, InventoryElement * p_el)
 {
     entries[added] = new Menu_entry(e, a, val, p_el, nullptr);
@@ -90,6 +96,11 @@ int Menu::get_val(int v)
 int Menu::get_val()
 {
     return entries[menu_pos]->value;
+}
+
+Sentence * Menu::get_sentence()
+{
+    return entries[menu_pos]->sentence;
 }
 
 InventoryElement * Menu::get_el()
@@ -230,6 +241,25 @@ Menu_entry::Menu_entry(const char * e, enum menu_actions a, int v, InventoryElem
     }
 }
 
+Menu_entry::Menu_entry(const char * e, menu_actions a, Sentence * s, InventoryElement * _el)
+{
+    texture = nullptr;
+    action = a;
+    el = _el;
+    sentence = s;
+    if (el)
+    {
+        entry = new char[64];
+        sprintf(entry, "%s item?", e);
+        dynamic_entry = true;
+    }
+    else
+    {
+        entry = (char *)e;
+        dynamic_entry = false;
+    }
+}
+
 Menu_entry::~Menu_entry()
 {
     if (dynamic_entry)
@@ -336,6 +366,7 @@ Menu * create_inv_category_menu(enum Form f)
     return menu_inventory_categories2;
 }
 // FIXME
+#if 0
 void create_inv_menu(Item_id id)
 {
     printf("szukam %d\n", id);
@@ -361,7 +392,7 @@ void create_inv_menu(Item_id id)
     }
     current_menu = nullptr;
 }
-
+#endif
 void Menu::go_down()
 {
     menu_pos++;
@@ -513,7 +544,7 @@ bool craft2elements(Product_id what)
 
 int craft(menu_actions a)
 {
-    InventoryElement * el = NULL;
+    //    InventoryElement * el = NULL;
 
     switch (a)
     {
@@ -534,13 +565,14 @@ int craft(menu_actions a)
         case MENU_CRAFT_AXE:
             if (craft2elements(PROD_AXE))
                 goto sent;
+            break;
+        default:
+            break;
     }
-    status_code = 0;
     return 0;
 
 sent:
     sprintf(status_line, "Starting crafting");
-    status_code = 1;
     return 1;
 }
 
@@ -555,7 +587,7 @@ int Menu::interact()
             // FIXME - doesn't work for beings
         case MENU_CATEGORIE:
         { // FIXME don't use elements'id but c_id and type
-            create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
+            // create_inv_menu((Item_id)(menu_inventory_categories2->get_val()));
             return 0;
         }
 
@@ -685,9 +717,11 @@ int Menu::interact()
 
         case MENU_NPC:
             return npc();
-            break;
+
         case MENU_NPC_SAY:
-            npc_say((Npc_say)menu_dialog->get_val());
+            return npc_say(menu_dialog->get_sentence());
+
+        default:
             return 0;
     }
     return 1;

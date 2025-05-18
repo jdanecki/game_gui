@@ -28,10 +28,9 @@ extern SDL_Texture * tiles_textures[TILE_MAX_NUM];
 extern SDL_Texture * items_textures[BASE_ELEMENTS];
 extern SDL_Texture * ing_textures[ING_ELEMENTS];
 extern SDL_Texture * prod_textures[PROD_ELEMENTS];
-extern SDL_Texture * being_textures[BEINGS];
-extern SDL_Texture * animal_textures[ANIMALS];
-extern SDL_Texture * plant_textures[PLANTS];
-extern SDL_Texture * grown_plant_textures[PLANTS];
+extern SDL_Texture * animal_textures[BASE_ANIMALS];
+extern SDL_Texture * plant_textures[BASE_PLANTS];
+
 extern SDL_Texture * object_textures[TEXTURE_wall_max];
 extern SDL_Texture * npc_texture;
 extern SDL_Texture * up_mask;

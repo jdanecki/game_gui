@@ -26,16 +26,21 @@ void PlayerServer::move(int dx, int dy)
         {
             new_map_x += dx;
             new_x += -CHUNK_SIZE * dx;
-            if (!load_chunk(new_map_x, new_map_y))
+            if (!(new_map_x >= 0 && new_map_x < WORLD_SIZE && new_map_y >= 0 && new_map_y < WORLD_SIZE))
                 return;
+            if (!world_table[new_map_y][new_map_x])
+                load_chunk(new_map_x, new_map_y);
         }
 
         if (new_y < 0 || new_y >= CHUNK_SIZE)
         {
             new_map_y += dy;
             new_y += -CHUNK_SIZE * dy;
-            if (!load_chunk(new_map_x, new_map_y))
+
+            if (!(new_map_x >= 0 && new_map_x < WORLD_SIZE && new_map_y >= 0 && new_map_y < WORLD_SIZE))
                 return;
+            if (!world_table[new_map_y][new_map_x])
+                load_chunk(new_map_x, new_map_y);
         }
     }
     check_and_move(new_map_x, new_map_y, new_x, new_y);
@@ -51,6 +56,8 @@ bool PlayerServer::use_item_on_object(InventoryElement * item, InventoryElement 
 
 bool PlayerServer::plant_with_seed(InventoryElement * el, int map_x, int map_y, int x, int y)
 {
+    // FIXME
+#if 0
     if (get_tile_at_ppos(this) == TILE_GRASS || get_tile_at_ppos(this) == TILE_DIRT)
     {
         int id = el->get_id();
@@ -102,6 +109,7 @@ bool PlayerServer::plant_with_seed(InventoryElement * el, int map_x, int map_y, 
             return true;
         }
     }
+#endif
     return false;
 }
 

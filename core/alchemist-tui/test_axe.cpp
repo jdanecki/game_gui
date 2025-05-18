@@ -3,8 +3,8 @@
 
 Axe * test_axe()
 {
-    Element * element1 = new Element(base_elements[rand() % BASE_ELEMENTS]);
-    Element * element2 = new Element(base_elements[rand() % BASE_ELEMENTS]);
+    Element * element1 = new Element();
+    Element * element2 = new Element();
     printf("element1 = %s\n", element1->get_name());
     printf("element2 = %s\n", element2->get_name());
 

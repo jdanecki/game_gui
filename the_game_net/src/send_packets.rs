@@ -62,6 +62,16 @@ pub extern "C" fn send_packet_craft(
             println!("extended");
         }
     }
-  //  println!("{:?}", buf);
+    //  println!("{:?}", buf);
+    client.send(&buf);
+}
+
+#[no_mangle]
+pub extern "C" fn send_packet_request_chunk(client: &NetClient, x: i32, y: i32) {
+    let mut buf = vec![core::PACKET_REQUEST_CHUNK];
+    buf.extend_from_slice(&x.to_le_bytes());
+    buf.extend_from_slice(&y.to_le_bytes());
+    println!("request {} {}", x, y);
+
     client.send(&buf);
 }

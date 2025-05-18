@@ -1,16 +1,9 @@
-#ifndef NPC_H
-#define NPC_H
+#ifndef SDL_NPC_H
+#define SDL_NPC_H
+#include "../core/alchemist/npc_talk.h"
+#include "../core/npc.h"
 
 extern int npc();
-
-enum Npc_say
-{
-    NPC_Say_hello,
-    NPC_Say_how_do_you_do,
-    NPC_Ask_do_you_know,
-
-};
-
-extern void npc_say(enum Npc_say s);
-
+extern int npc_say(Sentence * s);
+extern Npc * current_npc;
 #endif // NPC_H

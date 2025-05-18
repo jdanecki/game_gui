@@ -2,16 +2,7 @@
 #include "networking.h"
 #include "world_server.h"
 
-void to_bytes_binding(InventoryElement * el, unsigned char * buf)
-{
-    el->to_bytes(buf);
-}
-
-unsigned int get_packet_size_binding(InventoryElement * el)
-{
-    return el->get_packet_size();
-}
-
+#ifndef CORE_TUI
 void destroy(InventoryElement * el)
 {
     notify_destroy(el->get_uid(), el->location);
@@ -20,6 +11,21 @@ void destroy(InventoryElement * el)
         world_table[el->location.data.chunk.map_y][el->location.data.chunk.map_x]->remove_object(el);
     }
     delete el;
+}
+#endif
+
+AnimalServer::AnimalServer()
+{
+    delay_for_move = max_delay_move; // 600 * 100ms -> 1min
+    dst_loc_x = rand() % CHUNK_SIZE;
+    dst_loc_y = rand() % CHUNK_SIZE;
+}
+
+AnimalServer::AnimalServer(int id) : Animal(id % BASE_ANIMALS)
+{
+    delay_for_move = max_delay_move; // 600 * 100ms -> 1min
+    dst_loc_x = rand() % CHUNK_SIZE;
+    dst_loc_y = rand() % CHUNK_SIZE;
 }
 
 void AnimalServer::move()
@@ -82,7 +88,11 @@ bool AnimalServer::tick()
 
 PlantServer::PlantServer()
 {
-    type = (enum plant_types)(rand() % PLANTS);
+    delay_for_grow = max_delay_grow;
+}
+
+PlantServer::PlantServer(int id) : Plant(id % BASE_PLANTS)
+{
     delay_for_grow = max_delay_grow;
 }
 
@@ -106,7 +116,9 @@ bool PlantServer::grow()
         {
             grown = true;
             change_phase(Plant_fruits);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -115,7 +127,9 @@ bool PlantServer::grow()
         if (phase != Plant_flowers)
         {
             change_phase(Plant_flowers);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -124,7 +138,9 @@ bool PlantServer::grow()
         if (phase != Plant_growing)
         {
             change_phase(Plant_growing);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -133,7 +149,9 @@ bool PlantServer::grow()
         if (phase != Plant_seedling)
         {
             change_phase(Plant_seedling);
+#ifndef CORE_TUI
             objects_to_update.add(this);
+#endif
         }
         return !grown;
     }
@@ -146,3 +164,17 @@ bool PlantServer::tick()
     Plant::tick();
     return true;
 }*/
+AnimalServer* create_animal(int id)
+{
+    return new AnimalServer(id);
+}
+
+PlantServer* create_plant(int id)
+{
+    return new PlantServer(id);
+}
+
+Element* create_element(int id)
+{
+    return new Element(id);
+}

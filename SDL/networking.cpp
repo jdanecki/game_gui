@@ -13,9 +13,11 @@
 extern Player * players[PLAYER_NUM];
 extern Player * player;
 
-InventoryElement * find_by_uid(size_t uid)
+InventoryElement * find_by_uid(size_t uid, int chunk_x, int chunk_y)
 {
-    ListElement * el = world_table[128][128]->objects.head;
+    if (!world_table[chunk_y][chunk_x])
+       return nullptr;
+    ListElement * el = world_table[chunk_y][chunk_x]->objects.head;
     while (el)
     {
         if (el->el->uid == uid)
@@ -51,6 +53,8 @@ InventoryElement * remove_from_location(ItemLocationLol location, size_t id)
         case ItemLocationLol::Tag::Chunk:
         {
             // printf("removed %ld from chunk %d %d\n", id, location.chunk.map_x, location.chunk.map_y);
+            if (!world_table[location.chunk.map_y][location.chunk.map_x])
+                return nullptr;
             el = world_table[location.chunk.map_y][location.chunk.map_x]->find_by_id(id);
             world_table[location.chunk.map_y][location.chunk.map_x]->remove_object(el);
             break;
@@ -60,7 +64,7 @@ InventoryElement * remove_from_location(ItemLocationLol location, size_t id)
             // printf("removed %ld from player %ld\n", id, location.player.id);
             el = players[location.player.id]->get_item_by_uid(id);
             players[location.player.id]->drop(el);
-            if (location.player.id == player->get_id())
+            if ((int)location.player.id == player->get_id())
             {
                 update_hotbar();
             }
@@ -99,8 +103,8 @@ InventoryElement * el_from_data(ObjectData data)
     {
         el->uid = data.inv_element.data.uid;
         el->location.type = LOCATION_CHUNK; //(ItemLocationType)data.inv_element.data.location.tag;
-        el->location.data.chunk.map_x = 128;
-        el->location.data.chunk.map_y = 128;
+        el->location.data.chunk.map_x = data.inv_element.data.location.chunk.map_x;
+        el->location.data.chunk.map_y = data.inv_element.data.location.chunk.map_y;
         el->location.data.chunk.x = data.inv_element.data.location.chunk.x;
         el->location.data.chunk.y = data.inv_element.data.location.chunk.y;
     }
@@ -122,15 +126,15 @@ extern "C"
             {
                 printf("%d, ", data[i]);
             }*/
-            Player * player = players[id];
-            player->map_x = map_x;
-            player->map_y = map_y;
+            Player * p = players[id];
+            p->map_x = map_x;
+            p->map_y = map_y;
 
             // FIXME when more chunks added
-            if (x != player->x)
-                player->going_right = player->x > x ? 0 : 1;
-            player->x = x;
-            player->y = y;
+            if (x != p->x)
+                p->going_right = p->x > x ? 0 : 1;
+            p->x = x;
+            p->y = y;
 
             // printf("updated player %ld: %d %d %d %d\n", id, player->map_x, player->map_y, player->x, player->y);
         }
@@ -162,7 +166,9 @@ extern "C"
         printf("seed: %ld\n", seed);
         srand(seed);
         init_elements();
+        init_sentences();
         printf("got id %ld\n", id);
+        print_status(1, "player %d connected", id);
     }
 
     void update_object(ObjectData data)
@@ -170,7 +176,7 @@ extern "C"
         size_t uid = data.inv_element.data.uid;
         Class_id c_id = data.inv_element.data.el_type;
 
-        InventoryElement * el = find_by_uid(data.inv_element.data.uid);
+        InventoryElement * el = find_by_uid(data.inv_element.data.uid, data.inv_element.data.location.chunk.map_x, data.inv_element.data.location.chunk.map_y);
 
         if (el && el->c_id == c_id)
         {
@@ -198,15 +204,17 @@ extern "C"
                     p->max_age->value = data.animal.data.max_age;
                     break;
                 }
+                default:
+                    break;
             }
             // printf("%s updated\n", el->get_name());
         }
         else
         {
-            if (el)
-                printf("bad data for update object %ld %d real %d\n", uid, c_id, el->c_id);
+            /*if (el)
+                print_status(1, "bad data for update object %ld %d real %d", uid, c_id, el->c_id);
             else
-                printf("non existing object for update object %ld %d\n", uid, c_id);
+                print_status(1, "non existing object for update object %ld %d", uid, c_id);*/
         }
     }
 
@@ -217,10 +225,9 @@ extern "C"
         ItemLocationLol & new_loc = data.new_;
 
         InventoryElement * el = remove_from_location(old_loc, id);
-
         if (!el)
         {
-            printf("not found item to remove %d %d\n", old_loc.chunk.map_x, old_loc.chunk.map_y);
+            //print_status(1, "not found item to remove %d %d", old_loc.chunk.map_x, old_loc.chunk.map_y);
             return;
         }
         switch (new_loc.tag)
@@ -242,7 +249,7 @@ extern "C"
             {
                 // printf("added %ld to player %ld\n", id, new_loc.player.id);
                 players[new_loc.player.id]->pickup(el);
-                if (new_loc.player.id == player->get_id())
+                if ((int)new_loc.player.id == player->get_id())
                 {
                     update_hotbar(); // FIXME - remove only one element
                 }
@@ -252,34 +259,23 @@ extern "C"
 
     void create_object(ObjectData data)
     {
-        int x = 128; // data.inv_element.data.location.chunk.x;
-        int y = 128; // data.inv_element.data.location.chunk.y;
+        int x = data.inv_element.data.location.chunk.map_x;
+        int y = data.inv_element.data.location.chunk.map_y;
         if (world_table[y][x])
         {
-            int x = 128;
-            int y = 128;
-            if (world_table[y][x])
+            InventoryElement * el = el_from_data(data);
+            if (el)
             {
-                int offset = 0;
-                // for (int i = 0; i < num; i++)
-                //{
-                //   if (offset + 30 > num)
-                //     break;
-                InventoryElement * el = el_from_data(data);
-                if (el)
-                {
-                    int item_x = el->location.data.chunk.x;
-                    int item_y = el->location.data.chunk.y;
-                    // el->get_posittion(&item_x,&item_y);
-                    world_table[y][x]->add_object(el, item_x, item_y);
-                    offset += el->get_packet_size();
-                }
-                //}
+                int item_x = el->location.data.chunk.x;
+                int item_y = el->location.data.chunk.y;
+                world_table[y][x]->add_object(el, item_x, item_y);
+
+                print_status(1, "created object: %s", el->get_name());
             }
-            else
-            {
-                printf("inexisting chunk\n");
-            }
+        }
+        else
+        {
+            print_status(1, "inexisting chunk");
         }
     }
 
@@ -288,16 +284,15 @@ extern "C"
         InventoryElement * el = remove_from_location(location, id);
         if (el)
         {
-            printf("delete %ld\n", id);
+            print_status(1, "delete %ld", id);
             delete el;
         }
         else
-            printf("deleting inexisting item %ld\n", id);
+            print_status(1, "deleting inexisting item %ld", id);
     }
 
     void failed_craft()
     {
-        printf("failed craft\n");
-        print_status("failed craft");
+        print_status(1, "failed craft");
     }
 }

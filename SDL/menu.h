@@ -1,7 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "../core/alchemist/elements.h"
+#include "../core/alchemist/npc_talk.h"
 #include "text.h"
 
 enum menu_actions
@@ -48,7 +48,9 @@ class Menu_entry
     enum menu_actions action;
     int value;
     InventoryElement * el;
+    Sentence * sentence;
     Menu_entry(const char * e, enum menu_actions a, int v, InventoryElement * _el, SDL_Texture * t);
+    Menu_entry(const char * e, enum menu_actions a, Sentence * s, InventoryElement * _el);
     ~Menu_entry();
 };
 
@@ -70,8 +72,10 @@ class Menu
     void add(const char * e, enum menu_actions a, int val, InventoryElement * p_el);
     void add(const char * e, enum menu_actions a, InventoryElement * p_el);
     void add(const char * e, enum menu_actions a, SDL_Texture * t, int index, int item_id);
+    void add(const char * e, enum menu_actions a, Sentence * s, InventoryElement * p_el);
     int get_val(int v);
     int get_val();
+    Sentence * get_sentence();
     InventoryElement * get_el();
     void show();
     void go_down();

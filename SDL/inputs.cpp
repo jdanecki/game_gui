@@ -42,7 +42,7 @@ void update_window_size()
     if (tile_size < 32)
         tile_size = 32;
 
-    SDL_SetWindowSize(main_window, (tile_size * CHUNK_SIZE) + PANEL_WINDOW, tile_size * CHUNK_SIZE + STATUS_LINE);
+    SDL_SetWindowSize(main_window, (tile_size * CHUNK_SIZE) + PANEL_WINDOW, tile_size * CHUNK_SIZE + STATUS_LINES);
     SDL_GetWindowSize(main_window, &window_width, &window_height);
 }
 
@@ -55,7 +55,6 @@ void key_pressed(int key)
     {
         case SDLK_v:
             sprintf(status_line, " ");
-            status_code = 1;
             break;
         case SDLK_t:
             player->hotbar[active_hotbar] = NULL;
@@ -199,7 +198,8 @@ void key_pressed(int key)
         case SDLK_F1:
         {
             InventoryElement * item = get_item_at_ppos(player);
-            item->show();
+            if (item)
+                item->show();
             break;
         }
         case SDLK_RETURN:
@@ -224,18 +224,15 @@ void mouse_pressed(SDL_MouseButtonEvent & event)
 
     SDL_GetMouseState(&x, &y);
 
-    int game_size;
     int tile_dungeon_size;
     int width = window_width - PANEL_WINDOW;
 
     if (width < window_height)
     {
-        game_size = width;
         tile_dungeon_size = width / (CHUNK_SIZE);
     }
     else
     {
-        game_size = window_height;
         tile_dungeon_size = window_height / (CHUNK_SIZE);
     }
 
@@ -272,7 +269,7 @@ void mouse_pressed(SDL_MouseButtonEvent & event)
 Uint64 handle_keyboard_state(const Uint8 * keys)
 {
     Uint64 current_time = SDL_GetTicks64();
-    int time_period = 0;
+    Uint64 time_period = 0;
     if (keys[SDL_SCANCODE_LSHIFT])
     {
         player->sneaking = 1;
@@ -325,7 +322,8 @@ Uint64 handle_keyboard_state(const Uint8 * keys)
     if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_A] ||
         keys[SDL_SCANCODE_LEFT])
     {
-        print_status("");
+        print_status(0, " ");
+        print_status(1, " ");
         last_frame_press = 1;
         return 0;
     }

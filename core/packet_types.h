@@ -18,5 +18,6 @@ constexpr static const PacketType PACKET_OBJECT_CREATE = 12;
 constexpr static const PacketType PACKET_OBJECT_DESTROY = 13;
 constexpr static const PacketType PACKET_FAILED_CRAFT = 14;
 constexpr static const PacketType PACKET_PLAYER_ACTION_USE_ITEM_ON_TILE = 15;
+constexpr static const PacketType PACKET_REQUEST_CHUNK = 16;
 
 #endif

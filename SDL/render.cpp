@@ -1,4 +1,5 @@
 #include "main.h"
+#include "networking.h"
 #include "texture.h"
 #include "window.h"
 #include <SDL2/SDL_render.h>
@@ -10,12 +11,16 @@ int width;
 int tx;
 int game_size;
 int tile_dungeon_size;
+int request_delay = 0;
 
 char text[300];
 
+// TODO remove that when not necessary
+extern NetClient* client;
+
 void draw_hotbar()
 {
-    int ty = window_height - 80;
+    int ty = window_height - 112;
 
     for (int i = 0; i < 10; i++)
     {
@@ -33,8 +38,15 @@ void draw_hotbar()
             SDL_RenderCopy(renderer, texture, NULL, &rect);
             if (i == active_hotbar)
             {
-                sprintf(text, "%s (%s)", item->get_form_name(), item->get_name());
-                write_text(tx + 3, rect.y + 50, text, Yellow, 10, 20);
+                char * t = player->get_el_description(item);
+                if (t)
+                {
+                    write_text(tx + 3, rect.y + 50, t, Yellow, 10, 20);
+                }
+                else
+                {
+                    write_text(tx + 3, rect.y + 50, item->get_form_name(), Yellow, 10, 20);
+                }
             }
         }
         if (i == active_hotbar)
@@ -65,29 +77,41 @@ void draw_texts()
 {
     int ty = 10;
 
-    sprintf(text, "Hunger=%d Irrigation=%d", player->hunger, player->thirst);
+    sprintf(text, "Hunger=%d Irrigation=%d %d %d", player->hunger, player->thirst, player->map_x, player->map_y);
     write_text(tx, ty, text, (player->hunger < 100 || player->thirst < 100) ? Red : White, 15, 30);
     ty += 25;
 
     InventoryElement * item = get_item_at_ppos(player);
     if (item)
     {
-        char * t = item->get_description();
-        write_text(tx, ty, t, White, 15, 30);
-        delete[] t;
-        ty += 25;
-        int count = 0;
-        Property ** props = item->get_properties(&count);
-        if (props)
+
+        char * t = player->get_el_description(item);
+        if (t)
         {
-            char buf[64];
-            for (int i = 0; i < count; i++)
+            write_text(tx, ty, t, White, 15, 30);
+            delete[] t;
+            ty += 25;
+            int count = 0;
+            Property ** props = item->get_properties(&count);
+            if (props)
             {
-                sprintf(buf, "%s: %u", props[i]->name, props[i]->value);
-                write_text(tx, ty, buf, White, 15, 30);
-                ty += 25;
+                char buf[64];
+                for (int i = 0; i < count; i++)
+                {
+                    sprintf(buf, "%s: %u", props[i]->name, props[i]->value);
+                    write_text(tx, ty, buf, White, 15, 30);
+                    ty += 25;
+                }
+                delete props;
             }
-            delete props;
+        }
+        else
+        {
+            t = new char[256];
+            sprintf(t, "It looks like %s, but ", item->get_class_name());
+            write_text(tx, ty, t, White, 15, 30);
+            write_text(tx, ty + 25, "I don't know what it's exactly", White, 15, 30);
+            delete[] t;
         }
     }
 }
@@ -128,7 +152,7 @@ void draw_maps()
         }
     }
 
-    unsigned int p = pixels[player->map_y * WORLD_SIZE + player->map_x];
+    //    unsigned int p = pixels[player->map_y * WORLD_SIZE + player->map_x];
     for (y = 0; y < 3; y++)
         for (x = 0; x < 3; x++)
         {
@@ -151,7 +175,7 @@ void draw_maps()
         window_rec.h = 0;
     }
     window_rec.x = width + 10;
-    window_rec.y = window_height - WORLD_SIZE - STATUS_LINE;
+    window_rec.y = window_height - WORLD_SIZE - STATUS_LINES;
 
     SDL_RenderCopy(renderer, map, NULL, &window_rec);
 }
@@ -173,28 +197,37 @@ bool draw_terrain()
     }
 
     // render terrain
-    if (world_table[128][128])
+    if (world_table[player->map_y][player->map_x])
     {
+        request_delay = 0;
         for (int y = 0; y < CHUNK_SIZE; y++)
         {
             for (int x = 0; x < CHUNK_SIZE; x++)
             {
                 SDL_Rect img_rect = {x * tile_dungeon_size, y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
                 // enum game_tiles tile = get_tile_at(player.map_x, player.map_y, x, y);
-                enum game_tiles tile = get_tile_at(128, 128, x, y);
-                SDL_Texture * texture = tiles_textures[tile];
+                int tile = get_tile_at(player->map_x, player->map_y, x, y);
+                SDL_Texture * texture = tiles_textures[(tile+1) % 6];
+                SDL_SetTextureColorMod(texture, get_base_element(tile)->color.r,  get_base_element(tile)->color.g, get_base_element(tile)->color.b);
                 SDL_RenderCopy(renderer, texture, NULL, &img_rect);
             }
         }
     }
     else
     {
-        print_status("chunk not loaded");
-        status_code = 0;
-
+        if (request_delay == 0)
+        {
+            send_packet_request_chunk(client, player->map_x, player->map_y);
+            request_delay = 20;
+        }
+        else
+        {
+            request_delay--;
+        }
+        print_status(1, "chunk not loaded");
         return false;
     }
-    chunk * c = world_table[128][128];
+    chunk * c = world_table[player->map_y][player->map_x];
     if (c)
     {
         ListElement * el = c->objects.head;
@@ -223,7 +256,7 @@ void draw_players()
     // render players
     for (int i = 0; i < PLAYER_NUM; i++)
     {
-        if (players[i])
+        if (players[i] && player->map_x == players[i]->map_x && player->map_y == players[i]->map_y)
         {
             SDL_Rect img_rect = {players[i]->x * tile_dungeon_size, players[i]->y * tile_dungeon_size, tile_dungeon_size, tile_dungeon_size};
             if (players[i]->going_right)
@@ -277,8 +310,13 @@ void draw()
         // FIXME when more chunks enabled
         // draw_maps();
     }
-    sprintf(text, "%s: %s", status_line, status_code ? "OK" : "Failed");
-    write_text(5, window_height - 32, text, White, 15, 30);
+    if (status_line[0] != ' ')
+    {
+        write_text(5, window_height - 64, status_line, White, 15, 30);
+    }
+
+    if (status_line2[0] != ' ')
+        write_text(5, window_height - 32, status_line2, White, 15, 30);
 
     if (current_menu)
         current_menu->show();

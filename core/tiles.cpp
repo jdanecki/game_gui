@@ -2,8 +2,11 @@
 
 void chunk::add_object(InventoryElement * object, int x, int y)
 {
+#ifndef CORE_FOR_CLIENT
+    printf("adding object %s uid=%lx\n", object->get_name(), object->uid);
+#endif
     objects.add(object);
-    if (Being * being = dynamic_cast<Being *>(object))
+    if (object->c_id == Class_Plant || object->c_id == Class_Animal)
     {
         beings.add(object);
     }

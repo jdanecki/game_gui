@@ -1,14 +1,17 @@
 #include "world_server.h"
 #include "elements_server.h"
+#include <stdarg.h>
 
 void generator()
 {
     load_chunk(WORLD_CENTER, WORLD_CENTER);
-    printf("generated: %d items\n", world_table[128][128]->objects.size());
+    printf("generated: %d items\n", world_table[128][128]->objects.nr_elements);
 }
 
 void create_biome_plains(chunk * chunk)
 {
+// FIXME
+#if 0
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
         for (int x = 0; x < CHUNK_SIZE; x++)
@@ -82,6 +85,7 @@ void create_biome_plains(chunk * chunk)
             chunk->add_object(a, x, y);
         }
     }
+#endif
 }
 
 void create_biome_forest(chunk * chunk)
@@ -94,19 +98,24 @@ void create_biome_forest(chunk * chunk)
         }
         // printf("\n");
     }
+#if 0
+    Element *o= new Element(base_elements[0]);
+    o->show(true);
+    chunk->add_object(o);
+#else
     for (int i = 0; i < 16; i++)
     {
-        int b = rand() % BASE_ELEMENTS;
-        Element * o = new Element(base_elements[b]);
+        Element * o = new Element();
         int x = rand() % CHUNK_SIZE;
         int y = rand() % CHUNK_SIZE;
 
         chunk->add_object(o, x, y);
     }
+
     if (/*rand() % 2*/ 1)
     {
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
             chunk->add_object(new AnimalServer());
         }
@@ -116,10 +125,13 @@ void create_biome_forest(chunk * chunk)
     {
         chunk->add_object(new PlantServer());
     }
+#endif
 }
 
 void create_biome_desert(chunk * chunk)
 {
+    // FIXME
+#if 0
     for (int y = 0; y < CHUNK_SIZE; y++)
     {
         for (int x = 0; x < CHUNK_SIZE; x++)
@@ -138,11 +150,12 @@ void create_biome_desert(chunk * chunk)
 
         chunk->add_object(o, x, y);
     }
+#endif
 }
 
 void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 {
-    enum biomes random_biome = (enum biomes)(rand() % BIOMES);
+    //  enum biomes random_biome = (enum biomes)(rand() % BIOMES);
 
     create_biome_forest(chunk);
     /*
@@ -161,36 +174,23 @@ void generate_chunk(chunk * chunk, int chunk_x, int chunk_y)
 */
 }
 
-char load_chunk(int x, int y)
-{
-    // FIXME when more chunks enabled
-    if (x != 128)
-        return 0;
-    if (y != 128)
-        return 0;
-
-    if (x >= 0 && x < WORLD_SIZE && y >= 0 && y < WORLD_SIZE)
-    {
-        if (world_table[y][x] == NULL)
-        {
-            chunk * c = new chunk(x, y);
-            printf("load_chunk: %d %d\n", x, y);
-            generate_chunk(c, x, y);
-            world_table[y][x] = c;
-        }
-        return 1;
-    }
-    return 0;
-}
-
 void update()
 {
-    // TODO update more chunks
-    ListElement * el = world_table[128][128]->beings.head;
-    while (el)
+    // TODO maybe in the future make it smarter
+    for (int y = 0; y < WORLD_SIZE; y++)
     {
-        el->el->tick();
-        el = el->next;
+        for (int x = 0; x < WORLD_SIZE; x++)
+        {
+            chunk* c = world_table[y][x];
+            if (!c)
+                continue;
+            ListElement * el = world_table[y][x]->beings.head;
+            while (el)
+            {
+                el->el->tick();
+                el = el->next;
+            }
+        }
     }
     // TODO kill animals
     /*            if (!a->alive)
@@ -211,4 +211,14 @@ void update()
             a=NULL;
             world_table[player.map_y][player.map_x]->animals[i]=NULL;
         }*/
+}
+
+void print_status(int l, const char * format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
+    fflush(stdout);
 }

@@ -5,6 +5,7 @@ use std::net::UdpSocket;
 
 mod convert_types;
 mod core;
+mod generator;
 mod types;
 
 #[no_mangle]
@@ -61,6 +62,10 @@ pub enum ClientEvent<'a> {
         x: i32,
         y: i32,
     },
+    RequestChunk {
+        x: i32,
+        y: i32,
+    },
     Whatever,
 }
 
@@ -106,6 +111,10 @@ impl<'a> From<&'a [u8]> for ClientEvent<'a> {
                 x: i32::from_le_bytes(value[17..21].try_into().unwrap()),
                 y: i32::from_le_bytes(value[21..25].try_into().unwrap()),
             },
+            core::PACKET_REQUEST_CHUNK => ClientEvent::RequestChunk {
+                x: i32::from_le_bytes(value[1..5].try_into().unwrap()),
+                y: i32::from_le_bytes(value[5..9].try_into().unwrap()),
+            },
             1 => ClientEvent::Whatever,
             _ => panic!("invalid event {:?}", value),
         }
@@ -115,6 +124,7 @@ impl<'a> From<&'a [u8]> for ClientEvent<'a> {
 pub fn init_server() -> Result<Server, Box<dyn Error>> {
     let socket = UdpSocket::bind("127.0.0.1:1234")?;
     socket.set_nonblocking(true).unwrap();
+    generator::generate();
 
     Ok(Server {
         socket,
@@ -153,17 +163,11 @@ fn add_player(
 
     unsafe {
         let p = core::PlayerServer::new(players.len() as i32);
-
-        //let el = &mut core::Element::new(core::base_elements[0]) as *mut core::Element;
-        //let el = el as *mut core::InventoryElement;
-        //println!("item {} {}", (*el).c_id, (*el).uid);
-        //(*p.inventory).add(el);
         players.push(p);
     }
-    println!("{:?} , players {:?}", peer, players);
+    //println!("{:?} , players {:?}", peer, players);
+
     update_chunk_for_player(server, &mut peer, (128, 128));
-    //FIXME
-//    update_player_inventory(server, &mut peer, players);
 }
 
 fn update_players(server: &Server, players: &mut Vec<core::PlayerServer>) {
@@ -176,50 +180,9 @@ fn update_players(server: &Server, players: &mut Vec<core::PlayerServer>) {
         data[17..21].clone_from_slice(&p._base.x.to_le_bytes());
         data[21..25].clone_from_slice(&p._base.y.to_le_bytes());
 
-        //println!("updating players{:?}", data);
         server.broadcast(&data);
     }
 }
-
-#[allow(non_snake_case)]
-fn InvList_to_bytes(data: &mut Vec<u8>, list: *mut core::InvList) {
-    unsafe {
-        let mut list = *list;
-        let object_num = list.size();
-        data.extend_from_slice(&object_num.to_le_bytes());
-        let mut cur = list.head;
-        while cur != std::ptr::null_mut() {
-            let el = (*cur).el;
-            let size = core::get_packet_size_binding((*cur).el) as usize;
-            let mut buf = vec![0 as u8];
-            buf.resize(size, 0);
-            core::to_bytes_binding(el, buf.as_mut_ptr());
-            //println!("{:?}", buf);
-
-            let o = std::slice::from_raw_parts(buf.as_ptr(), size);
-            data.extend_from_slice(o);
-            cur = (*cur).next;
-        }
-    }
-}
-//FIXME
-/*
-fn update_player_inventory(
-    server: &Server,
-    peer: &SocketAddr,
-    players: &mut Vec<core::PlayerServer>,
-) {
-    let id = server.clients.get(peer).unwrap();
-
-    let mut data = vec![core::PACKET_INVENTORY_UPDATE as u8];
-    unsafe {
-        let inv = &mut *players[*id]._base.inventory;
-        InvList_to_bytes(&mut data, inv);
-    }
-
-    server.socket.send_to(&data, peer).unwrap();
-    
-}*/
 
 fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
     let mut data = vec![
@@ -248,11 +211,11 @@ fn update_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8))
 }
 
 fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords: (u8, u8)) {
-    let mut chunk;
+    let chunk;
     unsafe {
         chunk = *core::world_table[coords.1 as usize][coords.0 as usize];
 
-        let mut le = chunk.objects.head;
+        let mut le = chunk.objects._base.head;
         while le != std::ptr::null_mut() {
             let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
@@ -263,11 +226,6 @@ fn create_objects_in_chunk_for_player(server: &Server, peer: &SocketAddr, coords
             le = (*le).next;
             server.socket.send_to(&data, peer).unwrap();
         }
-        /*if chunk.objects.size() <= 64 {
-            InvList_to_bytes(&mut data, &mut chunk.objects);
-        } else {
-            println!("TODO to much items in chunk");
-        }*/
     }
 }
 
@@ -408,6 +366,15 @@ fn handle_packet(
                 println!("failed to plant");
             }
         },
+        ClientEvent::RequestChunk { x, y } => unsafe {
+            println!("received {} {}", x, y);
+            if !(x < 0 || x > core::WORLD_SIZE as i32 || y < 0 || y > core::WORLD_SIZE as i32) {
+                if core::world_table[y as usize][x as usize] != std::ptr::null_mut() {
+                    update_chunk_for_player(server, peer, (x as u8, y as u8));
+                    println!("request received {} {}", x, y);
+                }
+            }
+        },
         ClientEvent::Whatever => println!("whatever"),
     }
 }
@@ -416,7 +383,7 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
     update_players(server, players);
     unsafe {
         let list = std::ptr::addr_of_mut!(core::objects_to_create);
-        let mut le = (*list).head;
+        let mut le = (*list)._base.head;
         while le != std::ptr::null_mut() {
             let mut data = vec![core::PACKET_OBJECT_CREATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
@@ -428,12 +395,12 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
             server.broadcast(&data);
         }
 
-        while (*list).head != std::ptr::null_mut() {
-            (*list).remove((*(*list).head).el);
+        while (*list)._base.head != std::ptr::null_mut() {
+            (*list).remove((*(*list)._base.head).el);
         }
 
         let el = std::ptr::addr_of_mut!(core::objects_to_update);
-        let mut le = (*el).head;
+        let mut le = (*el)._base.head;
         while le != std::ptr::null_mut() {
             let mut data = vec![core::PACKET_OBJECT_UPDATE];
             let obj = convert_types::convert_to_data(&*(*le).el);
@@ -444,8 +411,8 @@ fn send_game_updates(server: &Server, players: &mut Vec<core::PlayerServer>) {
             le = (*le).next;
             server.broadcast(&data);
         }
-        while (*el).head != std::ptr::null_mut() {
-            (*el).remove((*(*el).head).el);
+        while (*el)._base.head != std::ptr::null_mut() {
+            (*el).remove((*(*el)._base.head).el);
         }
     }
     send_location_updates(server);

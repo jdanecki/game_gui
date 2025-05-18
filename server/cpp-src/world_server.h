@@ -6,9 +6,11 @@
 
 void generator();
 void generate_chunk(chunk * chunk, int chunk_x, int chunk_y);
-char load_chunk(int x, int y);
 int height_at(int chunk_x, int chunk_y, int x, int y);
 
 void update();
-
+extern void print_status(int l, const char * format, ...);
+extern "C" {
+    void load_chunk(int x, int y);
+}
 #endif

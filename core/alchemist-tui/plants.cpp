@@ -1,13 +1,14 @@
 #include "plants.h"
+#include "../player.h"
 #include "show_list.h"
 
-extern InvList * inventory;
+extern Player * player;
 extern InvList * elements;
 InvList * plants;
 
 void sow_plant()
 {
-    ListElement * cur = elements->head;
+    ListElement * cur = player->inventory->head;
     while (cur)
     {
         if (cur->el->c_id != Class_Plant)
@@ -15,11 +16,11 @@ void sow_plant()
         cur = cur->next;
     }
 
-    InventoryElement * el = select_element(elements);
-    elements->enable_all();
+    InventoryElement * el = select_element(player->inventory);
+    player->inventory->enable_all();
     if (!el)
         return;
-    elements->remove(el);
+    player->inventory->remove(el);
     plants->add(el);
     Plant * p = (Plant *)el;
     p->sow();
@@ -28,35 +29,12 @@ void sow_plant()
 
 void harvest_plant()
 {
-    ListElement * cur = plants->head;
-    while (cur)
-    {
-        Plant * p = (Plant *)cur->el;
-        if (!p->planted)
-            cur->disable();
-        cur = cur->next;
-    }
-
-    InventoryElement * el = select_element(plants);
-    plants->enable_all();
+    Plant * el = dynamic_cast<Plant *>(select_element(plants));
+    //   plants->enable_all();
     if (!el)
         return;
-    inventory->add(el);
+    el->change_phase(Plant_seed);
+    player->inventory->add(el);
     plants->remove(el);
     printf("plant: %s harvested to inventory\n", el->get_name());
-}
-
-void add_new_plant()
-{
-    Plant * p = new Plant();
-    if (p->phase == Plant_seed)
-    {
-        elements->add(p);
-        printf("new Plant seed %s found\n", p->get_name());
-    }
-    else
-    {
-        plants->add(p);
-        printf("new Plant %s found\n", p->get_name());
-    }
 }
