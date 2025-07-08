@@ -11,6 +11,7 @@ add_library(server_cpp SHARED
     world_server.cpp player_server.cpp
     networking.cpp elements_server.cpp
     craft.cpp
+    craft_ing.cpp
 
     tools/axe_blade.cpp
     tools/axe_handle.cpp
@@ -19,6 +20,8 @@ add_library(server_cpp SHARED
     tools/knife_blade.cpp
     tools/knife_handle.cpp
     tools/knife.cpp
+
+    tools/wall.cpp
 )
 
 target_link_libraries(server_cpp pime)

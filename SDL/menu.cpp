@@ -311,10 +311,11 @@ void create_menus()
     menu_inventory_categories->add("Gas form", MENU_INV_GAS, Form_gas);
     menu_inventory_categories->add("Cancel", MENU_CANCEL);
 
-    menu_crafting = new Menu("Crafting", 4);
+    menu_crafting = new Menu("Crafting", 5);
     menu_crafting->add("Axe blade (1 ing.)", MENU_CRAFT_AXE_BLADE);
     menu_crafting->add("Axe handle (1 ing.)", MENU_CRAFT_AXE_HANDLE);
     menu_crafting->add("Axe (2 ing.)", MENU_CRAFT_AXE);
+    menu_crafting->add("Wall (1 ing.)", MENU_CRAFT_WALL);
     menu_crafting->add("Cancel", MENU_CANCEL);
     // FIXME
     /*
@@ -566,6 +567,11 @@ int craft(menu_actions a)
             if (craft2elements(PROD_AXE))
                 goto sent;
             break;
+
+        case MENU_CRAFT_WALL:
+            send_packet_craft(client, ING_WALL, 1, &player->hotbar[active_hotbar]->uid);
+            goto sent;
+
         default:
             break;
     }
@@ -713,6 +719,7 @@ int Menu::interact()
         case MENU_CRAFT_KNIFE:
         case MENU_CRAFT_KNIFE_BLADE:
         case MENU_CRAFT_KNIFE_HANDLE:
+        case MENU_CRAFT_WALL:
             return craft(a);
 
         case MENU_NPC:

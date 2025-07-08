@@ -33,7 +33,7 @@ int npc()
             if (sentence->id == NPC_Ask_do_you_know_item)
                 menu_dialog->add("Do you know", MENU_NPC_SAY, sentence, player->hotbar[active_hotbar]);
             else
-                menu_dialog->add(sentence->question, MENU_NPC_SAY, sentence, nullptr);
+                menu_dialog->add(sentence->text, MENU_NPC_SAY, sentence, nullptr);
         }
         sentence = (Sentence *)sentence->next;
     }

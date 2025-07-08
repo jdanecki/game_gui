@@ -24,7 +24,7 @@ Axe::Axe(InventoryElement * el1, InventoryElement * el2) : Product(el1, el2, PRO
             }
         }
 
-        Object * o = NULL; //TODOworld_table[map_y][map_x]->objects[i];
+        Object * o = NULL; //TODO world_table[map_y][map_x]->objects[i];
         if (o && o->type == OBJECT_wall)
         {
             int ox,oy;
@@ -45,10 +45,11 @@ Axe::Axe(InventoryElement * el1, InventoryElement * el2) : Product(el1, el2, PRO
     return false;
 }*/
 
+#if 0
 bool Axe::use(InventoryElement * object)
 {
-    return false;
-#if 0
+
+
     Plant * p = dynamic_cast<Plant *>(object);
 
     if (p && (p->type == PLANTID_tree || p->type == PLANTID_tree1 || p->type == PLANTID_tree2))
@@ -96,9 +97,8 @@ switch (p->type)
     }
 
     return true;
-#endif
 }
-
+#endif
 bool Axe::check_ing()
 {
     int id1 = ings[0]->get_id();
