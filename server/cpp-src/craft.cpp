@@ -5,29 +5,13 @@
 #include "tools/knife.h"
 #include "world_server.h"
 #include "craft_ing.h"
+#include "craft_prod.h"
+
 #include <cstdio>
 
 // extern class Player player;
 // extern int active_hotbar;
 int active_hotbar = 0;
-
-InventoryElement * craft_axe(InventoryElement * el1, InventoryElement * el2)
-{
-    if (el1 && el2)
-    {
-        // print_status("crafting: axe from %s and %s", el1->get_name(), el2->get_name());
-
-        Axe * axe = new Axe(el1, el2);
-        if (axe->craft())
-        {
-            axe->show();
-            return axe;
-        }
-        else
-            delete axe;
-    }
-    return NULL;
-}
 
 bool craft(int product_id, int ingredients_num, const size_t * ingredients_ids, Player * player)
 {
@@ -49,7 +33,8 @@ bool craft(int product_id, int ingredients_num, const size_t * ingredients_ids, 
         crafted=craft_ing(product_id, el);
     }
     else
-    {//product_id = ING_NUM + product id
+    {
+        product_id -= ING_NUM;
         if (ingredients_num != 2)
         {
             printf("invalid num of ingredients %d\n", ingredients_num);
@@ -65,12 +50,7 @@ bool craft(int product_id, int ingredients_num, const size_t * ingredients_ids, 
             return false;
         }
 
-        switch (product_id)
-        {
-            case ING_NUM + PROD_AXE:
-                crafted = craft_axe(el1, el2);
-                printf("crafted axe\n");
-        }
+        crafted = craft_prod(product_id, el1, el2);
     }
     if (crafted)
     {

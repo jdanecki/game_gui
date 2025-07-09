@@ -127,6 +127,7 @@ void load_textures()
     add_prod_texture(PROD_AXE, "textures/items/products/axe.png");
     add_prod_texture(PROD_KNIFE, "textures/items/products/knife.png");
     add_prod_texture(PROD_PICKAXE, "textures/items/products/pickaxe.png");
+    add_prod_texture(PROD_HUT, "textures/objects/hut.png");
 
     i = 0;
     i = add_textures_from_dir(plant_textures, i, "textures/plants");

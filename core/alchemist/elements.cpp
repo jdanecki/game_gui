@@ -25,6 +25,8 @@ const char * Ingredient_name[] = {
 const char * Product_name[] = {
     "Axe",
     "Knife",
+    "Pickaxe",
+    "Hut",
 };
 
 const char * object_names[] = {"wall"};

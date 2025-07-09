@@ -97,6 +97,7 @@ class InventoryElement
 
   public:
     bool crafted;
+    bool pickable;
     ItemLocation location;
     size_t uid;
     Class_id c_id;
@@ -108,6 +109,7 @@ class InventoryElement
         uid = (size_t)this;
         name = nullptr;
         crafted = false;
+        pickable=true;
     }
     virtual bool use(int map_x, int map_y, int x, int y)
     {
@@ -324,6 +326,7 @@ enum Product_id
     PROD_AXE,
     PROD_KNIFE,
     PROD_PICKAXE,
+    PROD_HUT,
 };
 
 extern const char * Ingredient_name[];
@@ -688,7 +691,7 @@ class Plant : public Being
 #define GAS_ELEMENTS 1
 #define BASE_ELEMENTS (SOLID_ELEMENTS + LIQUID_ELEMENTS + GAS_ELEMENTS)
 #define ING_ELEMENTS 7
-#define PROD_ELEMENTS 3
+#define PROD_ELEMENTS 4
 
 #define BASE_ANIMALS 40
 #define BASE_PLANTS 30

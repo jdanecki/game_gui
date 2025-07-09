@@ -12,16 +12,22 @@ add_library(server_cpp SHARED
     networking.cpp elements_server.cpp
     craft.cpp
     craft_ing.cpp
+    craft_prod.cpp
 
     tools/axe_blade.cpp
     tools/axe_handle.cpp
     tools/axe.cpp
+
+    tools/pickaxe_blade.cpp
+    tools/pickaxe_handle.cpp
+    tools/pickaxe.cpp
 
     tools/knife_blade.cpp
     tools/knife_handle.cpp
     tools/knife.cpp
 
     tools/wall.cpp
+    tools/hut.cpp
 )
 
 target_link_libraries(server_cpp pime)

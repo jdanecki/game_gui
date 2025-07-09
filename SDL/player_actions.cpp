@@ -43,24 +43,11 @@ void use_tile(int map_x, int map_y, int x, int y)
         send_packet_item_used_on_object(client, item->uid, object->uid);
         return;
     }
-
-    send_packet_pickup(client, object->uid);
-    /*if (item_pointer)
-    {
-        InventoryElement * item = *item_pointer;
-        player.inventory->add(item);
-        for (int i = 0; i<10; i++) {
-            if (!player.hotbar[i])
-            {
-                player.hotbar[i]=item;
-                break;
-            }
-        }
-        sprintf(status_line, "got item: %s (%s)", item->get_form_name(), item->get_name()); //player.inventory->get_count(item));
-        *item_pointer=NULL;
-
-       status_code = 1;
-    }
+    //FIXME pickable only on server side
+    if (object->pickable) send_packet_pickup(client, object->uid);
+    else
+        printf("Can't pickup %s\n", object->get_name());
+    /*
 
     for (int i = 0; i < CHUNK_SIZE*CHUNK_SIZE; i++)
     {
